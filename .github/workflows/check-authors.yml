@@ -1,0 +1,60 @@
+# Fails if a commit doesn't come from one of the team's accounts or was made by an AI assistant or bot.
+# Without GitHub Pro this can't block a merge; it marks the push or pull request red.
+name: Check commit authors
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+env:
+  # Team accounts, lowercase. web-flow is GitHub itself, used as committer for merges in the web UI.
+  ALLOWED: "lpuehringerstudent ayan2310 behrangel11 david-fruehwirt"
+  ALLOWED_COMMITTERS: "web-flow"
+  # Names that must not appear as author, committer or co-author
+  BLOCKED: "claude|anthropic|copilot|openai|chatgpt|codex|cursor|devin|gemini|\\[bot\\]"
+
+jobs:
+  authors:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Collect commits
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+        run: |
+          if [ -n "$PR" ]; then
+            gh api "repos/$REPO/pulls/$PR/commits" --paginate --jq '.[]' > commits.jsonl
+          elif [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            gh api "repos/$REPO/commits/$AFTER" > commits.jsonl
+          else
+            gh api "repos/$REPO/compare/$BEFORE...$AFTER" --jq '.commits[]' > commits.jsonl
+          fi
+
+      - name: Check each commit
+        run: |
+          failed=0
+          while read -r c; do
+            sha=$(jq -r '.sha[0:7]' <<< "$c")
+            author=$(jq -r '.author.login // "" | ascii_downcase' <<< "$c")
+            committer=$(jq -r '.committer.login // "" | ascii_downcase' <<< "$c")
+            identity=$(jq -r '[.commit.author.name, .commit.author.email, .commit.committer.name, .commit.committer.email, .commit.message] | join(" ")' <<< "$c")
+
+            if [ -z "$author" ] || ! grep -qw -- "$author" <<< "$ALLOWED"; then
+              echo "::error::$sha author '${author:-unknown email}' is not a team account"; failed=1
+            fi
+            if [ -z "$committer" ] || ! grep -qw -- "$committer" <<< "$ALLOWED $ALLOWED_COMMITTERS"; then
+              echo "::error::$sha committer '${committer:-unknown email}' is not a team account"; failed=1
+            fi
+            match=$(grep -oiE -- "$BLOCKED" <<< "$identity" | head -1)
+            if [ -n "$match" ]; then
+              echo "::error::$sha mentions '$match' in its author, committer or message"; failed=1
+            fi
+          done < <(jq -c '.' commits.jsonl)
+          exit $failed

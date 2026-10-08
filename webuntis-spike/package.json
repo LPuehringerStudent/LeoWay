@@ -1,0 +1,18 @@
+{
+  "name": "webuntis-spike",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "type": "module",
+  "dependencies": {
+    "dotenv": "^18.0.6",
+    "otplib": "^12.0.1",
+    "webuntis": "^2.2.1"
+  }
+}

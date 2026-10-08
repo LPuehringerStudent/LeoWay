@@ -1,0 +1,5 @@
+# Secrets and personal data: credentials, timetables, absences
+.env
+probe-output.json
+
+node_modules/

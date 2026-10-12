@@ -159,7 +159,7 @@ def build():
         elif line.startswith('# '):
             story.append(paragraph(line[2:],'title'))
         else:
-            style = 'small' if line.startswith('8 October') or line.startswith('Scope: [') else 'body'
+            style = 'small' if ' · Version ' in line or line.startswith('Scope: [') else 'body'
             story.append(paragraph(line,style))
         i += 1
     doc = SimpleDocTemplate(str(OUTPUT),pagesize=A4,leftMargin=54,rightMargin=54,

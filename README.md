@@ -18,8 +18,11 @@ python -m pip install -r docs/tools/requirements.txt
 python docs/tools/build_spec.py
 ```
 
-The PDF includes the use cases, domain model and home screen sketch. Windows uses
-Calibri and Georgia when available; other systems use standard PDF fonts.
+The PDF uses Times New Roman throughout, with 12-point body text and bold headings.
+This font is recommended in the [official BBS layout guidance](https://www.diplomarbeiten-bbs.at/durchfuehrung/gliederung-der-diplomarbeit-und-formale-vorgaben).
+The builder reads the installed Windows fonts. On other systems, set `LEOWAY_FONT_DIR`
+to a folder containing `times.ttf`, `timesbd.ttf`, `timesi.ttf` and `timesbi.ttf`.
+Font files are not included in the repository.
 The PDF drawings live in `docs/tools/build_spec.py`; update them too when changing
 the diagrams or screen sketch in Markdown.
 

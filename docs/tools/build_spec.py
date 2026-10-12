@@ -26,19 +26,24 @@ GREY = colors.HexColor('#686660')
 RULE = colors.HexColor('#deddd8')
 PALE = colors.HexColor('#f3f3f0')
 
-# Match the original PDF on Windows; use standard PDF fonts elsewhere.
-font_dir = Path(os.environ.get('WINDIR', 'C:/Windows')) / 'Fonts'
-body, bold, serif = 'Helvetica', 'Helvetica-Bold', 'Times-Roman'
-if all((font_dir / f).is_file() for f in ['calibri.ttf', 'calibrib.ttf', 'georgia.ttf']):
-    for name, file in [('Body', 'calibri.ttf'), ('Bold', 'calibrib.ttf'), ('Serif', 'georgia.ttf')]:
-        pdfmetrics.registerFont(TTFont(name, str(font_dir / file)))
-    body, bold, serif = 'Body', 'Bold', 'Serif'
-pdfmetrics.registerFontFamily(body, normal=body, bold=bold, italic=body, boldItalic=bold)
+# One family throughout, including diagrams and page numbers.
+font_dir = Path(os.environ.get('LEOWAY_FONT_DIR', str(Path(os.environ.get('WINDIR', 'C:/Windows')) / 'Fonts')))
+font_files = {
+    'TimesNewRoman': 'times.ttf', 'TimesNewRoman-Bold': 'timesbd.ttf',
+    'TimesNewRoman-Italic': 'timesi.ttf', 'TimesNewRoman-BoldItalic': 'timesbi.ttf',
+}
+if not all((font_dir / file).is_file() for file in font_files.values()):
+    raise FileNotFoundError('Times New Roman is required. Set LEOWAY_FONT_DIR to a folder containing times.ttf, timesbd.ttf, timesi.ttf and timesbi.ttf.')
+for name, file in font_files.items():
+    pdfmetrics.registerFont(TTFont(name, str(font_dir / file)))
+body, bold = 'TimesNewRoman', 'TimesNewRoman-Bold'
+pdfmetrics.registerFontFamily(body, normal=body, bold=bold,
+    italic='TimesNewRoman-Italic', boldItalic='TimesNewRoman-BoldItalic')
 STYLES = {
-    'title': ParagraphStyle('title', fontName=serif, fontSize=23, leading=29, textColor=INK, spaceAfter=10),
-    'h2': ParagraphStyle('h2', fontName=serif, fontSize=16, leading=21, textColor=INK, spaceBefore=12, spaceAfter=6, keepWithNext=True),
-    'h3': ParagraphStyle('h3', fontName=serif, fontSize=12.5, leading=17, textColor=INK, spaceBefore=10, spaceAfter=5, keepWithNext=True),
-    'body': ParagraphStyle('body', fontName=body, fontSize=10.5, leading=14, textColor=INK, spaceAfter=6),
+    'title': ParagraphStyle('title', fontName=bold, fontSize=20, leading=26, textColor=INK, spaceAfter=10),
+    'h2': ParagraphStyle('h2', fontName=bold, fontSize=16, leading=21, textColor=INK, spaceBefore=12, spaceAfter=6, keepWithNext=True),
+    'h3': ParagraphStyle('h3', fontName=bold, fontSize=12.5, leading=17, textColor=INK, spaceBefore=10, spaceAfter=5, keepWithNext=True),
+    'body': ParagraphStyle('body', fontName=body, fontSize=12, leading=16, textColor=INK, spaceAfter=6),
     'small': ParagraphStyle('small', fontName=body, fontSize=8.5, leading=11.5, textColor=GREY, spaceAfter=5),
     'cell': ParagraphStyle('cell', fontName=body, fontSize=9.5, leading=12.5, textColor=INK),
     'head': ParagraphStyle('head', fontName=bold, fontSize=9.5, leading=12.5, textColor=INK),

@@ -4,8 +4,6 @@
 
 **Authors:** Laurenz (LPuehringerStudent), Ayan (Ayan2310), David (David-Fruehwirt), Behrang (BehrangEl11).
 
-**Document owner:** David (David-Fruehwirt).
-
 ## 1. Purpose and scope
 
 ### 1.1 Situation and goal

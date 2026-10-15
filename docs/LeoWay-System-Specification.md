@@ -2,6 +2,8 @@
 
 Version 0.4 · Draft for review
 
+**Team:** LRD (Leo Research Department)
+
 **Authors:** Laurenz (LPuehringerStudent), Ayan (Ayan2310), David (David-Fruehwirt), Behrang (BehrangEl11).
 
 ## 1. Initial situation and goal

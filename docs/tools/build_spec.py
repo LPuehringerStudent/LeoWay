@@ -459,7 +459,7 @@ def make_story():
 def build(total):
     doc = SimpleDocTemplate(str(OUTPUT),pagesize=A4,leftMargin=54,rightMargin=54,
         topMargin=43,bottomMargin=43,title='LeoWay - System Specification',
-        author='Laurenz, Ayan, David, Behrang')
+        author='LRD (Leo Research Department): Laurenz, Ayan, David, Behrang')
     frame = partial(page_frame, total=total)
     doc.build(make_story(),onFirstPage=frame,onLaterPages=frame,
         canvasmaker=partial(canvas.Canvas,invariant=1))

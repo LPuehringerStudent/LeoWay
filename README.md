@@ -23,8 +23,9 @@ This font is recommended in the [official BBS layout guidance](https://www.diplo
 The builder reads the installed Windows fonts. On other systems, set `LEOWAY_FONT_DIR`
 to a folder containing `times.ttf`, `timesbd.ttf`, `timesi.ttf` and `timesbi.ttf`.
 Font files are not included in the repository.
-The PDF drawings live in `docs/tools/build_spec.py`; update them too when changing
-the diagrams or screen sketch in Markdown.
+Use case, activity and architecture diagrams and the screen sketches are drawn from
+the Markdown blocks (a small Mermaid subset and `screens` blocks). Only the domain model
+is drawn by hand in `docs/tools/build_spec.py`; update it too when changing that diagram.
 
 ## Running the WebUntis spike
 

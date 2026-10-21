@@ -223,7 +223,7 @@ We use test data to check the following with the teacher. Each feature can be ch
 
 ### 6.1 Plan until January 2028
 
-The project runs from October 2026 to January 2028. We work in two-week sprints during school weeks. **Behrang Elyasi is the product owner** and helps the team set backlog priorities. These are planned milestones; we adjust tasks during sprint reviews while keeping the January 2028 deadline.
+The project runs from October 2026 to January 2028, with two-week sprints during school weeks. **Behrang Elyasi is the product owner.** We review this working plan after each sprint and keep final delivery in January 2028.
 
 | Period | Planned result |
 | --- | --- |
@@ -231,15 +231,26 @@ The project runs from October 2026 to January 2028. We work in two-week sprints 
 | Dec 2026-Jan 2027 | First working version: connect WebUntis, save a route and send a leave-by alert through Discord. |
 | Feb-Jun 2027 | Build the website and Android app, delay warnings, changing alarms and delay appeals. Test with students and a form teacher. |
 | Jul-Aug 2027 | The recorder continues during holidays. No regular school sprints are planned. |
-| Sep-Nov 2027 | Add crowd reports, the way home, Auspex rules and connection statistics. Consider the optional model and teacher portal only if the main features are working and time allows. |
+| Sep-Nov 2027 | Complete crowd reports, the way home, Auspex rules and statistics. Consider the optional model and portal only if time allows. |
 | Dec 2027-Jan 2028 | Test the complete system, fix problems, finish setup steps and the user guide, then deliver the final version in January 2028. |
 
-The final delivery includes the code, setup steps, a short user guide and test results. If time gets tight, the optional model and teacher portal come after the main features.
+Deliver the code, setup steps, a short user guide and test results. Optional extras must not delay the main features.
 
 ### 6.2 Before we start
 
-Agree WebUntis access and sync limits with school IT. Agree the appeal email format with form teachers before building that feature. Choose hosting. Follow up VAO education access; the project must also work without it. Test the Linz AG feed and Android alarm early, and survey our classes.
+Prepare team computers, a server and database, an Android phone, test WebUntis access and a Discord bot. Test the Linz AG feed, changing phone alarms and the Auspex connection early. Survey our classes. Software and data sources are listed in section 5.
 
-Prepare team computers, a server for the backend and database, and a real Android phone for alarm tests. Set up test WebUntis access and a Discord bot. Build the Auspex runtime and test passing delay/exam data to it. Software and data sources are listed in section 5.
+### 6.3 Still to decide
 
-Still open: the final name, how students sign into LeoWay, teacher email lookup, optional teacher login and safe Auspex execution. Until email lookup is agreed, students enter and check the teacher's address. Decide login and script access before implementing those features.
+Settle these points before building the affected feature. Keep the answers in the related GitHub issues.
+
+| Decision | What we need to settle |
+| --- | --- |
+| School access | Ask school IT whether we may use WebUntis keys and how often we may request data. |
+| Hosting | Team server or LeoCloud? Agree who monitors the recorder and handles backups. |
+| Student login | Choose how students sign into LeoWay and reconnect or disconnect WebUntis. |
+| Auspex | Test how scripts run separately with limited access to files, data and server resources. |
+| Appeals | Agree the email format with form teachers before building it. Decide where teacher addresses come from; use checked manual entry until then. |
+| VAO | Confirm access, request limits and permission to store departure data. LeoWay must work without VAO. |
+
+Later, choose the final name. Decide on the optional model and teacher portal once the main features work. If the portal is added, agree teacher login with the school.

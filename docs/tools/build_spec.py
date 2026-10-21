@@ -56,7 +56,7 @@ STYLES = {
 # First column widths by table header; the last column takes the rest.
 COLUMNS = {
     'Test': [118], 'Term': [104], 'Characteristic': [108], 'Goal': [120], 'Partner': [118],
-    'Quantity': [128, 140], 'ID': [42], 'Period': [105],
+    'Quantity': [128, 140], 'ID': [42], 'Period': [105], 'Decision': [105],
 }
 COLUMNS_3 = {'ID': [42, 210]}
 

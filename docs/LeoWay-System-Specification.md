@@ -30,7 +30,7 @@ flowchart LR
   T[Form teacher] --> V([Check a delay record])
 ```
 
-The team also checks whether the transport feeds and the server are working. Teachers can use verification links without an account. The teacher portal is optional.
+The team checks feeds and server status. Teachers check links without an account; the portal is optional. iPhone users use the website. We are not building a native iPhone app.
 
 ### 1.4 Important terms
 
@@ -71,7 +71,7 @@ LeoWay shows the next connection home after the actual last lesson, allowing tim
 
 #### F06 · Write personal alert rules
 
-Students can use auspex-lang, a small rule language, for alerts such as “notify me if the delay is over five minutes and the first lesson is an exam”. Invalid rules show an error. Manual exam marking is available if WebUntis exam data is missing.
+We plan to use [Auspex](https://github.com/auspex-lang/auspex) (formerly MyPL), a C-like scripting language, to check custom alert conditions. The backend provides delay and exam data and sends the resulting alerts. Example condition: delay over five minutes and first lesson is an exam. This is an explanation, not Auspex syntax. Invalid scripts show an error. Manual exam marking remains a fallback.
 
 ### 2.2 Simple home screen
 
@@ -160,7 +160,7 @@ We start with students from our own classes. Each student saves a route; student
 
 ### 5.1 Main parts
 
-We use Angular for the website and Capacitor for the Android app. Quarkus runs the backend, PostgreSQL stores the data and Python is used for model training. The project runs on free services and the team's hardware or school hosting.
+We use Angular for the website, Capacitor for Android, Quarkus for the backend, PostgreSQL for data and Python for model training. Auspex is planned for alert scripts; its backend connection and safe execution still need testing. We use free services and team hardware or school hosting.
 
 ```mermaid
 %% architecture
@@ -170,6 +170,7 @@ flowchart LR
   API --> DB[(PostgreSQL)]
   API --> W[WebUntis]
   API --> T[Transport feeds]
+  API --> Rules[Auspex scripts - planned]
   ML[Python training] --> DB
 ```
 
@@ -185,11 +186,11 @@ flowchart LR
 
 ### 5.3 Updates and calculation
 
-Refresh lessons and exams in the evening and before and during the morning commute. Check absences again around noon and later in the afternoon, because teachers may enter lateness after the commute. Students can also refresh manually. Agree request frequency with school IT.
+Refresh lessons and exams in the evening and morning. Check absences at noon and in the afternoon, because teachers may enter lateness later. Allow manual refresh and agree request frequency with school IT.
 
-When the first lesson changes, send the new alarm time to the phone. The app replaces the old alarm and checks again when opened. If the phone is offline or the app is stopped, the update may arrive late.
+Lesson changes send a new alarm time to the phone. Replace the old alarm and sync when opened. Offline or stopped apps may receive updates late.
 
-Choose a journey that arrives before the first real lesson, allowing the walk to school and a buffer. Subtract the walk to the departure stop to get the leave-by time. Match lateness to the saved journey and date; the student confirms the suggested record. Store timestamps in UTC and show local Austria time.
+Pick a journey arriving before the first real lesson, including the school walk and buffer. Subtract the walk to the stop for leave-by time. Match lateness by saved journey and date; the student confirms. Store UTC timestamps and show local Austrian time.
 
 ### 5.4 Main data objects
 
@@ -214,25 +215,29 @@ We use test data to check the following with the teacher. Each feature can be ch
 
 | Test | What should happen |
 | --- | --- |
-| A01 · F01 | A valid key loads lessons, exams and lateness. Exams are found without manual marking. A wrong key shows an error. Unneeded WebUntis calls are blocked. |
-| A02 · F02 | A saved route gives a leave-by time. Cancelling the first lesson changes that time and the Android alarm. Check a change between summer and winter time too. |
-| A03 · F03 | A delay that causes late arrival gives a warning and an available alternative. An exam in the first lesson is mentioned. Missing live data shows “timetable only”. |
-| A04 · F04 | Alerts reach the chosen channels without duplicates. The alarm works on a real Android phone. Missing alarm permission offers a normal notification. |
-| A05 · F05 | The journey home follows the actual last lesson, including when lessons end early. |
-| A06 · F06 | A valid delay/exam rule works with a WebUntis exam. Invalid rules show an error. Manual exam marking works as a fallback. |
-| A07 · F07 | A matching lateness entry opens the right email draft in under a minute. The link shows the chosen delay record. No match means no suggested appeal. Invalid or revoked links are rejected. |
-| A08 · F08 | If built, the teacher can handle an assigned appeal but cannot open another class's private appeals. |
-| A09 · F09 | Stored departures have a source and collection time. Disconnecting one feed does not stop the others. |
-| A10 · F10 | Three different students trigger a crowd warning. Repeated reports from one account count once. |
-| A11 · F11 | Test the model on later data it was not trained on. Compare it with both simple methods and use the better method if the model loses. |
-| A12 · F12 | A known unreliable connection appears in the statistics. Student names do not appear in the report. |
-| A13 · Privacy | One student cannot read another's records. Deleted accounts lose their private data. Verification links do not show private timetable data. |
-| A14 · General | Check phone layout, keyboard use, supported browsers, several users at once and the automated tests. |
+| A01 · F01 | A valid key loads lessons, automatic exams and lateness. Reject wrong keys and unneeded WebUntis calls. |
+| A02 · F02 | A route gives a leave-by time. A cancelled lesson updates the time and alarm. Check summer/winter time changes. |
+| A03 · F03 | A late journey triggers a warning, available alternative and exam note when needed. Missing live data shows “timetable only”. |
+| A04 · F04 | Chosen channels receive alerts once. Test the Android alarm on a phone and the notification fallback when permission is denied. |
+| A05 · F05 | The way home follows the actual last lesson, including early finishes. |
+| A06 · F06 | An Auspex script checks delay/exam data. Invalid scripts show an error; manual exam fallback works. |
+| A07 · F07 | Open the correct email draft in under a minute; its link shows the matching record. Reject invalid/revoked links. No match means no suggested appeal. |
+| A08 · F08 | If built, teachers handle assigned appeals but cannot access another class. |
+| A09 · F09 | Records keep source and time. One failed feed does not stop the others. |
+| A10 · F10 | Three students trigger a crowd warning. One account's repeated reports count once. |
+| A11 · F11 | Test predictions on later, unseen data against both simple methods. Use the better method if the model loses. |
+| A12 · F12 | A known unreliable connection appears in statistics without student names. |
+| A13 · Privacy | Block other students' private records. Delete account data. Verification links show no private timetable data. |
+| A14 · General | Check phone layout, keyboard use, browsers, several users at once and automated tests. |
 
 ### 6.1 Work and delivery
 
-We work in two-week sprints over two school years. Start with the recorder so delay history is collected early, then connect WebUntis and build leave-by alerts. The other features stay in the backlog. We provide the source code, setup steps, a short user guide and test results.
+We work in two-week sprints over two school years. Build the recorder first, then WebUntis and leave-by alerts. Keep other features in the backlog. Deliver the code, setup steps, a short user guide and test results.
 
-### 6.2 Still to decide
+### 6.2 Before we start
 
-The final name, product owner, hosting, WebUntis permission and request limits, VAO access, teacher email source and optional teacher login are still open. Until email lookup is agreed, the student enters and checks the address. Detailed settings can be decided when we build and test each feature.
+Agree WebUntis access and sync limits with school IT. Agree the appeal email format with form teachers before building that feature. Choose hosting and a product owner. Follow up VAO education access; the project must also work without it. Test the Linz AG feed and Android alarm early, and survey our classes.
+
+Prepare team computers, a server for the backend and database, and a real Android phone for alarm tests. Set up test WebUntis access and a Discord bot. Build the Auspex runtime and test passing delay/exam data to it. Software and data sources are listed in section 5.
+
+The final name, teacher email lookup and optional teacher login are still open. Until lookup is agreed, students enter and check the teacher's address.

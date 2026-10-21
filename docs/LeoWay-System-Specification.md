@@ -181,21 +181,6 @@ Lesson changes send a new alarm time to the phone. Replace the old alarm and syn
 
 Pick a journey arriving before the first real lesson, including the school walk and buffer. Subtract the walk to the stop for leave-by time. Match lateness by saved journey and date; the student confirms. Store UTC timestamps and show local Austrian time.
 
-### 5.4 Main data objects
-
-```mermaid
-%% domain
-classDiagram
-  Student "1" --> "0..*" SavedRoute
-  Student "1" --> "0..*" LatenessEntry
-  LatenessEntry "1" --> "0..1" Appeal
-  Appeal "0..*" --> "1" DelayRecord
-  SavedRoute : stops, walking times, buffer
-  LatenessEntry : lesson date, start, end
-  DelayRecord : trip, stop, source, time, delay
-  Appeal : confirmed match, verification token
-```
-
 <!-- page -->
 
 ## 6. Acceptance criteria

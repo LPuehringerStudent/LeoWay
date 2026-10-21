@@ -1,6 +1,6 @@
 # LeoWay - System Specification
 
-Version 0.5 · 21 October 2026 · Draft
+Version 0.6 · 21 October 2026 · Draft
 
 **Team:** LRD (Leo Research Department)
 
@@ -71,22 +71,11 @@ LeoWay shows the next connection home after the actual last lesson, allowing tim
 
 #### F06 · Write personal alert rules
 
-We plan to use [Auspex](https://github.com/auspex-lang/auspex) (formerly MyPL), a C-like scripting language, to check custom alert conditions. The backend provides delay and exam data and sends the resulting alerts. Example condition: delay over five minutes and first lesson is an exam. This is an explanation, not Auspex syntax. Invalid scripts show an error. Manual exam marking remains a fallback.
-
-### 2.2 Simple home screen
-
-```text
-Today                         Last sync 05:45
-First lesson                  08:55
-Leave by                      07:42
-Bus 19                        +6 min
-[View another connection]     [Report disruption]
-[My lateness / draft appeal]  [Route and alerts]
-```
+We plan to use [Auspex](https://github.com/auspex-lang/auspex), a C-like scripting language, to check custom alert conditions. The backend provides delay and exam data and sends the resulting alerts. Example condition: delay over five minutes and first lesson is an exam. This is an explanation, not Auspex syntax. Invalid scripts show an error. Manual exam marking remains a fallback.
 
 <!-- page -->
 
-### 2.3 Delay appeals, records and reports
+### 2.2 Delay appeals, records and reports
 
 #### F07 · Prepare a delay appeal
 
@@ -104,15 +93,15 @@ The recorder runs from the first sprint, including holidays. It saves the line, 
 
 Students can report a problem on a line. When three students report the same disruption, LeoWay warns others on that line. Repeated reports from one account do not count again. The app labels crowd reports clearly and does not present them as official delay evidence.
 
-#### F11 · Get delay predictions
+#### F11 · Delay predictions (optional)
 
-Once enough history is available, we use it to predict delay risk and suggest an extra buffer. We compare the model with “same delay as yesterday” and “average delay of this trip”. If the model is worse, we use the better simple method.
+We may add a model to predict delays and suggest an extra buffer. This depends on the available history and time left after the main features work. If we build it, compare it with “same delay as yesterday” and “average delay of this trip”. Python is only needed if we choose it for model training. LeoWay must work without a model.
 
 #### F12 · View connection statistics
 
 LeoWay shows which connections often arrive after lessons start. We prepare a report for the student council to discuss with transport providers. Reports do not name students. If there is too little data for a useful result, the app says so.
 
-### 2.4 Example of an appeal
+### 2.3 Example of an appeal
 
 A student is marked 13 minutes late. LeoWay recorded an 11-minute delay on their bus. The student checks the match and sends the draft email. The teacher opens the link to see the recorded delay and decides about the appeal.
 
@@ -160,7 +149,7 @@ We start with students from our own classes. Each student saves a route; student
 
 ### 5.1 Main parts
 
-We use Angular for the website, Capacitor for Android, Quarkus for the backend, PostgreSQL for data and Python for model training. Auspex is planned for alert scripts; its backend connection and safe execution still need testing. We use free services and team hardware or school hosting.
+We use Angular for the website, Capacitor for Android, Quarkus for the backend and PostgreSQL for data. Python is optional if we add model training. Auspex is planned for alert scripts; its backend connection and safe execution still need testing. We use free services and team hardware or school hosting.
 
 ```mermaid
 %% architecture
@@ -171,7 +160,7 @@ flowchart LR
   API --> W[WebUntis]
   API --> T[Transport feeds]
   API --> Rules[Auspex scripts - planned]
-  ML[Python training] --> DB
+  ML[Python model - optional] -.-> DB
 ```
 
 ### 5.2 Data sources
@@ -182,7 +171,7 @@ flowchart LR
 | Linz AG | Live departures and delays for supported lines. |
 | MVO and ÖBB | Published bus and train timetables. |
 | VAO | Keep off until education access and suitable limits are agreed. Use timetables where live regional data is unavailable. |
-| GeoSphere Austria | Weather as a possible input for prediction. |
+| GeoSphere Austria | Optional weather input if we add a prediction model. |
 
 ### 5.3 Updates and calculation
 
@@ -211,7 +200,7 @@ classDiagram
 
 ## 6. Acceptance criteria
 
-We use test data to check the following with the teacher. Each feature can be checked separately. The optional portal is only checked if we build it.
+We use test data to check the following with the teacher. Each feature can be checked separately. The portal and model are only checked if we build them; leaving them out does not block delivery of the main features.
 
 | Test | What should happen |
 | --- | --- |
@@ -225,19 +214,32 @@ We use test data to check the following with the teacher. Each feature can be ch
 | A08 · F08 | If built, teachers handle assigned appeals but cannot access another class. |
 | A09 · F09 | Records keep source and time. One failed feed does not stop the others. |
 | A10 · F10 | Three students trigger a crowd warning. One account's repeated reports count once. |
-| A11 · F11 | Test predictions on later, unseen data against both simple methods. Use the better method if the model loses. |
+| A11 · F11 | Only if added: test the model on later, unseen data against both simple methods. If omitted, the main app still works. |
 | A12 · F12 | A known unreliable connection appears in statistics without student names. |
 | A13 · Privacy | Block other students' private records. Delete account data. Verification links show no private timetable data. |
 | A14 · General | Check phone layout, keyboard use, browsers, several users at once and automated tests. |
 
-### 6.1 Work and delivery
+<!-- page -->
 
-We work in two-week sprints over two school years. Build the recorder first, then WebUntis and leave-by alerts. Keep other features in the backlog. Deliver the code, setup steps, a short user guide and test results.
+### 6.1 Plan until January 2028
+
+The project runs from October 2026 to January 2028. We work in two-week sprints during school weeks. **Behrang Elyasi is the product owner** and helps the team set backlog priorities. These are planned milestones; we adjust tasks during sprint reviews while keeping the January 2028 deadline.
+
+| Period | Planned result |
+| --- | --- |
+| Oct-Nov 2026 | Agree school access, test the live feed and Android alarm, set up hosting and start the recorder. |
+| Dec 2026-Jan 2027 | First working version: connect WebUntis, save a route and send a leave-by alert through Discord. |
+| Feb-Jun 2027 | Build the website and Android app, delay warnings, changing alarms and delay appeals. Test with students and a form teacher. |
+| Jul-Aug 2027 | The recorder continues during holidays. No regular school sprints are planned. |
+| Sep-Nov 2027 | Add crowd reports, the way home, Auspex rules and connection statistics. Consider the optional model and teacher portal only if the main features are working and time allows. |
+| Dec 2027-Jan 2028 | Test the complete system, fix problems, finish setup steps and the user guide, then deliver the final version in January 2028. |
+
+The final delivery includes the code, setup steps, a short user guide and test results. If time gets tight, the optional model and teacher portal come after the main features.
 
 ### 6.2 Before we start
 
-Agree WebUntis access and sync limits with school IT. Agree the appeal email format with form teachers before building that feature. Choose hosting and a product owner. Follow up VAO education access; the project must also work without it. Test the Linz AG feed and Android alarm early, and survey our classes.
+Agree WebUntis access and sync limits with school IT. Agree the appeal email format with form teachers before building that feature. Choose hosting. Follow up VAO education access; the project must also work without it. Test the Linz AG feed and Android alarm early, and survey our classes.
 
 Prepare team computers, a server for the backend and database, and a real Android phone for alarm tests. Set up test WebUntis access and a Discord bot. Build the Auspex runtime and test passing delay/exam data to it. Software and data sources are listed in section 5.
 
-The final name, teacher email lookup and optional teacher login are still open. Until lookup is agreed, students enter and check the teacher's address.
+Still open: the final name, how students sign into LeoWay, teacher email lookup, optional teacher login and safe Auspex execution. Until email lookup is agreed, students enter and check the teacher's address. Decide login and script access before implementing those features.

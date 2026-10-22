@@ -1,6 +1,6 @@
 # LeoWay - System Specification
 
-Version 0.7 · 22 October 2026 · Draft
+Version 1.0 · 22 October 2026
 
 **Team:** LRD (Leo Research Department)
 
@@ -10,9 +10,13 @@ Version 0.7 · 22 October 2026 · Draft
 
 ### 1.1 Application domain
 
-HTL Leonding students travel to school using Linz AG bus 19 at Limesstraße, trams 3 and 4 and buses 11, 19 and 191 at Meixnerkreuzung, regional OÖVV buses such as 611 and 618, and ÖBB trains. Lessons start at 07:05 (period 0) or 08:00 (period 1).
+LeoWay belongs to the area of school commuting by public transport. It is built for students at HTL Leonding who travel by bus, tram or train, and for form teachers who deal with late arrivals. The student council uses the collected transport statistics to discuss unreliable connections.
 
-The school plans lessons in WebUntis, including cancellations, substitutions and exams. Teachers record late arrivals there as a short absence; the form teacher decides whether it is excused. Linz AG publishes live departures; the other operators publish timetables. LeoWay connects the student's WebUntis data with recorded transport delays.
+The school is served by Linz AG bus 19 at Limesstraße, trams 3 and 4 and buses 11, 19 and 191 at Meixnerkreuzung, regional OÖVV buses and ÖBB trains. Lessons start at 07:05 or 08:00. A student's actual first and last lessons can change because of cancellations and substitutions.
+
+The school plans lessons in WebUntis, including cancellations, substitutions and exams. Teachers record late arrivals there as an absence; the form teacher decides whether it is excused. Transport sources provide timetables and, where available, live departures and delays. LeoWay connects these two areas: the student's school timetable and their journey to and from school.
+
+The main activities are planning when to leave, reacting to a delayed connection, checking a delay as evidence for lateness and collecting statistics. Students choose their route and alert channels. Teachers check the transport evidence and make the decision about an excuse themselves. LeoWay does not operate transport services or change records in WebUntis. Auspex is an internal backend technology, not a tool for students or teachers.
 
 ### 1.2 Terms
 
@@ -28,7 +32,7 @@ The school plans lessons in WebUntis, including cancellations, substitutions and
 | Delay appeal | An email from the student to the form teacher that links a lateness entry to a delay record. |
 | Verification link | A link in the appeal showing only the shared delay record. |
 | Crowd report | A disruption reported by a student; several reports can trigger a warning. |
-| [Auspex](https://github.com/auspex-lang/auspex) | A small rule language for personal alerts, such as a delay over five minutes on an exam day. |
+| [Auspex](https://github.com/auspex-lang/auspex) | A programming language used only inside the backend. Students and teachers cannot write, upload or run Auspex code. |
 
 ### 1.3 Business processes today
 
@@ -69,7 +73,7 @@ flowchart TD
 
 ## 2. Functional requirements
 
-The twelve use cases are grouped into four blocks. Each block starts with an overview diagram. Each use case lists its process, goal, precondition, postcondition, roles and trigger, followed by a normal case, an error case, three small screen sketches and an activity diagram. Screen values are examples, not measured results. These are first sketches, not the final app design.
+The functional requirements are grouped into four blocks. Each block starts with a use-case overview diagram. User use cases list the process, goal, precondition, postcondition, roles and trigger, followed by normal and error scenarios, screen sketches and an activity diagram. F06 describes the internal backend integration and has no user screen. Values in the screen sketches illustrate the scenarios.
 
 ### 2.1 Block A: Timetable and leave-by time
 
@@ -183,7 +187,6 @@ flowchart LR
   S[Student] --> F03([F03 Get delay warnings])
   S --> F04([F04 Choose alert channels and alarm])
   S --> F05([F05 Find the way home])
-  S --> F06([F06 Write scripts in Auspex])
   F03 --> T[Transport feeds]
   F05 --> T
 ```
@@ -314,46 +317,25 @@ flowchart TD
   d --> x((end))
 ```
 
-#### F06 · Write alert scripts in Auspex
+#### F06 · Internal Auspex integration
 
-| Characteristic | Description |
-| --- | --- |
-| Business process | BP1 Getting to school |
-| Goal | Check personal alert conditions using Auspex. |
-| Precondition | The student is signed in and has a saved route and alert channel. |
-| Postcondition | A checked script is saved, or an error is shown. |
-| Involved roles | Student; Auspex runner |
-| Triggering event | The student opens Alert scripts and selects Check. |
+Auspex is used only inside the backend. The development team writes and maintains this code as part of LeoWay. Students and teachers use the normal app features; they have no Auspex editor, script upload, execution endpoint or direct access to its runtime.
 
-**Standard scenario.** The student writes a script that checks whether the delay is over five minutes and the first lesson is an exam. The backend gives it delay and exam data, then sends the alert if the result is true. Auspex is a C-like scripting language; this sentence describes the condition, not its syntax.
+This is a technical requirement supporting the user features, not a separate student use case. It therefore has no user screen. The exact backend tasks implemented with Auspex and the connection to Quarkus are implementation details to be defined by the team; this specification does not add a student scripting feature.
 
-**Non-standard scenario.** A script has a syntax error: show the error and do not save it as active. A script that hangs or tries to access restricted data must be stopped by the runner. If exam data is missing, manual exam marking is available.
+**Normal operation.** A user uses an ordinary LeoWay feature. The backend performs the required processing and returns the result through the normal API. Any internal Auspex code is maintained and executed by the backend.
 
-```screens
-Call: Route and alerts
-[Alert scripts]
----
-Standard: checked script
-Auspex script editor
-Result: valid
-[Save and activate]
----
-Non-standard: error
-Error on line 3
-Script not activated
-[Edit script]
-```
+**Error handling.** An internal processing error must not expose code, credentials or server details to the user. The backend returns an appropriate error message and logs technical details for the team without private school data.
 
 ```mermaid
 %% activity
 flowchart TD
-  s((start)) --> a[Edit script]
-  a --> b[Check in restricted runner]
-  b --> c{Valid?}
-  c -- yes --> d[Save active script]
-  c -- no --> e[Show error and keep inactive] --> x2((end))
-  d --> f[Evaluate on delay updates]
-  f --> x((end))
+  s((start)) --> a[User uses an ordinary app feature]
+  a --> b[Backend processes the request]
+  b --> c{Processing successful?}
+  c -- yes --> d[Return feature result]
+  c -- no --> e[Return error message and log technical details] --> x2((end))
+  d --> x((end))
 ```
 
 
@@ -670,7 +652,7 @@ Each source has one adapter, and alert channels share one interface. Adding anot
 
 **Availability:** a failed adapter must not stop the others. Retry failed requests without flooding the source and notify the team if the recorder stops. Keep backups and test a restore on the selected host. Exact backup settings are decided during deployment.
 
-**Auspex:** student scripts must run separately with limited file, data and server access. The prototype must show that a blocked operation is rejected and an endless loop is stopped. The integration is still to be built; the Auspex runtime alone does not establish that protection.
+**Auspex:** only the backend runs code maintained by the development team. Students and teachers cannot submit or execute code. Do not expose the Auspex runtime directly through the website, Android app or public API.
 
 ### 3.5 Legal and school constraints
 
@@ -708,7 +690,7 @@ Resources: team computers, a continuously running backend/database server and an
 
 ### 5.1 Main parts
 
-Angular provides the website and teacher portal; Capacitor wraps the app for Android. Quarkus handles journeys, the recorder, appeals and alerts. PostgreSQL stores data. [Auspex](https://github.com/auspex-lang/auspex) is planned for alert scripts in a restricted runner. Python is optional if we add model training. We use free services and team hardware or school hosting.
+Angular provides the website and teacher portal; Capacitor wraps the app for Android. Quarkus handles journeys, the recorder, appeals and alerts. PostgreSQL stores data. [Auspex](https://github.com/auspex-lang/auspex) is used only inside the backend, with code maintained by the development team. Python is optional if we add model training. We use free services and team hardware or school hosting.
 
 ```mermaid
 %% architecture
@@ -718,24 +700,24 @@ flowchart LR
   API -- SQL --> DB[(PostgreSQL)]
   API -- read --> W[WebUntis]
   API -- read --> T[Transport feeds]
-  API -- run --> Rules[Auspex scripts - planned]
+  API -- internal --> Rules[Auspex - backend only]
   ML[Python model - optional] -.-> DB
 ```
 
-The clients do not connect to the database themselves. The backend checks access and passes only the required delay and exam values to scripts. A script result tells the backend whether to send an alert; the script does not get the main database key. Auspex currently documents its own engine and SQLite, so a direct PostgreSQL connector is not assumed. Test the bridge before allowing student scripts.
+The clients communicate with the Quarkus backend and do not connect directly to PostgreSQL or Auspex. Auspex is an internal part of the backend. Its code and integration are maintained by the development team. The exact connection between Quarkus and Auspex must be documented during implementation; no specific connector or runtime protocol is assumed here.
 
 ### 5.2 Communication and external systems
 
 | Partner | Interface and exchanged data |
 | --- | --- |
 | Website / Android | REST/JSON over HTTPS: saved routes, lessons, journey results, reports and appeal drafts. Responses include last-update time. |
-| PostgreSQL | Backend SQL connection for routes, observations and appeals. Clients and student scripts have no direct connection. |
+| PostgreSQL | Backend SQL connection for routes, observations and appeals. Clients have no direct connection. |
 | WebUntis | Read-only calls through the webuntis adapter using the student's username and access key. Allow login/logout, timetable, timegrid, absences and exams only. |
 | Linz AG | Adapter for live departures and delays. The spike checks EFA or GTFS-RT availability, trip IDs, update frequency and source limits. |
 | MVO and OeBB | GTFS timetable files imported into a common stop/trip format. They provide scheduled times where live data is missing. |
 | VAO | Optional regional source under its active contract. Keep it disabled while usable access is unavailable; use timetables instead. |
 | Discord / push / email | One notification interface with a shared event ID. Discord bot messages, device pushes and email alerts carry the line, delay and relevant journey. Appeal emails open in the student's own mail app. |
-| Auspex | Proposed runner input: delay minutes and exam flag. Output: alert condition true/false or a script error. The exact process/API bridge is still open. |
+| Auspex | Internal backend integration only. No interface for student or teacher code. Document the Quarkus connection and exchanged data with the implementation. |
 | Optional model / weather | History is passed to training only if the model is built. GeoSphere weather can be an optional input. |
 | Form teacher | Browser verification page showing the chosen transport record. The optional portal needs an authenticated teacher assigned to the class. |
 
@@ -754,7 +736,7 @@ Store timestamps in UTC and show Europe/Vienna local time. Keep the service date
 
 ## 6. Acceptance criteria
 
-Accept each use case against its normal and non-standard scenario below. Use recorded or synthetic data for private records. Keep the test results with the delivered version. The model and teacher portal do not block delivery if the team leaves them out.
+Accept the user use cases against their normal and non-standard scenarios below. Check the internal requirement F06 through backend and access tests. Use recorded or synthetic data for private records. Keep the test results with the delivered version. The model and teacher portal do not block delivery if the team leaves them out.
 
 | Test | Pass condition |
 | --- | --- |
@@ -763,7 +745,7 @@ Accept each use case against its normal and non-standard scenario below. Use rec
 | A03 - F03 | A late journey creates an alert, an available alternative and an exam note when needed. Without live data, show timetable-only status and no invented live delay. |
 | A04 - F04 | Each chosen channel gets a test message once. A real Android phone rings at leave-by time and moves the alarm after an update. Without exact-alarm access, offer a notification. |
 | A05 - F05 | Show a connection after the last lesson and the walk to the stop. Cancel the last lessons and show an earlier journey home. |
-| A06 - F06 | A valid Auspex script checks delay/exam values. A syntax error keeps it inactive. A blocked file/data operation is rejected and an endless script is stopped. Test manual exam fallback. |
+| A06 - F06 | Confirm that Auspex is reachable only through internal backend processing. Neither students nor teachers can submit or execute Auspex code through the UI or API. Internal errors do not expose code or credentials. |
 | A07 - F07 | A suggested match opens the correct editable email in under one minute. The link shows the same source record. No match gives no suggested appeal; invalid or revoked links are rejected. |
 | A08 - F08 | If built: an assigned teacher sees evidence and can approve/decline. An unassigned teacher is denied; WebUntis is never changed. |
 | A09 - F09 | Records keep trip, stop, source, service date and time. A failed feed is marked unavailable while others continue. Retrying does not duplicate observations. |
@@ -786,7 +768,7 @@ The project runs from October 2026 to January 2028, with two-week sprints during
 | Dec 2026-Jan 2027 | First working version: connect WebUntis, save a route and send a leave-by alert through Discord. |
 | Feb-Jun 2027 | Build the website and Android app, delay warnings, changing alarms and delay appeals. Test with students and a form teacher. |
 | Jul-Aug 2027 | The recorder continues during holidays. No regular school sprints are planned. |
-| Sep-Nov 2027 | Complete crowd reports, the way home, Auspex rules and statistics. Consider the optional model and portal only if time allows. |
+| Sep-Nov 2027 | Complete crowd reports, the way home, the internal Auspex integration and statistics. Consider the optional model and portal only if time allows. |
 | Dec 2027-Jan 2028 | Test the complete system, fix problems, finish setup steps and the user guide, then deliver the final version in January 2028. |
 
 Deliver the code, setup steps, a short user guide and test results. Optional extras must not delay the main features.
@@ -803,7 +785,7 @@ Settle these points before building the affected feature. Keep the answers in th
 | --- | --- |
 | Hosting | Team server or LeoCloud? Agree who monitors the recorder and handles backups. |
 | Student login | Choose how students sign into LeoWay and reconnect or disconnect WebUntis. |
-| Auspex | Test how scripts run separately with limited access to files, data and server resources. |
+| Auspex | Define which internal backend tasks use it and document its connection to Quarkus. Students and teachers have no direct access. |
 | Appeals | Agree the email format with form teachers before building it. Decide where teacher addresses come from; use checked manual entry until then. |
 | VAO | Define request limits and data retention under the active contract. LeoWay must work without VAO. |
 

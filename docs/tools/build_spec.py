@@ -4,7 +4,7 @@ Run: python docs/tools/build_spec.py
 Dependency: python -m pip install -r docs/tools/requirements.txt
 
 Use case, activity and architecture diagrams and the screen sketches are drawn from
-the Markdown blocks themselves. Only the domain model is drawn by hand below.
+the Markdown blocks themselves. Domain concept positions are set in layout_domain.
 """
 from pathlib import Path
 from functools import partial
@@ -390,21 +390,62 @@ class Diagram(Flowable):
             if len(parts) > 1:
                 c.drawString(WIDTH/2, y, parts[1])
 
-    # Domain model, drawn by hand to match the Mermaid class diagram.
+    # Domain concepts and labelled associations from the Markdown class diagram.
     def layout_domain(self):
-        self.height = 100
+        self.height = 280
+        self.domain_positions = {
+            'Student': (0, 220), 'SavedRoute': (185, 220),
+            'FormTeacher': (370, 220), 'LatenessEntry': (0, 125),
+            'Appeal': (185, 125), 'DelayRecord': (185, 30),
+        }
+        edge = re.compile(r'^\s*(\w+)\s+"([^"]+)"\s+--\s+"([^"]+)"\s+(\w+)\s*:\s*(.+)$')
+        self.domain_edges = [match.groups() for line in self.block if (match := edge.match(line))]
+        if not self.domain_edges:
+            raise ValueError('Domain diagram needs labelled associations with multiplicities.')
+        self.domain_nodes = {n for src, _, _, dst, _ in self.domain_edges for n in (src, dst)}
+        if self.domain_nodes - self.domain_positions.keys():
+            raise ValueError('Add positions for new domain concepts.')
 
     def draw_domain(self):
-        self.box(0,63,94,32,['Student'])
-        self.box(165,63,130,32,['SavedRoute','stops, walks, buffer'])
-        self.arrow(94,79,165,79,'1 : 0..*')
-        self.box(0,3,125,35,['LatenessEntry','date, start, end'])
-        self.box(180,3,120,35,['Appeal','match, token'])
-        self.box(355,3,WIDTH-355,35,['DelayRecord','trip, source, delay'])
-        self.canv.setStrokeColor(GREY); self.canv.line(47,63,47,38)
-        self.canv.setFont(body,7); self.canv.setFillColor(GREY); self.canv.drawString(52,47,'1 : 0..*')
-        self.arrow(125,20,180,20,'1 : 0..1')
-        self.arrow(300,20,355,20,'0..* : 1')
+        c = self.canv
+        w, h = 115, 50
+
+        def label(x, y, text, size=9):
+            tw = pdfmetrics.stringWidth(text, body, size)
+            c.setFillColor(colors.white)
+            c.rect(x-tw/2-3, y-3, tw+6, size+5, fill=1, stroke=0)
+            c.setFillColor(INK); c.setFont(body, size)
+            c.drawCentredString(x, y, text)
+
+        for src, left, right, dst, name in self.domain_edges:
+            sx, sy = self.domain_positions[src]
+            dx, dy = self.domain_positions[dst]
+            c.setStrokeColor(GREY); c.setLineWidth(0.7)
+            if sy == dy:
+                y = sy+h/2
+                c.line(sx+w, y, dx, y)
+                label((sx+w+dx)/2, y-3, name)
+                label(sx+w+8, y-14, left, 8)
+                label(dx-12, y+8, right, 8)
+            elif sx == dx:
+                x = sx+w/2
+                c.line(x, sy, x, dy+h)
+                label(x, (sy+dy+h)/2-3, name)
+                label(x+12, sy-12, left, 8)
+                label(x+15, dy+h+5, right, 8)
+            else:
+                # Form teacher to appeal: right-angle line avoids the other concepts.
+                x, y = sx+w/2, dy+h/2
+                c.line(x, sy, x, y); c.line(x, y, dx+w, y)
+                label((x+dx+w)/2, y-3, name)
+                label(x+10, sy-12, left, 8)
+                label(dx+w+15, y+8, right, 8)
+        for node in sorted(self.domain_nodes):
+            x, y = self.domain_positions[node]
+            c.setFillColor(colors.HexColor('#d0d0d0'))
+            c.rect(x, y, w, h, fill=1, stroke=0)
+            words = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', node)
+            self.text_lines(x+w/2, y+h/2, [words], 11, bold)
 
     def draw(self):
         getattr(self, 'draw_' + self.kind.replace('-', '_'))()

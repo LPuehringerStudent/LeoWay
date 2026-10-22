@@ -18,6 +18,24 @@ The school plans lessons in WebUntis, including cancellations, substitutions and
 
 The main activities are planning when to leave, reacting to a delayed connection, checking a delay as evidence for lateness and collecting statistics. Students choose their route and alert channels. Teachers check the transport evidence and make the decision about an excuse themselves. LeoWay does not operate transport services or change records in WebUntis. Auspex is an internal backend technology, not a tool for students or teachers.
 
+<!-- page -->
+
+#### Application domain diagram
+
+`1` means one, `0..1` means zero or one, and `0..*` means zero or more.
+
+```mermaid
+%% domain
+classDiagram
+  Student "1" -- "0..*" SavedRoute : saves
+  Student "1" -- "0..*" LatenessEntry : has
+  LatenessEntry "1" -- "0..1" Appeal : has
+  FormTeacher "1" -- "0..*" Appeal : reviews
+  Appeal "0..*" -- "1" DelayRecord : refers to
+```
+
+A student can save several routes and have several lateness entries. A lateness entry can have an appeal, which the form teacher reviews. Each appeal refers to one recorded delay; the same delay can be used by several students. Auspex is a technical backend component, so it is not part of this domain diagram.
+
 ### 1.2 Terms
 
 | Term | Meaning |

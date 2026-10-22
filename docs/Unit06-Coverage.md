@@ -29,6 +29,6 @@ Document: [LeoWay system specification](LeoWay-System-Specification.md), version
 - The document is version 1.0 and is not labelled as a draft.
 - Product owner: Behrang Elyasi. Final delivery: January 2028.
 - iPhone users use the website.
-- The separate general home-screen sketch and main-data-objects/domain-model section remain removed. The small use-case sketches cover the GUI requirement on handout page 8.
+- Section 1.1 includes a conceptual application-domain diagram with named relations and multiplicities, as requested. The separate general home-screen sketch and main-data-objects section remain removed. The small use-case sketches cover the GUI requirement on handout page 8.
 - Sizing figures and performance targets are first planning values to revise with measurements; they are not claims about real users or source volumes.
 - This document describes planned behaviour. It does not claim these features have already been implemented or tested in the running application.

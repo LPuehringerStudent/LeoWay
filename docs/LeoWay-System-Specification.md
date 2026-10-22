@@ -28,7 +28,7 @@ The school plans lessons in WebUntis, including cancellations, substitutions and
 | Delay appeal | An email from the student to the form teacher that links a lateness entry to a delay record. |
 | Verification link | A link in the appeal showing only the shared delay record. |
 | Crowd report | A disruption reported by a student; several reports can trigger a warning. |
-| auspex-lang | A small rule language for personal alerts, such as a delay over five minutes on an exam day. |
+| [Auspex](https://github.com/auspex-lang/auspex) | A small rule language for personal alerts, such as a delay over five minutes on an exam day. |
 
 ### 1.3 Business processes today
 
@@ -708,7 +708,7 @@ Resources: team computers, a continuously running backend/database server and an
 
 ### 5.1 Main parts
 
-Angular provides the website and teacher portal; Capacitor wraps the app for Android. Quarkus handles journeys, the recorder, appeals and alerts. PostgreSQL stores data. Auspex is planned for alert scripts in a restricted runner. Python is optional if we add model training. We use free services and team hardware or school hosting.
+Angular provides the website and teacher portal; Capacitor wraps the app for Android. Quarkus handles journeys, the recorder, appeals and alerts. PostgreSQL stores data. [Auspex](https://github.com/auspex-lang/auspex) is planned for alert scripts in a restricted runner. Python is optional if we add model training. We use free services and team hardware or school hosting.
 
 ```mermaid
 %% architecture

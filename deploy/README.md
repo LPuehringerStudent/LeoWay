@@ -13,6 +13,7 @@ Everything needed to run it is in this folder; nothing is installed by hand exce
 | Responsible | @LPuehringerStudent |
 | App folder | `/opt/leoway/deploy` (this folder) with `.env` (secrets, `chmod 600`, never committed) |
 | Backups | `/var/backups/leoway`, daily at 02:30 (`leoway-backup.timer`), kept 7 days |
+| Public URL | **https://leoway.lpuehringer.dev** via Cloudflare Tunnel `r740` (cloudflared on the Proxmox host), no Cloudflare Access: open to everyone |
 | Monitoring | Uptime Kuma on CT 103 (`192.168.178.30:3001`) |
 
 Availability depends on home power and internet. Outages show up as gaps in the recorded data and are not hidden.
@@ -76,6 +77,13 @@ re-apply account deletions after every restore (spec A13).
 
 Restore tests on 2026-11-04: normal restore, a truncated backup (rejected, live DB untouched) and a backup older
 than the schema (newer table gone after the restore).
+
+## Public access
+
+`leoway.lpuehringer.dev` is a route of the existing Cloudflare Tunnel `r740` on the Proxmox host to
+`http://192.168.178.11:8080`, plus a proxied CNAME to the tunnel. Cloudflare ends TLS and redirects HTTP to HTTPS.
+There is deliberately **no** Cloudflare Access app in front: students and teachers must reach it without a login
+from Cloudflare. Private data is protected by the API itself (S02).
 
 ## Secrets to keep outside the server
 

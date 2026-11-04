@@ -38,6 +38,9 @@ services:
       QUARKUS_DATASOURCE_USERNAME: ${POSTGRES_USER:-leoway}
       QUARKUS_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       LEOWAY_PUBLIC_BASE_URL: ${LEOWAY_PUBLIC_BASE_URL}
+      # Behind nginx and the Cloudflare Tunnel: take scheme and client IP from X-Forwarded-* headers.
+      QUARKUS_HTTP_PROXY_PROXY_ADDRESS_FORWARDING: "true"
+      QUARKUS_HTTP_PROXY_ALLOW_X_FORWARDED: "true"
       LEOWAY_KEY_ENCRYPTION_KEY: ${LEOWAY_KEY_ENCRYPTION_KEY:?set LEOWAY_KEY_ENCRYPTION_KEY in .env}
     # No port: only the web container talks to it.
 
@@ -47,7 +50,7 @@ services:
     depends_on:
       backend:
         condition: service_healthy
-    # Plain HTTP. Reachable on the home LAN (Uptime Kuma); the public HTTPS tunnel will point here.
+    # Plain HTTP on the home LAN (Uptime Kuma). Public HTTPS: Cloudflare Tunnel r740 -> here.
     ports:
       - "${LEOWAY_HTTP_PORT:-8080}:80"
 

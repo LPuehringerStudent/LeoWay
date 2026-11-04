@@ -6,3 +6,6 @@ Requires=docker.service
 [Service]
 Type=oneshot
 ExecStart=/opt/leoway/deploy/backup.sh
+# The catch-up run after a reboot can start before PostgreSQL is ready: retry.
+Restart=on-failure
+RestartSec=2min

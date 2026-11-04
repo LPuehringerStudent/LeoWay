@@ -49,7 +49,28 @@ cd ../deploy && docker compose pull && docker compose up -d --wait
 ```
 
 Copy the private key to the server only for the restore (e.g. to `/dev/shm`) and delete it afterwards (`shred -u`).
-A restore was tested on 2026-11-04: write test row → backup → drop → restore → row back.
+
+`restore.sh` first checks that the file decrypts and decompresses completely, stops the backend, and restores into a
+fresh scratch database in one transaction. Only if that works does it swap the databases. The old database stays
+as `leoway_before_restore` until you drop it. So a broken backup never touches the live data, and tables that are
+newer than the backup don't stay behind.
+
+**Deleted accounts:** a restore brings back accounts deleted after the backup was made. Until #20 handles this,
+re-apply account deletions after every restore (spec A13).
+
+Restore tests on 2026-11-04: normal restore, a truncated backup (rejected, live DB untouched) and a backup older
+than the schema (newer table gone after the restore).
+
+## Secrets to keep outside the server
+
+Keep both in the team password manager. If CT 104 is lost without them, the backups and stored WebUntis keys are lost too:
+- the age **private** key for backups
+- `LEOWAY_KEY_ENCRYPTION_KEY` from `.env` (not included in the backups; also needed for the LeoCloud move)
+
+## Backup monitoring
+
+Create a **Push** monitor in Uptime Kuma (CT 103, heartbeat interval about 25 h) and put its URL into
+`BACKUP_HEARTBEAT_URL` in `.env`. Every successful backup calls it; if backups stop, Kuma alerts.
 
 ## Moving to LeoCloud
 

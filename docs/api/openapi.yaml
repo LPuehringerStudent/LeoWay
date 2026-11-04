@@ -11,6 +11,8 @@ tags:
 - name: Session
   description: "Login: POST /j_security_check with j_username and j_password (the\
     \ WebUntis access key)."
+- name: WebUntis
+  description: The logged-in student's WebUntis connection (F01).
 - name: MicroProfile Health
   description: Check the health of the application
 components:
@@ -28,11 +30,33 @@ components:
           $ref: "#/components/schemas/Instant"
         lastError:
           type: string
+    FirstLesson:
+      type: object
+      properties:
+        date:
+          $ref: "#/components/schemas/LocalDate"
+        start:
+          $ref: "#/components/schemas/LocalTime"
+        subject:
+          type: string
     Instant:
       type: string
       format: date-time
       examples:
       - 2022-03-10T16:15:50Z
+    LocalDate:
+      type: string
+      format: date
+      examples:
+      - 2022-03-10
+    LocalTime:
+      type: string
+      format: local-time
+      examples:
+      - 13:45:30.123456789
+      externalDocs:
+        description: As defined by 'partial-time' in RFC3339
+        url: https://www.rfc-editor.org/rfc/rfc3339.html#section-5.6
     Me:
       type: object
       properties:
@@ -40,6 +64,11 @@ components:
           type: string
         createdAt:
           $ref: "#/components/schemas/Instant"
+    Reachability:
+      type: object
+      properties:
+        webUntisReachable:
+          type: boolean
     Route:
       type: object
       properties:
@@ -65,6 +94,17 @@ components:
       - OK
       - STALE
       - DOWN
+    Status:
+      type: object
+      properties:
+        connected:
+          type: boolean
+        username:
+          type: string
+        available:
+          type: boolean
+        firstLesson:
+          $ref: "#/components/schemas/FirstLesson"
     HealthResponse:
       type: object
       properties:
@@ -214,6 +254,40 @@ paths:
       security:
       - SecurityScheme:
         - student
+  /api/me/webuntis:
+    get:
+      summary: Connection status and the next first lesson (today or the next school
+        day)
+      tags:
+      - WebUntis
+      responses:
+        "200":
+          description: Status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Status"
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - SecurityScheme:
+        - student
+    delete:
+      summary: "Disconnect WebUntis: deletes the stored access key"
+      tags:
+      - WebUntis
+      responses:
+        "204":
+          description: Disconnected
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - SecurityScheme:
+        - student
   /api/session/logout:
     post:
       summary: "Log out: removes the session cookie"
@@ -228,6 +302,18 @@ paths:
           description: Not Allowed
       security:
       - SecurityScheme: []
+  /api/session/webuntis-reachable:
+    get:
+      summary: Whether WebUntis can be reached right now (no login needed)
+      tags:
+      - Session
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reachability"
   /q/health:
     description: MicroProfile Health Endpoint
     summary: MicroProfile Health provides a way for your application to distribute

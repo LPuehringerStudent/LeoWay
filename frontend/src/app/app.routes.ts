@@ -1,11 +1,15 @@
 import { Routes } from '@angular/router';
 import { HomePage } from './home/home-page';
 import { PlaceholderPage } from './pages/placeholder-page';
+import { ConnectPage } from './connect/connect-page';
+import { PrivacyPage } from './privacy/privacy-page';
+import { RoutePage } from './route/route-page';
 
 export const routes: Routes = [
   { path: '', component: HomePage, pathMatch: 'full', title: 'LeoWay' },
-  { path: 'route', component: PlaceholderPage, title: 'Route and alerts' },
-  { path: 'privacy', component: PlaceholderPage, title: 'Privacy' },
+  { path: 'route', component: RoutePage, title: 'Route and alerts' },
+  { path: 'connect', component: ConnectPage, title: 'Connect WebUntis' },
+  { path: 'privacy', component: PrivacyPage, title: 'Privacy' },
   // Admin only once accounts exist (#20).
   { path: 'admin/feeds', component: PlaceholderPage, title: 'Feed status' },
   { path: 'connections', component: PlaceholderPage, title: 'Other connections' },

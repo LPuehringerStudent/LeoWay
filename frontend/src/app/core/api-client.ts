@@ -24,6 +24,23 @@ export class ApiClient {
     return this.http.get<T>(this.url(path), options);
   }
 
+  post<T>(path: string, body: unknown): Observable<T> {
+    return this.http.post<T>(this.url(path), body);
+  }
+
+  delete(path: string): Observable<void> {
+    return this.http.delete<void>(this.url(path));
+  }
+
+  /** Form-encoded POST, used for the Quarkus login endpoint. */
+  postForm(path: string, fields: Record<string, string>): Observable<string> {
+    const body = new URLSearchParams(fields).toString();
+    return this.http.post(this.url(path), body, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      responseType: 'text',
+    });
+  }
+
   getText(path: string, options: { timeout?: number } = {}): Observable<string> {
     return this.http.get(this.url(path), { ...options, responseType: 'text' });
   }

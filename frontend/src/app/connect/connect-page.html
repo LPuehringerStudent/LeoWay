@@ -1,0 +1,46 @@
+<h1>Connect WebUntis</h1>
+<p class="lead">LeoWay logs you in with your WebUntis username and an access key. Connecting creates your LeoWay
+  account.</p>
+
+@if (!consented()) {
+  <section class="card" aria-labelledby="privacy-heading">
+    <h2 id="privacy-heading" class="visually-hidden">Privacy information</h2>
+    <app-privacy-info />
+    <button type="button" class="btn" (click)="consented.set(true)">
+      I have read this and I am 14 or older – continue
+    </button>
+  </section>
+} @else {
+  <form class="card" (ngSubmit)="submit()" aria-describedby="key-help">
+    <label for="username">WebUntis username</label>
+    <input id="username" name="username" autocomplete="username" autocapitalize="none" spellcheck="false"
+           required [(ngModel)]="username" />
+
+    <label for="key">Access key</label>
+    <input id="key" name="key" type="password" autocomplete="off" spellcheck="false" required
+           [(ngModel)]="accessKey" />
+
+    @switch (result()) {
+      @case ('rejected') {
+        <p class="error" role="alert">Error: access key not accepted. Check the username and create a new key if
+          needed.</p>
+      }
+      @case ('unavailable') {
+        <p class="error" role="alert">WebUntis cannot be reached right now. Nothing was saved – please try again
+          later.</p>
+      }
+    }
+
+    <button type="submit" class="btn" [disabled]="busy()">{{ busy() ? 'Connecting…' : 'Connect WebUntis' }}</button>
+
+    <details id="key-help">
+      <summary>How to create a key</summary>
+      <ol>
+        <li>Open WebUntis in the browser and log in.</li>
+        <li>Click your name (top right) → <strong>Profil</strong> → tab <strong>Freigaben</strong>.</li>
+        <li>Next to <em>Zugriff über Schlüssel</em>, click <strong>Anzeigen</strong> and copy the key.</li>
+        <li>Paste it above. You can revoke it there at any time.</li>
+      </ol>
+    </details>
+  </form>
+}

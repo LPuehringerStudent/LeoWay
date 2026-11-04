@@ -46,6 +46,21 @@ public class WebUntisConnection {
         return withClient(studentId, c -> FirstLesson.on(date, c.timetable(date, date)));
     }
 
+    /** The next school day's first lesson from {@code from} on, looking up to a week ahead. */
+    public Optional<Lesson> nextFirstLesson(long studentId, LocalDate from) {
+        return withClient(studentId, c -> {
+            List<Lesson> week = c.timetable(from, from.plusDays(7));
+            return from.datesUntil(from.plusDays(8))
+                    .map(d -> FirstLesson.on(d, week)).flatMap(Optional::stream).findFirst();
+        });
+    }
+
+    /** Deletes the stored key. The student logs in again to reconnect. */
+    @Transactional
+    public void disconnect(long studentId) {
+        WebUntisCredential.deleteById(studentId);
+    }
+
     public Optional<List<Absence>> absences(long studentId, LocalDate from, LocalDate to) {
         return withClient(studentId, c -> Optional.of(c.absences(from, to)));
     }

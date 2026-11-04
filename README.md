@@ -58,11 +58,21 @@ npm --prefix frontend test -- --watch=false
 
 Use `docker compose down` to stop PostgreSQL and keep its data.
 
+## API documentation
+
+- **Swagger UI:** <http://localhost:5080/q/swagger-ui> while the API runs (`npm start` or the local profile).
+- **OpenAPI file:** [`docs/api/openapi.yaml`](docs/api/openapi.yaml). Every backend build regenerates it.
+  Commit it together with endpoint changes; CI fails if it is outdated.
+- Give new endpoints an `@Operation` summary, `@APIResponse` for each error status, and a `@Tag`.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for branches, pull requests and commit rules.
+
 ## Repository layout
 
 - `backend/` — Java Quarkus API and Flyway migrations
 - `frontend/` — Angular app
-- `docs/` — project proposal, system specification and VAO Start contract
+- `docs/` — project proposal, system specification, VAO Start contract and `api/openapi.yaml`
+- `deploy/` — interim server deployment and backups (see `deploy/README.md`)
 - `webuntis-spike/` — feasibility test against HTL Leonding's WebUntis
 - `linz-ag-spike/` — feasibility test against the Linz AG live departures
 

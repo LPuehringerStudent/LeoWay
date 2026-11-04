@@ -17,6 +17,7 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
@@ -38,8 +39,9 @@ public class WebUntisIdentityProvider implements IdentityProvider<UsernamePasswo
     @Inject
     WebUntisClientFactory clients;
 
-    @ConfigProperty(name = "leoway.admins", defaultValue = " ")
-    Set<String> admins;
+    // Empty or unset LEOWAY_ADMINS means no admins.
+    @ConfigProperty(name = "leoway.admins")
+    Optional<Set<String>> admins;
 
     @Override
     public Class<UsernamePasswordAuthenticationRequest> getRequestType() {
@@ -56,7 +58,7 @@ public class WebUntisIdentityProvider implements IdentityProvider<UsernamePasswo
 
     SecurityIdentity login(String username, String key) {
         try {
-            if (admins.contains(username)) {
+            if (admins.orElse(Set.of()).contains(username)) {
                 try (WebUntisClient client = clients.create()) {
                     client.login(username, key);
                 }

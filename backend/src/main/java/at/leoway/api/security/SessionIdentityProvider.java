@@ -8,6 +8,7 @@ import io.quarkus.security.runtime.QuarkusPrincipal;
 import io.quarkus.security.runtime.QuarkusSecurityIdentity;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
+import java.util.Optional;
 import java.util.Set;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -18,8 +19,9 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  */
 @ApplicationScoped
 public class SessionIdentityProvider implements IdentityProvider<TrustedAuthenticationRequest> {
-    @ConfigProperty(name = "leoway.admins", defaultValue = " ")
-    Set<String> admins;
+    // Empty or unset LEOWAY_ADMINS means no admins.
+    @ConfigProperty(name = "leoway.admins")
+    Optional<Set<String>> admins;
 
     @Override
     public Class<TrustedAuthenticationRequest> getRequestType() {
@@ -31,7 +33,7 @@ public class SessionIdentityProvider implements IdentityProvider<TrustedAuthenti
         String username = request.getPrincipal();
         return Uni.createFrom().item(QuarkusSecurityIdentity.builder()
                 .setPrincipal(new QuarkusPrincipal(username))
-                .addRole(admins.contains(username) ? Roles.ADMIN : Roles.STUDENT)
+                .addRole(admins.orElse(Set.of()).contains(username) ? Roles.ADMIN : Roles.STUDENT)
                 .build());
     }
 }

@@ -49,6 +49,7 @@ jobs:
           QUARKUS_DATASOURCE_USERNAME: leoway
           QUARKUS_DATASOURCE_PASSWORD: ci
           QUARKUS_FLYWAY_MIGRATE_AT_START: "true"
+          LEOWAY_KEY_ENCRYPTION_KEY: Y2ktb25seS1rZXktY2ktb25seS1rZXktY2ktb25seTE=
         run: |
           java -jar target/quarkus-app/quarkus-run.jar > api.log 2>&1 &
           for i in $(seq 1 30); do

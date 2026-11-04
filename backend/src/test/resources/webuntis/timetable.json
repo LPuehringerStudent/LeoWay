@@ -1,0 +1,6 @@
+{"jsonrpc":"2.0","id":"leoway","result":[
+ {"id":1,"date":20261105,"startTime":800,"endTime":850,"kl":[{"id":7}],"su":[{"id":1,"name":"AM","longname":"Angewandte Mathematik"}],"ro":[{"id":3}],"te":[{"id":4}],"code":"cancelled","activityType":"Unterricht"},
+ {"id":2,"date":20261105,"startTime":855,"endTime":945,"kl":[{"id":7}],"su":[{"id":2,"name":"POS","longname":"Programmieren"}],"ro":[{"id":3}],"te":[{"id":5}],"code":"irregular","activityType":"Unterricht"},
+ {"id":3,"date":20261105,"startTime":1000,"endTime":1050,"kl":[{"id":7}],"su":[{"id":3,"name":"D","longname":"Deutsch"}],"ro":[{"id":3}],"te":[{"id":6}],"activityType":"Unterricht"},
+ {"id":4,"date":20261106,"startTime":800,"endTime":850,"kl":[{"id":7}],"su":[{"id":3,"name":"D","longname":"Deutsch"}],"ro":[{"id":3}],"te":[{"id":6}],"code":"cancelled","activityType":"Unterricht"}
+]}

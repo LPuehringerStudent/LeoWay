@@ -22,7 +22,7 @@ services:
     ports:
       - "127.0.0.1:5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -38,9 +38,10 @@ services:
   #     QUARKUS_DATASOURCE_USERNAME: ${POSTGRES_USER:-leoway}
   #     QUARKUS_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
   #     LEOWAY_PUBLIC_BASE_URL: ${LEOWAY_PUBLIC_BASE_URL}
-  #     LEOWAY_KEY_ENCRYPTION_KEY: ${LEOWAY_KEY_ENCRYPTION_KEY}
+  #     LEOWAY_KEY_ENCRYPTION_KEY: ${LEOWAY_KEY_ENCRYPTION_KEY:?set LEOWAY_KEY_ENCRYPTION_KEY in .env}
+  #   # Plain HTTP on localhost only; the public side is the TLS proxy / tunnel in front of it.
   #   ports:
-  #     - "8080:8080"
+  #     - "127.0.0.1:8080:8080"
 
 volumes:
   db-data:

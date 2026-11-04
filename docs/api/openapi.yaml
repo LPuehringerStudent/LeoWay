@@ -8,6 +8,9 @@ tags:
 - name: Routes
   description: The student's saved routes. Other students' routes always look missing
     (404).
+- name: Session
+  description: "Login: POST /j_security_check with j_username and j_password (the\
+    \ WebUntis access key)."
 - name: MicroProfile Health
   description: Check the health of the application
 components:
@@ -211,6 +214,20 @@ paths:
       security:
       - SecurityScheme:
         - student
+  /api/session/logout:
+    post:
+      summary: "Log out: removes the session cookie"
+      tags:
+      - Session
+      responses:
+        "204":
+          description: Logged out
+        "401":
+          description: Not logged in
+        "403":
+          description: Not Allowed
+      security:
+      - SecurityScheme: []
   /q/health:
     description: MicroProfile Health Endpoint
     summary: MicroProfile Health provides a way for your application to distribute

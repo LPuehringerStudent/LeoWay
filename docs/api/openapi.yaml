@@ -1,0 +1,339 @@
+---
+openapi: 3.1.0
+tags:
+- name: Account
+  description: The logged-in student's own account.
+- name: Admin
+  description: Feed health for administrators. No student data.
+- name: Routes
+  description: The student's saved routes. Other students' routes always look missing
+    (404).
+- name: MicroProfile Health
+  description: Check the health of the application
+components:
+  schemas:
+    FeedStatus:
+      type: object
+      properties:
+        feedId:
+          type: string
+        state:
+          $ref: "#/components/schemas/State"
+        lastSuccessAt:
+          $ref: "#/components/schemas/Instant"
+        lastErrorAt:
+          $ref: "#/components/schemas/Instant"
+        lastError:
+          type: string
+    Instant:
+      type: string
+      format: date-time
+      examples:
+      - 2022-03-10T16:15:50Z
+    Me:
+      type: object
+      properties:
+        username:
+          type: string
+        createdAt:
+          $ref: "#/components/schemas/Instant"
+    Route:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        homeStopId:
+          type: string
+        schoolStopId:
+          type: string
+        walkToStopMinutes:
+          type: integer
+          format: int32
+        walkToSchoolMinutes:
+          type: integer
+          format: int32
+        bufferMinutes:
+          type: integer
+          format: int32
+    State:
+      type: string
+      enum:
+      - OK
+      - STALE
+      - DOWN
+    HealthResponse:
+      type: object
+      properties:
+        checks:
+          type: array
+          items:
+            $ref: "#/components/schemas/HealthCheck"
+        status:
+          type: string
+          enum:
+          - UP
+          - DOWN
+    HealthCheck:
+      type: object
+      properties:
+        data:
+          type:
+          - object
+          - "null"
+        name:
+          type: string
+        status:
+          type: string
+          enum:
+          - UP
+          - DOWN
+paths:
+  /api/admin/feeds:
+    get:
+      summary: "List all feeds with their health state (OK, STALE, DOWN)"
+      tags:
+      - Admin
+      responses:
+        "200":
+          description: Feed states
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FeedStatus"
+        "401":
+          description: Not logged in
+        "403":
+          description: Not an administrator
+      security:
+      - SecurityScheme:
+        - admin
+  /api/me:
+    get:
+      summary: Show the logged-in student
+      tags:
+      - Account
+      responses:
+        "200":
+          description: The student
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Me"
+        "401":
+          description: Not logged in
+        "403":
+          description: "No student account, or an administrator"
+      security:
+      - SecurityScheme:
+        - student
+    delete:
+      summary: Delete the account and all private data
+      description: "Removes the WebUntis key, saved routes and lateness entries (L02,\
+        \ L03)."
+      tags:
+      - Account
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Not logged in
+        "403":
+          description: "No student account, or an administrator"
+      security:
+      - SecurityScheme:
+        - student
+  /api/me/routes:
+    get:
+      summary: List the student's saved routes
+      tags:
+      - Routes
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Route"
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - SecurityScheme:
+        - student
+  /api/me/routes/{id}:
+    get:
+      summary: Show one saved route
+      tags:
+      - Routes
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "404":
+          description: No such route for this student
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - SecurityScheme:
+        - student
+    delete:
+      summary: Delete one saved route
+      tags:
+      - Routes
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: No such route for this student
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - SecurityScheme:
+        - student
+  /q/health:
+    description: MicroProfile Health Endpoint
+    summary: MicroProfile Health provides a way for your application to distribute
+      information about its healthiness state to state whether or not it is able to
+      function properly
+    get:
+      operationId: microprofile_health_root
+      description: Check the health of the application
+      tags:
+      - MicroProfile Health
+      summary: "An aggregated view of the Liveness, Readiness and Startup of this\
+        \ application"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+  /health/live:
+    description: MicroProfile Health - Liveness Endpoint
+    summary: Liveness checks are utilized to tell whether the application should be
+      restarted
+    get:
+      operationId: microprofile_health_liveness
+      description: Check the liveness of the application
+      tags:
+      - MicroProfile Health
+      summary: The Liveness check of this application
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+  /api/health/ready:
+    description: MicroProfile Health - Readiness Endpoint
+    summary: Readiness checks are used to tell whether the application is able to
+      process requests
+    get:
+      operationId: microprofile_health_readiness
+      description: Check the readiness of the application
+      tags:
+      - MicroProfile Health
+      summary: The Readiness check of this application
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+  /q/health/started:
+    description: MicroProfile Health - Startup Endpoint
+    summary: Startup checks are an used to tell when the application has started
+    get:
+      operationId: microprofile_health_startup
+      description: Check the startup of the application
+      tags:
+      - MicroProfile Health
+      summary: The Startup check of this application
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+info:
+  title: LeoWay API
+  version: 0.1.0
+  description: "Backend of LeoWay, the commute assistant for HTL Leonding."
+servers:
+- url: http://localhost:8080
+  description: Auto generated value
+- url: http://0.0.0.0:8080
+  description: Auto generated value

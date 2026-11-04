@@ -37,6 +37,11 @@ jobs:
           cache: maven
       - name: Build and test
         run: mvn -B verify
+      - name: Check docs/api/openapi.yaml is up to date
+        working-directory: .
+        run: |
+          git diff --exit-code docs/api/openapi.yaml || {
+            echo "::error::docs/api/openapi.yaml is outdated. Run 'mvn -f backend/pom.xml package' and commit it."; exit 1; }
       # Starts the packaged API against a fresh PostgreSQL: catches broken Flyway migrations.
       - name: Start API and check readiness
         env:

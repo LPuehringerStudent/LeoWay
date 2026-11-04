@@ -1,0 +1,41 @@
+@if (summary(); as s) {
+  <section class="board" aria-labelledby="today-heading">
+    <div class="board__head">
+      <h1 id="today-heading">Today</h1>
+      <p class="muted">Last sync <time>{{ s.lastSync }}</time></p>
+    </div>
+
+    <dl class="rows">
+      <div class="row">
+        <dt>First lesson</dt>
+        <dd>
+          <span class="time">{{ s.firstLesson.start }}</span>
+          <app-time-source source="timetable" />
+        </dd>
+      </div>
+      <div class="row row--key">
+        <dt>Leave by</dt>
+        <dd>
+          <span class="time time--big">{{ s.leaveBy.time }}</span>
+          <app-time-source [source]="s.leaveBy.source" />
+        </dd>
+      </div>
+      <div class="row">
+        <dt>{{ s.line.name }} <span class="muted">{{ s.line.departure }}</span></dt>
+        <dd>
+          <span class="delay" [class.delay--late]="(s.line.delayMinutes ?? 0) > 0">{{ delayText() }}</span>
+          <app-time-source [source]="s.line.source" />
+        </dd>
+      </div>
+    </dl>
+  </section>
+
+  <nav class="actions" aria-label="Actions">
+    <a class="btn" routerLink="/connections">View another connection</a>
+    <a class="btn" routerLink="/disruptions">Report disruption</a>
+    <a class="btn" routerLink="/lateness">My lateness / draft appeal</a>
+    <a class="btn" routerLink="/route">Route and alerts</a>
+  </nav>
+}
+
+<p class="api muted" role="status">API status: {{ status() ?? 'Checking' }}</p>

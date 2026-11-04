@@ -9,7 +9,7 @@ Everything needed to run it is in this folder; nothing is installed by hand exce
 | --- | --- |
 | Host | Proxmox on Laurenz's Dell R740, LXC **CT 104 `leoway`** (Debian 13, unprivileged, Docker) |
 | Resources | 4 cores, 8 GB RAM, 40 GB disk (shared NVMe thin pool) |
-| Address | `192.168.178.31` on the home LAN, reached from outside through Tailscale via the Proxmox host |
+| Address | `192.168.178.11` on the home LAN, reached from outside through Tailscale via the Proxmox host |
 | Responsible | @LPuehringerStudent |
 | App folder | `/opt/leoway/deploy` (this folder) with `.env` (secrets, `chmod 600`, never committed) |
 | Backups | `/var/backups/leoway`, daily at 02:30 (`leoway-backup.timer`), kept 7 days |
@@ -34,12 +34,28 @@ Secrets:
 - `LEOWAY_KEY_ENCRYPTION_KEY`: `openssl rand -base64 32`. Encrypts the WebUntis access keys. It lives only in `.env`, never in the database or the repo. If it's lost, every student must reconnect WebUntis.
 - `BACKUP_AGE_RECIPIENT`: the **public** key from `age-keygen`. Keep the private key **off the server** (password manager); without it backups can't be read.
 
-## Updating
+## Deploying a new version
+
+The images are built on a developer machine and copied over SSH, so the server needs no GitHub access:
 
 ```sh
-cd /opt/leoway/repo && git pull && rsync -a --exclude .env ../repo/deploy/ ../deploy/
-cd ../deploy && docker compose pull && docker compose up -d --wait
+deploy/ship.sh                       # builds leoway-backend and leoway-web, tags them with the commit
+ssh leoway 'cd /opt/leoway/deploy && docker compose up -d --wait'
 ```
+
+Changes to files in `deploy/` itself (compose, scripts) are copied with
+`rsync -a --exclude .env deploy/ leoway:/opt/leoway/deploy/`.
+
+Flyway applies new migrations when the backend starts. Roll back by setting `LEOWAY_VERSION=<older commit>` in
+`.env` and running `docker compose up -d` (only if no migration ran in between; otherwise restore a backup).
+
+| Service | What | Reachable |
+| --- | --- | --- |
+| `db` | PostgreSQL 17 | `127.0.0.1:5432` in the container only |
+| `backend` | Quarkus API, migrations at start | compose network only |
+| `web` | Angular app in nginx, proxies `/api` and `/health/live` | `http://192.168.178.11:8080` on the LAN |
+
+Uptime Kuma checks `http://192.168.178.11:8080/api/health/ready` (database included).
 
 ## Backup and restore
 

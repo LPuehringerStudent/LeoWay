@@ -1,0 +1,8 @@
+.git
+.serena
+**/node_modules
+**/target
+frontend/dist
+frontend/.angular
+*-spike/probe-output*
+.env

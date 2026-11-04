@@ -3,6 +3,65 @@
 Commute assistant for HTL Leonding: connects each student's WebUntis timetable with live public transport data,
 tells them when to leave, and drafts delay appeals to the form teacher.
 
+## Local development
+
+Install JDK 25, Maven 3.9, Node.js 26 (see `.nvmrc`), and Docker with Compose.
+Start Docker and run this from the repository root on Windows or Linux:
+
+```sh
+npm start
+```
+
+This creates `.env` if needed, starts PostgreSQL, installs frontend dependencies,
+applies migrations, and launches the API and Angular. Open <http://localhost:4200>.
+Press Ctrl+C to stop both apps. Run `docker compose down` to stop PostgreSQL and keep its data.
+If PowerShell blocks `npm.ps1`, use `npm.cmd start`.
+
+### Manual startup
+
+Run these commands from the repository root in PowerShell. If `.env` already exists, use it.
+
+```powershell
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+# Edit .env and choose a local database password (letters and numbers work here).
+docker compose up -d --wait db
+# Use the same password as LEOWAY_DB_PASSWORD in .env.
+$env:QUARKUS_DATASOURCE_PASSWORD = 'YOUR_LOCAL_PASSWORD'
+$env:QUARKUS_PROFILE = 'local'
+mvn -f backend/pom.xml package
+java -jar backend/target/quarkus-app/quarkus-run.jar
+```
+
+On macOS or Linux, use `cp` for the copy and `export NAME=value` for the two
+environment variables. Flyway applies migrations when the API starts with the local profile.
+
+In a second terminal, also from the repository root:
+
+```sh
+npm --prefix frontend ci
+npm --prefix frontend start
+```
+
+Open <http://localhost:4200>. The page checks the API every five seconds.
+The API runs on <http://localhost:5080> with `/health/live`, `/api/health/ready`,
+and the OpenAPI document at `/q/openapi`.
+Stop and restart the database with `docker compose stop db` and
+`docker compose up -d --wait db` to see the status change.
+
+Build and test from the root:
+
+```sh
+mvn -f backend/pom.xml verify
+npm --prefix frontend run build
+npm --prefix frontend test -- --watch=false
+```
+
+Use `docker compose down` to stop PostgreSQL and keep its data.
+
+## Repository layout
+
+- `backend/` — Java Quarkus API and Flyway migrations
+- `frontend/` — Angular app
 - `docs/` — project proposal, system specification and VAO Start contract
 - `webuntis-spike/` — feasibility test against HTL Leonding's WebUntis
 

@@ -1,0 +1,21 @@
+name: leoway-dev
+
+services:
+  db:
+    image: postgres:17.11
+    environment:
+      POSTGRES_DB: leoway
+      POSTGRES_USER: leoway
+      POSTGRES_PASSWORD: ${LEOWAY_DB_PASSWORD:?Set LEOWAY_DB_PASSWORD in .env or your shell}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "leoway", "-d", "leoway"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres-data:

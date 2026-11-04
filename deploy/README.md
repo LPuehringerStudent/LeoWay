@@ -20,7 +20,7 @@ Availability depends on home power and internet. Outages show up as gaps in the 
 ## First setup on a new host
 
 ```sh
-apt-get install -y docker.io docker-compose age rsync git
+apt-get install -y docker.io docker-compose age rsync git curl   # curl: backup heartbeat
 mkdir -p /opt/leoway && cd /opt/leoway
 git clone https://github.com/LPuehringerStudent/LeoWay.git repo && cp -r repo/deploy . && cd deploy
 cp .env.example .env && chmod 600 .env   # fill in passwords and keys (see comments in the file)

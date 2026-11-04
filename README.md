@@ -64,6 +64,7 @@ Use `docker compose down` to stop PostgreSQL and keep its data.
 - `frontend/` — Angular app
 - `docs/` — project proposal, system specification and VAO Start contract
 - `webuntis-spike/` — feasibility test against HTL Leonding's WebUntis
+- `linz-ag-spike/` — feasibility test against the Linz AG live departures
 
 ## System specification
 
@@ -94,4 +95,13 @@ npm install
 cp .env.example .env   # fill in UNTIS_USER and UNTIS_SECRET (WebUntis > Profil > Freigaben)
 node probe.mjs 2026-10-05
 node absences.mjs
+```
+
+## Running the Linz AG spike
+
+```sh
+cd linz-ag-spike
+node probe.mjs                 # one snapshot of the stops near school
+node probe.mjs poll 20         # poll for 20 minutes, writes to probe-output/
+node analyse.mjs probe-output/poll-<timestamp>.jsonl
 ```

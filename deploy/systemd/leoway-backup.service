@@ -2,6 +2,9 @@
 Description=LeoWay encrypted PostgreSQL backup
 After=docker.service
 Requires=docker.service
+# Stop retrying after 5 failed starts in an hour; Kuma then alerts on the missing heartbeat.
+StartLimitIntervalSec=1h
+StartLimitBurst=5
 
 [Service]
 Type=oneshot

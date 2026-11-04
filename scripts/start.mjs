@@ -66,23 +66,25 @@ async function start() {
   // Read Compose's resolved password so both processes use the same value.
   const config = await run('docker', ['compose', 'config', '--format', 'json'], { capture: true });
   if (interrupted) return;
-  const password = JSON.parse(config).services.db.environment.POSTGRES_PASSWORD.replaceAll('"', '""');
+  const password = JSON.parse(config).services.db.environment.POSTGRES_PASSWORD;
   const apiEnv = {
     ...process.env,
-    ConnectionStrings__LeoWay: `Host=localhost;Database=leoway;Username=leoway;Password="${password}"`,
-    ASPNETCORE_ENVIRONMENT: 'Development',
-    ASPNETCORE_URLS: 'http://localhost:5080',
+    QUARKUS_DATASOURCE_PASSWORD: password,
+    QUARKUS_PROFILE: 'local',
   };
 
   await run('docker', ['compose', 'up', '-d', '--wait', 'db']);
   await run(process.execPath, [process.env.npm_execpath, 'ci'], { cwd: frontend });
-  await run('dotnet', ['tool', 'restore']);
-  await run('dotnet', ['build', 'backend']);
-  await run('dotnet', ['ef', 'database', 'update', '--project', 'backend', '--no-build'], { env: apiEnv });
+  const mavenArgs = ['-B', '-ntp', 'package'];
+  if (process.platform === 'win32') {
+    await run('cmd.exe', ['/d', '/c', 'mvn.cmd', ...mavenArgs], { cwd: backend });
+  } else {
+    await run('mvn', mavenArgs, { cwd: backend });
+  }
   if (interrupted) return;
 
   await Promise.race([
-    run('dotnet', ['bin/Debug/net10.0/LeoWay.Api.dll'], { cwd: backend, env: apiEnv }),
+    run('java', ['-jar', 'target/quarkus-app/quarkus-run.jar'], { cwd: backend, env: apiEnv }),
     run(process.execPath, ['node_modules/@angular/cli/bin/ng.js', 'serve'], { cwd: frontend }),
   ]);
 }

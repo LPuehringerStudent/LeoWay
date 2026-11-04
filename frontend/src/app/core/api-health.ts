@@ -1,14 +1,14 @@
-import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { catchError, map, of, switchMap, timer } from 'rxjs';
+import { ApiClient } from './api-client';
 
 @Injectable({ providedIn: 'root' })
 export class ApiHealth {
-  private readonly http = inject(HttpClient);
+  private readonly api = inject(ApiClient);
 
   readonly status = timer(0, 5000).pipe(
     switchMap(() =>
-      this.http.get('/api/health/ready', { responseType: 'text', timeout: 3000 }).pipe(
+      this.api.getText('/api/health/ready', { timeout: 3000 }).pipe(
         map(() => 'Ready' as const),
         catchError(() => of('Unavailable' as const)),
       ),

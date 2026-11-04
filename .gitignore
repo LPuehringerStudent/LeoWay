@@ -3,3 +3,4 @@
 probe-output.json
 
 node_modules/
+backend/target/

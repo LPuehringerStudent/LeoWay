@@ -1,0 +1,47 @@
+# LeoWay production stack (interim host: R740, CT 104 "leoway").
+# Same file is meant to work on LeoCloud later: all settings come from .env.
+#
+#   cd /opt/leoway/deploy && docker compose up -d
+#
+# The backend service is added once the Quarkus skeleton (#4) publishes an image.
+
+name: leoway
+
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-leoway}
+      POSTGRES_USER: ${POSTGRES_USER:-leoway}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      TZ: UTC
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    # Only reachable from the container itself; the backend talks to it over the compose network.
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # backend:
+  #   image: ghcr.io/lpuehringerstudent/leoway-backend:${LEOWAY_VERSION:-latest}
+  #   restart: unless-stopped
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #   environment:
+  #     QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-leoway}
+  #     QUARKUS_DATASOURCE_USERNAME: ${POSTGRES_USER:-leoway}
+  #     QUARKUS_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+  #     LEOWAY_PUBLIC_BASE_URL: ${LEOWAY_PUBLIC_BASE_URL}
+  #     LEOWAY_KEY_ENCRYPTION_KEY: ${LEOWAY_KEY_ENCRYPTION_KEY:?set LEOWAY_KEY_ENCRYPTION_KEY in .env}
+  #   # Plain HTTP on localhost only; the public side is the TLS proxy / tunnel in front of it.
+  #   ports:
+  #     - "127.0.0.1:8080:8080"
+
+volumes:
+  db-data:

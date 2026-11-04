@@ -6,6 +6,19 @@ tells them when to leave, and drafts delay appeals to the form teacher.
 ## Local development
 
 Install the .NET 10 SDK (see `global.json`), Node.js 26 (see `.nvmrc`), and Docker with Compose.
+Start Docker and run this from the repository root on Windows or Linux:
+
+```sh
+npm start
+```
+
+This creates `.env` if needed, starts PostgreSQL, installs frontend dependencies,
+applies migrations, and launches the API and Angular. Open <http://localhost:4200>.
+Press Ctrl+C to stop both apps. Run `docker compose down` to stop PostgreSQL and keep its data.
+If PowerShell blocks `npm.ps1`, use `npm.cmd start`.
+
+### Manual startup
+
 Run these commands from the repository root in PowerShell.
 
 ```powershell

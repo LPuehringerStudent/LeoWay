@@ -23,6 +23,20 @@ public class WebUntisClientFactory {
 
     private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
 
+    /** True if the WebUntis server answers at all (any HTTP status). Sends no student data. */
+    public boolean reachable() {
+        try {
+            http.send(java.net.http.HttpRequest.newBuilder(baseUrl.resolve("/WebUntis/"))
+                    .timeout(Duration.ofSeconds(5)).GET().build(), java.net.http.HttpResponse.BodyHandlers.discarding());
+            return true;
+        } catch (java.io.IOException e) {
+            return false;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
+        }
+    }
+
     public WebUntisClient create() {
         return new WebUntisClient(http, json, baseUrl, school, Clock.systemUTC());
     }

@@ -1,0 +1,27 @@
+<h1>Route and alerts</h1>
+
+<section class="card" aria-labelledby="webuntis-heading">
+  <h2 id="webuntis-heading">WebUntis</h2>
+  @if (loading()) {
+    <p role="status">Loading…</p>
+  } @else if (!session.me()) {
+    <p>WebUntis <strong>not connected</strong></p>
+    <a class="btn" routerLink="/connect">Connect WebUntis</a>
+  } @else if (status(); as s) {
+    @if (s.connected) {
+      <p>Connected as <strong>{{ s.username }}</strong>
+        @if (s.firstLesson; as f) {
+          · first lesson {{ dayLabel(f.date) }} <strong>{{ f.start.slice(0, 5) }}</strong>
+        }
+      </p>
+      @if (!s.available) {
+        <p class="error" role="alert">WebUntis cannot be reached right now; the timetable will update later.</p>
+      }
+      <button type="button" class="btn btn--secondary" (click)="disconnect()">Disconnect WebUntis</button>
+    } @else {
+      <p>WebUntis <strong>not connected</strong>. Log in again to reconnect.</p>
+      <a class="btn" routerLink="/connect">Connect WebUntis</a>
+    }
+    <button type="button" class="btn btn--secondary" (click)="logout()">Log out</button>
+  }
+</section>

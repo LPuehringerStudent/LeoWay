@@ -85,4 +85,29 @@ class LoginTest {
         assertEquals(true, session.isHttpOnly());
         assertEquals("Strict", session.getSameSite());
     }
+
+    @Test
+    void statusShowsConnectionAndDisconnectRemovesTheKey() {
+        Cookie session = login(FakeWebUntis.USER, FakeWebUntis.KEY, 200);
+        given().cookie(session).get("/api/me/webuntis").then().statusCode(200)
+                .body("connected", equalTo(true)).body("available", equalTo(true))
+                .body("username", equalTo(FakeWebUntis.USER));
+
+        given().cookie(session).delete("/api/me/webuntis").then().statusCode(204);
+        given().cookie(session).get("/api/me/webuntis").then().statusCode(200).body("connected", equalTo(false));
+    }
+
+    @Test
+    void statusSaysUnavailableWhenWebUntisIsDown() {
+        Cookie session = login(FakeWebUntis.USER, FakeWebUntis.KEY, 200);
+        fake.close();
+        given().cookie(session).get("/api/me/webuntis").then().statusCode(200)
+                .body("connected", equalTo(true)).body("available", equalTo(false));
+        given().get("/api/session/webuntis-reachable").then().statusCode(200).body("webUntisReachable", equalTo(false));
+    }
+
+    @Test
+    void reachabilityNeedsNoLogin() {
+        given().get("/api/session/webuntis-reachable").then().statusCode(200).body("webUntisReachable", equalTo(true));
+    }
 }

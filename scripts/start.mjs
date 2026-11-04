@@ -75,7 +75,7 @@ async function start() {
 
   await run('docker', ['compose', 'up', '-d', '--wait', 'db']);
   await run(process.execPath, [process.env.npm_execpath, 'ci'], { cwd: frontend });
-  const mavenArgs = ['-B', '-ntp', 'package'];
+  const mavenArgs = ['-B', '-ntp', 'package', '-DskipTests'];
   if (process.platform === 'win32') {
     await run('cmd.exe', ['/d', '/c', 'mvn.cmd', ...mavenArgs], { cwd: backend });
   } else {

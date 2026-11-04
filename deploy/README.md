@@ -33,6 +33,8 @@ systemctl daemon-reload && systemctl enable --now leoway-backup.timer
 Secrets:
 - `POSTGRES_PASSWORD`: `openssl rand -hex 24`
 - `LEOWAY_KEY_ENCRYPTION_KEY`: `openssl rand -base64 32`. Encrypts the WebUntis access keys. It lives only in `.env`, never in the database or the repo. If it's lost, every student must reconnect WebUntis.
+- `LEOWAY_SESSION_KEY`: `openssl rand -base64 32`. Encrypts login cookies; if it changes, everyone has to log in again. No need to back it up.
+- `LEOWAY_ADMINS`: WebUntis usernames with the admin role (feed status only), comma-separated.
 - `BACKUP_AGE_RECIPIENT`: the **public** key from `age-keygen`. Keep the private key **off the server** (password manager); without it backups can't be read.
 
 ## Deploying a new version

@@ -11,15 +11,16 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /** A local stand-in for WebUntis that replays synthetic responses from src/test/resources/webuntis. */
-class FakeWebUntis implements AutoCloseable {
-    static final String USER = "test.student";
+public class FakeWebUntis implements AutoCloseable {
+    public static final String USER = "test.student";
+    public static final String ADMIN = "root.admin";
     /** Base32 test key; the fake accepts any 6-digit code for it. */
-    static final String KEY = "JBSWY3DPEHPK3PXP";
+    public static final String KEY = "JBSWY3DPEHPK3PXP";
 
-    final List<String> requests = new CopyOnWriteArrayList<>();
+    public final List<String> requests = new CopyOnWriteArrayList<>();
     private final HttpServer server;
 
-    FakeWebUntis(int port) throws IOException {
+    public FakeWebUntis(int port) throws IOException {
         server = HttpServer.create(new InetSocketAddress("127.0.0.1", port), 0);
         server.createContext("/", this::handle);
         server.start();
@@ -38,7 +39,7 @@ class FakeWebUntis implements AutoCloseable {
 
         switch (path) {
             case "/WebUntis/jsonrpc_intern.do" -> {
-                if (body.contains("\"user\":\"" + USER + "\"") && body.matches("(?s).*\"otp\":\"\\d{6}\".*")) {
+                if ((body.contains("\"user\":\"" + USER + "\"") || body.contains("\"user\":\"" + ADMIN + "\"")) && body.matches("(?s).*\"otp\":\"\\d{6}\".*")) {
                     ex.getResponseHeaders().add("Set-Cookie", "JSESSIONID=fake-session; Path=/WebUntis");
                     reply(ex, 200, "{\"jsonrpc\":\"2.0\",\"id\":\"leoway\",\"result\":{}}");
                 } else {

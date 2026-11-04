@@ -1,5 +1,8 @@
 {
   "/api/**": {
     "target": "http://localhost:5080"
+  },
+  "/j_security_check": {
+    "target": "http://localhost:5080"
   }
 }

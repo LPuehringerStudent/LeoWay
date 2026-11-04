@@ -1,0 +1,8 @@
+[Unit]
+Description=LeoWay encrypted PostgreSQL backup
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/leoway/deploy/backup.sh

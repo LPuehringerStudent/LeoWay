@@ -1,6 +1,7 @@
 package at.leoway.api.feed;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import at.leoway.api.domain.DelayRecord;
 import io.quarkus.narayana.jta.QuarkusTransaction;
@@ -50,6 +51,25 @@ class DelayRecordSinkTest {
         sink.store("test", T0, List.of(obs(2)));
         DelayRecordSink fresh = new DelayRecordSink();
         fresh.store("test", T0.plusSeconds(30), List.of(obs(2)));
+        assertEquals(1, rows());
+    }
+
+    @Test
+    void failedBatchIsStoredByTheNextPoll() {
+        DelayRecordSink fresh = new DelayRecordSink();
+        DepartureObservation invalid = new DepartureObservation(null, "trip-sink-test", "60501780", "2",
+                LocalDate.now(LinzAgAdapter.LINZ), T0.plusSeconds(1800), 1, "MONITORED");
+
+        assertThrows(RuntimeException.class, () -> fresh.store("test", T0, List.of(obs(2), invalid)));
+        assertEquals(0, rows());
+
+        fresh.store("test", T0.plusSeconds(30), List.of(obs(2)));
+        assertEquals(1, rows());
+    }
+
+    @Test
+    void repeatedDepartureInOneBatchIsStoredOnce() {
+        new DelayRecordSink().store("test", T0, List.of(obs(2), obs(2)));
         assertEquals(1, rows());
     }
 }

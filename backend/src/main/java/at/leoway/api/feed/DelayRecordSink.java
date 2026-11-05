@@ -4,6 +4,7 @@ import at.leoway.api.domain.DelayRecord;
 import io.quarkus.narayana.jta.QuarkusTransaction;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -25,11 +26,12 @@ public class DelayRecordSink implements ObservationSink {
 
     @Override
     public void store(String source, Instant collectedAt, List<DepartureObservation> observations) {
+        Map<Key, Last> stored = new HashMap<>();
         QuarkusTransaction.requiringNew().run(() -> {
             for (DepartureObservation o : observations) {
                 Key key = new Key(source, o.tripId(), o.stopId(), o.bay(), o.serviceDate());
                 Last now = new Last(o.reportedDelay(), o.tripStatus());
-                Last before = last.computeIfAbsent(key, this::latestStored);
+                Last before = stored.containsKey(key) ? stored.get(key) : last.computeIfAbsent(key, this::latestStored);
                 if (before != null && before.equals(now)) continue;
                 DelayRecord r = new DelayRecord();
                 r.source = source;
@@ -43,9 +45,11 @@ public class DelayRecordSink implements ObservationSink {
                 r.tripStatus = o.tripStatus();
                 r.collectedAt = collectedAt;
                 r.persist();
-                last.put(key, now);
+                stored.put(key, now);
             }
         });
+        // Only after the commit: a failed batch must not count as stored.
+        last.putAll(stored);
         // Departures from earlier days are never seen again.
         last.keySet().removeIf(k -> k.serviceDate().isBefore(java.time.LocalDate.now(LinzAgAdapter.LINZ).minusDays(1)));
     }

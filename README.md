@@ -43,7 +43,7 @@ npm --prefix frontend start
 ```
 
 Open <http://localhost:4200>. The page checks the API every five seconds.
-The API runs on <http://localhost:5080> with `/health/live`, `/api/health/ready`,
+The API runs on <http://localhost:5080> with `/health/live`, `/api/health/ready`, `/api/health/feeds`,
 and the OpenAPI document at `/q/openapi`.
 Stop and restart the database with `docker compose stop db` and
 `docker compose up -d --wait db` to see the status change.

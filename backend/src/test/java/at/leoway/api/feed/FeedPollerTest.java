@@ -193,20 +193,16 @@ class FeedPollerTest {
         ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
         try {
             FeedPoller poller = new FeedPoller(List.of(hanging, healthy), sink, store, clock, executor);
-            poller.tick();
-            await(() -> store.saved.containsKey("hanging"));
+            // Keep ticking like the real scheduler: a feed can't start again until its last poll has finished.
+            await(poller, () -> store.saved.containsKey("hanging") && store.saved.containsKey("healthy"));
 
             hanging.hang();
             clock.advance(INTERVAL);
-            poller.tick();
-            await(() -> hanging.polls.get() == 2);
-            await(() -> healthy.polls.get() == 2);
+            await(poller, () -> hanging.polls.get() == 2 && healthy.polls.get() == 2);
 
             // Still hanging: it isn't started again, the other feed carries on, and its status goes stale.
             clock.advance(Duration.ofMinutes(6));
-            poller.tick();
-            await(() -> healthy.polls.get() == 3);
-            await(() -> store.saved.get("hanging").state() == State.STALE);
+            await(poller, () -> healthy.polls.get() == 3 && store.saved.get("hanging").state() == State.STALE);
             assertEquals(2, hanging.polls.get());
         } finally {
             hanging.release();
@@ -218,8 +214,9 @@ class FeedPollerTest {
         return Duration.ofSeconds(seconds);
     }
 
-    private static void await(java.util.function.BooleanSupplier condition) throws InterruptedException {
+    private static void await(FeedPoller poller, java.util.function.BooleanSupplier condition) throws InterruptedException {
         for (int i = 0; i < 500 && !condition.getAsBoolean(); i++) {
+            poller.tick();
             Thread.sleep(10);
         }
         assertTrue(condition.getAsBoolean(), "condition not reached in time");

@@ -21,12 +21,12 @@ day) cannot be confirmed yet. The recorder keeps running; the check is repeated 
 
 ## Standard case: records keep source and time
 
-Production, CT 104, 08:21–08:37 Vienna time (`a09-report.sql`). Refresh before the review.
+Production, CT 104, 08:21–08:59 Vienna time (`a09-report.sql`). Version `1e8a71f` since 08:50 (adds #47 and #49).
 
 | Check | Result |
 | --- | --- |
-| Records | 132 rows for 95 departures (one row per change) |
-| With a live delay value | 107 of 132; the rest are departures without real-time data (`NULL`) |
+| Records | 194 rows for 108 departures (one row per change) |
+| With a live delay value | 167 of 194; the rest are departures without real-time data (`NULL`) |
 | Every row has `source` and `collected_at` | **yes**, 0 missing |
 | Duplicate observation keys (source, trip, stop, bay, service date, collection time) | **0** |
 | `EXTRA_TRIP` rows | 0 in this window |
@@ -34,13 +34,13 @@ Production, CT 104, 08:21–08:37 Vienna time (`a09-report.sql`). Refresh before
 
 | Line | Records | Trips | Avg. delay (min) | Max. delay (min) |
 | --- | ---: | ---: | ---: | ---: |
-| 3 | 17 | 13 | 0.6 | 4 |
-| 4 | 15 | 13 | 0.1 | 1 |
-| 19 | 54 | 24 | 2.1 | 6 |
-| 191 | 8 | 5 | 0.6 | 2 |
-| 194 | 38 | 20 | 0.3 | 2 |
+| 3 | 21 | 17 | 0.5 | 4 |
+| 4 | 22 | 16 | 0.1 | 1 |
+| 19 | 77 | 26 | 2.2 | 7 |
+| 191 | 16 | 5 | 1.2 | 5 |
+| 194 | 58 | 20 | 0.7 | 3 |
 
-Stops: Meixnerkreuzung 77 rows, Limesstraße 55 rows.
+Stops: Meixnerkreuzung 119 rows, Limesstraße 75 rows.
 
 Line 11 did not appear in this window. The spike (#3) also never saw it within 15 minutes of departure.
 

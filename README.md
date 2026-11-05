@@ -91,8 +91,9 @@ python docs/tools/build_spec.py
 The PDF uses Times New Roman throughout, with 12-point body text and bold headings.
 This font is recommended in the [official BBS layout guidance](https://www.diplomarbeiten-bbs.at/durchfuehrung/gliederung-der-diplomarbeit-und-formale-vorgaben).
 The builder reads the installed Windows fonts. On other systems, set `LEOWAY_FONT_DIR`
-to a folder containing `times.ttf`, `timesbd.ttf`, `timesi.ttf` and `timesbi.ttf`.
-Font files are not included in the repository.
+to a folder containing `times.ttf`, `timesbd.ttf`, `timesi.ttf` and `timesbi.ttf`. Without them it falls back to
+Liberation Serif (package `ttf-liberation` / `fonts-liberation`), which has the same letter widths, so the layout is
+identical. Font files are not included in the repository.
 Use case, activity and architecture diagrams and the screen sketches are drawn from
 the Markdown blocks (a small Mermaid subset and `screens` blocks). Only the domain model
 is drawn by hand in `docs/tools/build_spec.py`; update it too when changing that diagram.

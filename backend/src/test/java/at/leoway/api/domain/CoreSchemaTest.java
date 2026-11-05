@@ -159,6 +159,25 @@ class CoreSchemaTest {
 
     @Test
     @TestTransaction
+    void delayRecordCannotBeTruncated() {
+        PersistenceException failure = assertThrows(PersistenceException.class,
+                () -> em.createNativeQuery("TRUNCATE delay_record").executeUpdate());
+        assertTrue(rootMessage(failure).contains("cannot be truncated"), rootMessage(failure));
+    }
+
+    @Test
+    @TestTransaction
+    void delayRecordCanStillBeDeletedForRetention() {
+        DelayRecord record = delayRecord("bay A", COLLECTED, 0);
+        record.persistAndFlush();
+
+        assertEquals(1, em.createNativeQuery("DELETE FROM delay_record WHERE id = :id")
+                .setParameter("id", record.id)
+                .executeUpdate());
+    }
+
+    @Test
+    @TestTransaction
     void feedStatusRoundTripsItsState() {
         FeedStatus status = new FeedStatus();
         status.feedId = "linz-ag";

@@ -1,0 +1,14 @@
+{"parameters":[{"name":"serverTime","value":"2026-11-05 07:30:00"}],
+ "departureList":[
+  {"platform":"1","stopName":"Meixnerkreuzung","countdown":"5","realtimeTripStatus":"MONITORED",
+   "dateTime":{"year":"2026","month":"11","day":"5","hour":"7","minute":"35"},
+   "servingLine":{"number":"19","stateless":"esg:02019:E:R:f26","key":"1234","delay":"3","realtime":"1"},
+   "attrs":[{"name":"AVMSTripID","value":"T-19-0735"}]},
+  {"platform":"2","stopName":"Meixnerkreuzung","countdown":"9","realtimeTripStatus":"EXTRA_TRIP|MONITORED",
+   "dateTime":{"year":"2026","month":"11","day":"5","hour":"7","minute":"39"},
+   "servingLine":{"number":"3","stateless":"lil:03003:E:R:f26","key":"77","delay":"-1","realtime":"1"},
+   "attrs":[]},
+  {"platform":"","stopName":"Meixnerkreuzung","countdown":"20",
+   "dateTime":{"year":"2026","month":"11","day":"5","hour":"7","minute":"50"},
+   "servingLine":{"number":"191","stateless":"esg:02191:E:R:f26","key":"5","delay":"-9999","realtime":"0"}}
+ ]}

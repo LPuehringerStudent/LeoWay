@@ -60,6 +60,10 @@ Flyway applies new migrations when the backend starts. Roll back by setting `LEO
 
 Uptime Kuma checks `http://192.168.178.11:8080/api/health/ready` (database included).
 
+A second Kuma HTTP monitor on `http://192.168.178.11:8080/api/health/feeds` alerts the team when a feed stops working
+(F09). It answers 503 when a feed is `STALE` or `DOWN`, or has no status yet. Give the monitor at least one retry, because
+a feed has no status for a moment on a brand-new database. `/api/admin/feeds` has the error details.
+
 ## Backup and restore
 
 ```sh

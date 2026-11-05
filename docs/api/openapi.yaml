@@ -138,6 +138,19 @@ paths:
       security:
       - SecurityScheme:
         - admin
+  /api/health/feeds:
+    get:
+      summary: Report whether every configured feed is OK
+      tags:
+      - Health
+      responses:
+        "200":
+          description: All feeds are OK
+          content:
+            application/json:
+              schema: {}
+        "503":
+          description: "At least one feed is STALE, DOWN or has no status yet"
   /api/me:
     get:
       summary: Show the logged-in student
@@ -419,6 +432,8 @@ paths:
 tags:
 - name: Account
   description: The logged-in student's own account.
+- name: Health
+  description: Health checks for monitoring.
 - name: Routes
   description: The student's saved routes. Other students' routes always look missing
     (404).

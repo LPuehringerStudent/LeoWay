@@ -36,8 +36,21 @@ font_files = {
     'TimesNewRoman': 'times.ttf', 'TimesNewRoman-Bold': 'timesbd.ttf',
     'TimesNewRoman-Italic': 'timesi.ttf', 'TimesNewRoman-BoldItalic': 'timesbi.ttf',
 }
+# Without Times New Roman (Linux, macOS), use Liberation Serif: free and metric-compatible, so line breaks and
+# page layout are the same.
+LIBERATION_DIRS = [Path('/usr/share/fonts/liberation'), Path('/usr/share/fonts/truetype/liberation'),
+                   Path('/usr/share/fonts/liberation-serif'), Path('/Library/Fonts')]
+liberation_files = {
+    'TimesNewRoman': 'LiberationSerif-Regular.ttf', 'TimesNewRoman-Bold': 'LiberationSerif-Bold.ttf',
+    'TimesNewRoman-Italic': 'LiberationSerif-Italic.ttf', 'TimesNewRoman-BoldItalic': 'LiberationSerif-BoldItalic.ttf',
+}
 if not all((font_dir / file).is_file() for file in font_files.values()):
-    raise FileNotFoundError('Times New Roman is required. Set LEOWAY_FONT_DIR to a folder containing times.ttf, timesbd.ttf, timesi.ttf and timesbi.ttf.')
+    font_dir = next((d for d in LIBERATION_DIRS if all((d / f).is_file() for f in liberation_files.values())), None)
+    if font_dir is None:
+        raise FileNotFoundError('Times New Roman or Liberation Serif required. Set LEOWAY_FONT_DIR to a folder with '
+                                'times.ttf, timesbd.ttf, timesi.ttf and timesbi.ttf, or install Liberation Serif.')
+    font_files = liberation_files
+    print(f'Times New Roman not found, using Liberation Serif from {font_dir}')
 for name, file in font_files.items():
     pdfmetrics.registerFont(TTFont(name, str(font_dir / file)))
 body, bold, italic = 'TimesNewRoman', 'TimesNewRoman-Bold', 'TimesNewRoman-Italic'

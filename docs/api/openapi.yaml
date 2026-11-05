@@ -1,23 +1,8 @@
 ---
 openapi: 3.1.0
-tags:
-- name: Account
-  description: The logged-in student's own account.
-- name: Admin
-  description: Feed health for administrators. No student data.
-- name: Routes
-  description: The student's saved routes. Other students' routes always look missing
-    (404).
-- name: Session
-  description: "Login: POST /j_security_check with j_username and j_password (the\
-    \ WebUntis access key)."
-- name: WebUntis
-  description: The logged-in student's WebUntis connection (F01).
-- name: MicroProfile Health
-  description: Check the health of the application
 components:
   schemas:
-    FeedStatus:
+    FeedHealth:
       type: object
       properties:
         feedId:
@@ -134,22 +119,22 @@ components:
 paths:
   /api/admin/feeds:
     get:
-      summary: "List all feeds with their health state (OK, STALE, DOWN)"
-      tags:
-      - Admin
       responses:
         "200":
-          description: Feed states
+          description: OK
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/FeedStatus"
+                  $ref: "#/components/schemas/FeedHealth"
         "401":
-          description: Not logged in
+          description: Not Authorized
         "403":
-          description: Not an administrator
+          description: Not Allowed
+      summary: List
+      tags:
+      - Admin Feeds Resource
       security:
       - SecurityScheme:
         - admin
@@ -431,6 +416,19 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthResponse"
+tags:
+- name: Account
+  description: The logged-in student's own account.
+- name: Routes
+  description: The student's saved routes. Other students' routes always look missing
+    (404).
+- name: Session
+  description: "Login: POST /j_security_check with j_username and j_password (the\
+    \ WebUntis access key)."
+- name: WebUntis
+  description: The logged-in student's WebUntis connection (F01).
+- name: MicroProfile Health
+  description: Check the health of the application
 info:
   title: LeoWay API
   version: 0.1.0

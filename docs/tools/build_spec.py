@@ -400,7 +400,7 @@ class Diagram(Flowable):
         self.arrow(94,79,165,79,'1 : 0..*')
         self.box(0,3,125,35,['LatenessEntry','date, start, end'])
         self.box(180,3,120,35,['Appeal','match, token'])
-        self.box(355,3,WIDTH-355,35,['DelayRecord','trip, source, delay'])
+        self.box(355,3,WIDTH-355,35,['DelayRecord','trip, bay, source, delay'])
         self.canv.setStrokeColor(GREY); self.canv.line(47,63,47,38)
         self.canv.setFont(body,7); self.canv.setFillColor(GREY); self.canv.drawString(52,47,'1 : 0..*')
         self.arrow(125,20,180,20,'1 : 0..1')

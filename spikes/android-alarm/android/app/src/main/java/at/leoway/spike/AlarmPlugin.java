@@ -32,11 +32,15 @@ public class AlarmPlugin extends Plugin {
     /** time = epoch millis (UTC), version = increasing number from the backend, mode = alarmClock | exactIdle */
     @PluginMethod
     public void setAlarm(PluginCall call) {
-        long time = call.getDouble("time").longValue();
-        int version = call.getInt("version");
+        Double time = call.getDouble("time");
+        Integer version = call.getInt("version");
+        if (time == null || version == null) {
+            call.reject("time and version are required");
+            return;
+        }
         String mode = call.getString("mode", "alarmClock");
         JSObject r = new JSObject();
-        r.put("result", AlarmScheduler.set(getContext(), time, version, mode));
+        r.put("result", AlarmScheduler.set(getContext(), time.longValue(), version, mode));
         call.resolve(r);
     }
 

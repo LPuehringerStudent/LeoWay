@@ -24,7 +24,7 @@ The school plans lessons in WebUntis, including cancellations, substitutions and
 | Exam day | A day with an exam (e.g. a Schularbeit) from WebUntis. Manual marking is a fallback when exam data is missing. |
 | Leave-by time | When to leave home to reach the first real lesson, including walking time and a buffer. |
 | Lateness entry | A WebUntis absence starting at the first real lesson and ending within it; longer absences are not matched automatically. |
-| Delay record | A stored departure with its line, stop, planned time, reported delay, source and collection time. |
+| Delay record | One reported state of a departure, with its line, trip, stop, bay, service date, planned time, reported delay, trip status, source and collection time. A departure gets a new record each time its delay or trip status changes. The latest record is the last prediction, not a measured departure. |
 | Delay appeal | An email from the student to the form teacher that links a lateness entry to a delay record. |
 | Verification link | A link in the appeal showing only the shared delay record. |
 | Crowd report | A disruption reported by a student; several reports can trigger a warning. |
@@ -486,7 +486,7 @@ flowchart LR
 | Involved roles | Administrator; transport feeds |
 | Triggering event | The poll timer of a feed fires (also on holidays). |
 
-**Standard scenario.** The recorder fetches Linz AG departures, stores each departure with line, stop, planned time, delay, source and collection time, and updates the feed status.
+**Standard scenario.** The recorder fetches Linz AG departures, stores each new departure with line, trip, stop, bay, service date, planned time, delay, trip status, source and collection time, adds a new record when a departure's delay or trip status changes, and updates the feed status.
 
 **Non-standard scenario.** A feed fails: other feeds keep running, the feed is marked stale after five minutes, the team is alerted and the recorder backs off.
 
@@ -766,7 +766,7 @@ classDiagram
   Appeal "0..*" --> "1" DelayRecord
   SavedRoute : stops, walking times, buffer
   LatenessEntry : lesson date, start, end
-  DelayRecord : trip, stop, source, time, delay
+  DelayRecord : trip, stop, bay, service date, source, time, delay, trip status
   Appeal : confirmed match, verification token
 ```
 

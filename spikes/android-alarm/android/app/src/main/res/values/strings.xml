@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">LeoWay Alarm Spike</string>
+    <string name="title_activity_main">LeoWay Alarm Spike</string>
+    <string name="package_name">at.leoway.spike</string>
+    <string name="custom_url_scheme">at.leoway.spike</string>
+</resources>

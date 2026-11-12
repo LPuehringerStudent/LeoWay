@@ -1,13 +1,13 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { ApiHealth } from '../core/api-health';
+import { FeedHealth, FeedState } from '../core/feed-health';
 import { TimeSourceLabel } from '../shared/time-source';
-import { HomeSummaryService } from './home-summary';
+import { dayLabel, HomeData, HomeDataService } from './home-data';
 
 /**
- * Home works like a departure board (U01): first lesson, leave-by time and the line's delay
- * fit above the fold on a 360 px screen. Data is mocked until #7 and the leave-by calculation land.
+ * Home works like a departure board (U01): the next first lesson and, from #58 on, the leave-by time fit above
+ * the fold on a 360 px screen. Everything shown is real data; missing parts say what is missing.
  */
 @Component({
   selector: 'app-home-page',
@@ -15,14 +15,24 @@ import { HomeSummaryService } from './home-summary';
   templateUrl: './home-page.html',
   styleUrl: './home-page.css',
 })
-export class HomePage {
-  protected readonly status = toSignal(inject(ApiHealth).status);
-  protected readonly summary = toSignal(inject(HomeSummaryService).today);
+export class HomePage implements OnInit {
+  private readonly data = inject(HomeDataService);
+  protected readonly home = signal<HomeData | null>(null);
+  protected readonly feed = toSignal(inject(FeedHealth).linzAg);
+  protected readonly dayLabel = dayLabel;
 
-  protected readonly delayText = computed(() => {
-    const delay = this.summary()?.line.delayMinutes;
-    if (delay == null) return 'no live data';
-    if (delay === 0) return 'on time';
-    return delay > 0 ? `+${delay} min` : `${delay} min`;
-  });
+  async ngOnInit() {
+    this.home.set(await this.data.load());
+  }
+
+  protected feedText(state: FeedState | undefined): string {
+    switch (state) {
+      case 'OK': return 'Working';
+      case 'STALE': return 'No update for over five minutes';
+      case 'DOWN': return 'Not available right now';
+      case 'UNKNOWN': return 'Starting up';
+      case 'OFFLINE': return 'LeoWay server not reachable';
+      default: return 'Checking';
+    }
+  }
 }

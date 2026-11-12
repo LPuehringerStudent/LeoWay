@@ -36,7 +36,7 @@ No time estimates were recorded for this sprint, so this backlog lists the statu
 | Feed adapter interface and feed health | Ayan | Each feed polled on its own thread with backoff; STALE five minutes after the last success; `/api/admin/feeds` for admins | Done | [#19](https://github.com/LPuehringerStudent/LeoWay/issues/19) / #45 |
 | Delay recorder | Laurenz | Linz AG departures stored as one row per change, in UTC, without duplicates, also after a restart; tests with a recorded feed | Done | [#6](https://github.com/LPuehringerStudent/LeoWay/issues/6) / #45 |
 | Fix: failed save skipped records | Ayan | A failed batch is stored again by the next poll | Done | [#46](https://github.com/LPuehringerStudent/LeoWay/issues/46) / #47 |
-| Recorder test on the server (A09) | Laurenz | Every row has source and collection time; no duplicates; broken feed turns STALE after five minutes | Done (one-week check 2026-11-12, see below) | [#24](https://github.com/LPuehringerStudent/LeoWay/issues/24) / #52, #53, docs/a09-followup |
+| Recorder test on the server (A09) | Laurenz | Every row has source and collection time; no duplicates; broken feed turns STALE after five minutes | Done (one-week check 2026-11-12, see below) | [#24](https://github.com/LPuehringerStudent/LeoWay/issues/24) / #52, #53, #70 |
 
 ---
 
@@ -124,7 +124,7 @@ Done between the review on 2026-11-05 and the end of Sprint 1. Counted in the su
 | Item | Result | Issue / PR |
 |------|--------|------------|
 | Morning poll | Full run 2026-11-06 06:00–08:30, 600 polls, 0 failed. Every line near school has real-time data within 15 min of leaving, line 11 included. Results in #3 | [#27](https://github.com/LPuehringerStudent/LeoWay/issues/27), [#3](https://github.com/LPuehringerStudent/LeoWay/issues/3) |
-| Recorder test (A09) | One week on production: 16,617 records, 4,479 departures, about 2,700 records per school day. 0 missing source or time, 0 duplicate keys. Restore of the 2026-11-12 backup matches production exactly. Volume estimate in spec section 4 corrected (about 4 records per departure) | [#24](https://github.com/LPuehringerStudent/LeoWay/issues/24), [A09 results](../../test-results/sprint1-A09.md) |
+| Recorder test (A09) | One week on production: 16,617 records, 4,479 departures, about 2,700 records per school day. 0 missing source or time, 0 duplicate keys. Restore of the 2026-11-12 backup matches production exactly. Volume estimate in spec section 4 corrected (about 4 records per departure) | [#24](https://github.com/LPuehringerStudent/LeoWay/issues/24) / #70, [A09 results](../../test-results/sprint1-A09.md) |
 | Server power schedule | Server runs 24/7 since 2026-11-08; no outage of our host in 05:00–10:00 | [#51](https://github.com/LPuehringerStudent/LeoWay/issues/51) |
 
 Found in the follow-up, for Sprint 2:

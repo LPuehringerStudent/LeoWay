@@ -1,6 +1,6 @@
 # Sprint Backlog — Sprint 1
 
-**Sprint Duration:** 2026-11-04 – 2026-11-05 (planned until 2026-11-18, closed early at the review on 2026-11-05)
+**Sprint Duration:** 2026-11-04 – 2026-11-12 (first review on 2026-11-05; carry-overs finished until 2026-11-12, see "Finished after the review")
 **Team Size:** 4 developers (Laurenz, Ayan, David, Behrang)
 **Product Owner:** Behrang (@BehrangEl11)
 **Board:** [Sprint1](https://github.com/users/LPuehringerStudent/projects/14)
@@ -8,7 +8,7 @@
 **Sprint Goal:** The delay recorder runs on the server from the first sprint on, the project skeleton stands, and a
 student can connect WebUntis.
 
-**Result:** Goal reached. 13 of 13 items on the board are done. The recorder has been collecting Linz AG departures
+**Result:** Goal reached. 19 of 19 items on the board are done (13 at the first review, 6 finished after it), 21 of 21 tasks in this backlog. The recorder has been collecting Linz AG departures
 on production since 2026-11-05 08:21. Logging in with a real WebUntis access key works on
 https://leoway.lpuehringer.dev.
 

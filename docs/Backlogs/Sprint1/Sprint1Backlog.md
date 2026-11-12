@@ -58,7 +58,7 @@ No time estimates were recorded for this sprint, so this backlog lists the statu
 |------|-----|--------------------|--------|------------|
 | App shell and Home layout | Laurenz | Routes, Home as in the specification sketch (mock data), labels for predicted and timetable times (U03); fits 360 px (U01); Lighthouse accessibility 100 | Done | [#21](https://github.com/LPuehringerStudent/LeoWay/issues/21) / #35 |
 | Hosting on the R740 | Laurenz | Database, API and app in Docker on CT 104; public at https://leoway.lpuehringer.dev; encrypted daily backups; Uptime Kuma alert tested | Done | [#8](https://github.com/LPuehringerStudent/LeoWay/issues/8) / #25, #39, #40 |
-| Feed health endpoint for alerts | Ayan | `/api/health/feeds` answers 503 when a feed is stale, without error details | Merged, monitor in Sprint 2 | [#50](https://github.com/LPuehringerStudent/LeoWay/issues/50) / #54 |
+| Feed health endpoint for alerts | Ayan | `/api/health/feeds` answers 503 when a feed is stale, without error details | Done (deployed and Kuma monitor on 2026-11-12) | [#50](https://github.com/LPuehringerStudent/LeoWay/issues/50) / #54 |
 | Server power schedule (S06) | Laurenz | Recorder runs from 05:00 on school days | Done (server runs 24/7 since 2026-11-08) | [#51](https://github.com/LPuehringerStudent/LeoWay/issues/51) |
 | Android alarm spike | Behrang | Capacitor spike app with exact alarm, versioned pushes, re-arm after reboot; builds | Code merged, phone test in Sprint 2 | [#15](https://github.com/LPuehringerStudent/LeoWay/issues/15) / #67 |
 
@@ -71,8 +71,8 @@ No time estimates were recorded for this sprint, so this backlog lists the statu
 | Project foundation | 5 | 5 | Skeleton, CI, schema, docs |
 | Delay recorder | 5 | 5 | Data history (F09, A09) |
 | WebUntis and accounts | 5 | 5 | F01, S01, S02, S05, L02 |
-| App and hosting | 5 | 3 | U01, U03, deployment, S06 |
-| **TOTAL** | **20 tasks** | **18** | |
+| App and hosting | 5 | 4 | U01, U03, deployment, S06 |
+| **TOTAL** | **20 tasks** | **19** | |
 
 ---
 
@@ -110,7 +110,7 @@ Status as of 2026-11-12; see "Finished after the review" below.
 |------|-----|--------|
 | [#3](https://github.com/LPuehringerStudent/LeoWay/issues/3), [#27](https://github.com/LPuehringerStudent/LeoWay/issues/27) Morning poll | The server was off overnight and the 06:00 run was lost; rescheduled for 2026-11-06. | Done 2026-11-12 |
 | [#24](https://github.com/LPuehringerStudent/LeoWay/issues/24) Recorder test (A09) | Three days of data were not possible by the review; no stale alert yet; restore test with recorder data still open. | Done 2026-11-12 |
-| [#50](https://github.com/LPuehringerStudent/LeoWay/issues/50) Stale alert | Endpoint merged; deploy and Kuma monitor missing. | Open: deploy and Kuma monitor |
+| [#50](https://github.com/LPuehringerStudent/LeoWay/issues/50) Stale alert | Endpoint merged; deploy and Kuma monitor missing. | Done 2026-11-12 |
 | [#15](https://github.com/LPuehringerStudent/LeoWay/issues/15) Android alarm spike | Code merged; test on a real phone missing. | Open: phone test |
 | [#51](https://github.com/LPuehringerStudent/LeoWay/issues/51) Server power schedule | Found during the A09 test. | Done 2026-11-12 |
 | [#55](https://github.com/LPuehringerStudent/LeoWay/issues/55) Deletion after restore | Split from #20. | Open (Sprint 2) |
@@ -126,6 +126,7 @@ Done between the review on 2026-11-05 and the end of Sprint 1. Counted in the su
 | Morning poll | Full run 2026-11-06 06:00–08:30, 600 polls, 0 failed. Every line near school has real-time data within 15 min of leaving, line 11 included. Results in #3 | [#27](https://github.com/LPuehringerStudent/LeoWay/issues/27), [#3](https://github.com/LPuehringerStudent/LeoWay/issues/3) |
 | Recorder test (A09) | One week on production: 16,617 records, 4,479 departures, about 2,700 records per school day. 0 missing source or time, 0 duplicate keys. Restore of the 2026-11-12 backup matches production exactly. Volume estimate in spec section 4 corrected (about 4 records per departure) | [#24](https://github.com/LPuehringerStudent/LeoWay/issues/24) / #70, [A09 results](../../test-results/sprint1-A09.md) |
 | Server power schedule | Server runs 24/7 since 2026-11-08; no outage of our host in 05:00–10:00 | [#51](https://github.com/LPuehringerStudent/LeoWay/issues/51) |
+| Stale feed alert | `/api/health/feeds` deployed on 2026-11-12; second Uptime Kuma monitor notifies the team through ntfy | [#50](https://github.com/LPuehringerStudent/LeoWay/issues/50) / #54 |
 
 Found in the follow-up, for Sprint 2:
 

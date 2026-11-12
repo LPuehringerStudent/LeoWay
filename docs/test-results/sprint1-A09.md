@@ -162,8 +162,13 @@ and 1 connect timeout. Each failure is a gap from the last stored poll before it
 
 ### Team alert on STALE (#50)
 
-`/api/health/feeds` (#54) answers 503 when a feed is `STALE` or `DOWN`. It is merged but not deployed yet: on
-2026-11-12 production still answered 404. The Uptime Kuma monitor is added after the deploy (`deploy/README.md`).
+`/api/health/feeds` (#54) answers 503 when a feed is `STALE` or `DOWN`. Before 2026-11-12 it was merged but not
+deployed (production answered 404). Deployed on 2026-11-12 09:51 Vienna time; it answers
+`200 {"status":"UP","feeds":[{"feedId":"linz-ag","state":"OK"}]}` on the LAN and on https://leoway.lpuehringer.dev.
+
+A second Uptime Kuma HTTP monitor (`LeoWay feeds`, CT 103) checks it every 60 s with retries and notifies the team
+through ntfy, like the readiness monitor (`deploy/README.md`). It is green. The STALE → 503 path itself was tested on
+a local copy of the stack (see "Non-standard case" above); the live feed was not broken on purpose.
 
 ### Restore with recorder data (S06)
 
@@ -193,5 +198,5 @@ file were deleted.
 ### Result
 
 A09 is **passed**: records keep source and time, nothing is duplicated within the key, a broken feed turns STALE
-after five minutes and recovers by itself, and the backup restores completely. Open: S06's 99 % depends on Linz AG,
-the trip id bug (#69), and the Kuma monitor after the deploy (#50).
+after five minutes and recovers by itself, the team gets an alert through Uptime Kuma, and the backup restores
+completely. Open: S06's 99 % depends on Linz AG, and the trip id bug (#69).

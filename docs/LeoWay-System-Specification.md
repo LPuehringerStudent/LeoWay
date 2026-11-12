@@ -708,8 +708,8 @@ First estimates for 100 accounts (design limit 1,500), checked against measureme
 | Saved routes | 1–2 per student, up to 3,000 | Morning route and way home |
 | Stops (master data) | about 10,000 | Imported from MVO and ÖBB GTFS; replaced on each import |
 | Watched stops for live data | about 50 | Stops on saved routes plus the two school stops |
-| Delay records per day | about 15,000 | 50 stops × about 300 departures per day |
-| Delay record storage | about 0.2 KB each, about 1.1 GB per year | Including indexes; history is kept for prediction |
+| Delay records per day | about 60,000 | 50 stops × about 300 departures per day × about 4 changes each. Measured in Sprint 1 (A09): about 2,700 records per school day at the two school stops |
+| Delay record storage | about 0.23 KB each, about 5 GB per year | Including indexes (measured in A09); history is kept for prediction |
 | WebUntis requests per day | about 3,000 at 100 accounts | About 30 sync calls per student per school day (section 5.2) |
 | Lateness entries per day | up to 20 at 100 accounts | Assumption: a few students are late on a bad day |
 | Appeals per day | up to 20 | At most one per lateness entry |

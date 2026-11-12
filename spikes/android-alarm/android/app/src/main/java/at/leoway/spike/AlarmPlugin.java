@@ -32,7 +32,10 @@ public class AlarmPlugin extends Plugin {
     /** time = epoch millis (UTC), version = increasing number from the backend, mode = alarmClock | exactIdle */
     @PluginMethod
     public void setAlarm(PluginCall call) {
-        Double time = call.getDouble("time");
+        // Epoch millis arrive as a JSON Long. PluginCall.getDouble() only accepts Double/Float/Integer and getLong()
+        // only Long, so read any number (found in the phone test, #15).
+        Object rawTime = call.getData().opt("time");
+        Long time = rawTime instanceof Number ? ((Number) rawTime).longValue() : null;
         Integer version = call.getInt("version");
         if (time == null || version == null) {
             call.reject("time and version are required");
@@ -40,7 +43,7 @@ public class AlarmPlugin extends Plugin {
         }
         String mode = call.getString("mode", "alarmClock");
         JSObject r = new JSObject();
-        r.put("result", AlarmScheduler.set(getContext(), time.longValue(), version, mode));
+        r.put("result", AlarmScheduler.set(getContext(), time, version, mode));
         call.resolve(r);
     }
 

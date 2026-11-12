@@ -3,10 +3,14 @@ package at.leoway.spike;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-/** Persists the current alarm so it can be restored after reboot (alarms do not survive one). */
+/**
+ * Persists the current alarm so it can be restored after reboot (alarms do not survive one).
+ * Kept in device-protected storage, so the alarm can be re-armed and fire before the first unlock after a reboot
+ * (Direct Boot). Credential-protected storage is locked until then (found in the phone test, #15).
+ */
 final class AlarmStore {
     private static SharedPreferences p(Context c) {
-        return c.getSharedPreferences("leoalarm", Context.MODE_PRIVATE);
+        return c.createDeviceProtectedStorageContext().getSharedPreferences("leoalarm", Context.MODE_PRIVATE);
     }
     static long time(Context c) { return p(c).getLong("time", 0); }
     static int version(Context c) { return p(c).getInt("version", 0); }

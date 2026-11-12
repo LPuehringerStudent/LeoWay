@@ -1,65 +1,101 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { of, Subject } from 'rxjs';
-import { ApiHealth } from '../core/api-health';
+import { Subject } from 'rxjs';
+import { FeedHealth, FeedState } from '../core/feed-health';
+import { SavedRoute } from '../core/routes-api';
+import { WebUntisStatus } from '../core/webuntis-api';
 import { HomePage } from './home-page';
-import { HomeSummary, HomeSummaryService, MOCK_HOME_SUMMARY } from './home-summary';
+import { dayLabel, HomeData, HomeDataService } from './home-data';
 
-function render(summary: HomeSummary, status = new Subject<'Ready' | 'Unavailable'>()) {
+const lesson = (over: Partial<WebUntisStatus> = {}): WebUntisStatus => ({
+  connected: true,
+  username: 'max.muster',
+  available: true,
+  firstLesson: { date: '2026-11-16', start: '08:00:00', subject: 'Mathematics' },
+  ...over,
+});
+const student = (webUntis: WebUntisStatus | null, routes: SavedRoute[] | null = []): HomeData => ({
+  kind: 'student',
+  username: 'max.muster',
+  webUntis,
+  routes,
+});
+
+async function render(data: HomeData) {
+  const feed = new Subject<FeedState>();
   TestBed.configureTestingModule({
     providers: [
       provideRouter([]),
-      { provide: ApiHealth, useValue: { status } },
-      { provide: HomeSummaryService, useValue: { today: of(summary) } },
+      { provide: HomeDataService, useValue: { load: () => Promise.resolve(data) } },
+      { provide: FeedHealth, useValue: { linzAg: feed } },
     ],
   });
   const fixture = TestBed.createComponent(HomePage);
   fixture.detectChanges();
-  return { fixture, page: fixture.nativeElement as HTMLElement, status };
+  await fixture.whenStable();
+  fixture.detectChanges();
+  const page = fixture.nativeElement as HTMLElement;
+  return { fixture, page, feed, text: () => page.textContent?.replace(/\s+/g, ' ') ?? '' };
 }
 
 describe('HomePage', () => {
-  it('shows checking, unavailability, and recovery', () => {
-    const { fixture, page, status } = render(MOCK_HOME_SUMMARY);
-    const statusText = () => {
+  it('invites a guest to connect WebUntis and shows no times', async () => {
+    const { page, text } = await render({ kind: 'guest' });
+    expect(text()).toContain('Know when to leave for school');
+    expect(page.querySelector('a.btn')?.getAttribute('href')).toBe('/connect');
+    expect(page.querySelector('time')).toBeNull();
+  });
+
+  it('shows the real first lesson with its source (U03)', async () => {
+    const { page, text } = await render(student(lesson()));
+    expect(page.querySelector('time')?.textContent).toBe('08:00');
+    expect(text()).toContain('Mathematics');
+    expect(page.querySelector('app-time-source')?.textContent?.trim()).toBe('Timetable only');
+  });
+
+  it('never shows a made-up leave-by time', async () => {
+    expect((await render(student(lesson()))).text()).toContain('Leave by Needs a saved route');
+    TestBed.resetTestingModule();
+    const route = { id: 1, homeStopId: 'a', schoolStopId: 'b', walkToStopMinutes: 4, walkToSchoolMinutes: 3, bufferMinutes: 5 };
+    const { text, page } = await render(student(lesson(), [route]));
+    expect(text()).toContain('Leave by Not calculated yet');
+    expect(text()).toContain('4 min to the stop, 3 min from the stop to school, 5 min buffer');
+    expect(page.querySelectorAll('time').length).toBe(1);
+  });
+
+  it('explains a missing first lesson', async () => {
+    expect((await render(student(lesson({ connected: false, username: null, firstLesson: null })))).text())
+      .toContain('WebUntis is not connected');
+    TestBed.resetTestingModule();
+    expect((await render(student(lesson({ available: false, firstLesson: null })))).text())
+      .toContain("WebUntis can't be reached right now");
+    TestBed.resetTestingModule();
+    expect((await render(student(lesson({ firstLesson: null })))).text()).toContain('No lessons found');
+    TestBed.resetTestingModule();
+    expect((await render(student(null))).text()).toContain('could not be loaded');
+  });
+
+  it('shows the live feed state', async () => {
+    const { fixture, page, feed } = await render({ kind: 'guest' });
+    const status = () => {
       fixture.detectChanges();
-      return page.querySelector('[role="status"]')?.textContent;
+      return page.querySelector('.feed')?.textContent?.trim();
     };
-
-    expect(statusText()).toBe('API status: Checking');
-    status.next('Unavailable');
-    expect(statusText()).toBe('API status: Unavailable');
-    status.next('Ready');
-    expect(statusText()).toBe('API status: Ready');
+    expect(status()).toBe('Checking');
+    feed.next('OK');
+    expect(status()).toBe('Working');
+    feed.next('STALE');
+    expect(status()).toBe('No update for over five minutes');
+    feed.next('OFFLINE');
+    expect(status()).toBe('LeoWay server not reachable');
   });
+});
 
-  it('shows first lesson, leave-by time and the delay', () => {
-    const { page } = render(MOCK_HOME_SUMMARY);
-    const text = page.textContent ?? '';
-    expect(text).toContain('08:55');
-    expect(text).toContain('07:42');
-    expect(text).toContain('Bus 19');
-    expect(text).toContain('+6 min');
-  });
-
-  it('labels every time with its source (U03)', () => {
-    const { page } = render(MOCK_HOME_SUMMARY);
-    const labels = [...page.querySelectorAll('app-time-source')].map((l) => l.textContent?.trim());
-    expect(labels).toEqual(['Timetable only', 'Prediction', 'Prediction']);
-  });
-
-  it('says so when the line has no live data', () => {
-    const summary = { ...MOCK_HOME_SUMMARY, line: { ...MOCK_HOME_SUMMARY.line, delayMinutes: null } };
-    expect(render(summary).page.textContent).toContain('no live data');
-  });
-
-  it('offers the four actions as links', () => {
-    const links = [...render(MOCK_HOME_SUMMARY).page.querySelectorAll('nav a')];
-    expect(links.map((a) => a.getAttribute('href'))).toEqual([
-      '/connections',
-      '/disruptions',
-      '/lateness',
-      '/route',
-    ]);
+describe('dayLabel', () => {
+  const today = new Date(2026, 10, 16, 9);
+  it('names today, tomorrow and other days', () => {
+    expect(dayLabel('2026-11-16', today)).toEqual({ day: 'Today', date: 'Mon 16 Nov' });
+    expect(dayLabel('2026-11-17', today).day).toBe('Tomorrow');
+    expect(dayLabel('2026-11-19', today).day).toBe('Thursday');
   });
 });

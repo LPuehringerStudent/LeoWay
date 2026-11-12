@@ -9,11 +9,8 @@
     <a class="btn" routerLink="/connect">Connect WebUntis</a>
   } @else if (status(); as s) {
     @if (s.connected) {
-      <p>Connected as <strong>{{ s.username }}</strong>
-        @if (s.firstLesson; as f) {
-          · first lesson {{ dayLabel(f.date) }} <strong>{{ f.start.slice(0, 5) }}</strong>
-        }
-      </p>
+      <p>Connected as <strong>{{ s.username }}</strong>@if (s.firstLesson; as f) {<span>, first lesson
+        {{ dayLabel(f.date) }} <strong>{{ f.start.slice(0, 5) }}</strong></span>}</p>
       @if (!s.available) {
         <p class="error" role="alert">WebUntis cannot be reached right now; the timetable will update later.</p>
       }

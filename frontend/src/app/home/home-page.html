@@ -1,41 +1,80 @@
-@if (summary(); as s) {
-  <section class="board" aria-labelledby="today-heading">
-    <div class="board__head">
-      <h1 id="today-heading">Today</h1>
-      <p class="muted">Last sync <time>{{ s.lastSync }}</time></p>
-    </div>
+@if (home(); as h) {
+  @if (h.kind === 'guest') {
+    <section class="board hero" aria-labelledby="hero-heading">
+      <h1 id="hero-heading">Know when to leave for school</h1>
+      <p class="hero__text">LeoWay reads your first lesson from WebUntis and works out when you have to leave, with
+        live delays from Linz AG.</p>
+      <a class="btn btn--amber" routerLink="/connect">Connect WebUntis</a>
+    </section>
 
-    <dl class="rows">
-      <div class="row">
-        <dt>First lesson</dt>
-        <dd>
-          <span class="time">{{ s.firstLesson.start }}</span>
+    <section class="card" aria-labelledby="need-heading">
+      <h2 id="need-heading">What you need</h2>
+      <ul class="plain">
+        <li>Your WebUntis username</li>
+        <li>An access key from your WebUntis profile. LeoWay shows you where to find it.</li>
+      </ul>
+      <a routerLink="/privacy">What LeoWay reads from WebUntis</a>
+    </section>
+  } @else {
+    <section class="board" aria-labelledby="today-heading">
+      @let s = h.webUntis;
+      @if (s?.connected && s?.available && s?.firstLesson; as f) {
+        @let d = dayLabel(f.date);
+        <h1 id="today-heading" class="board__day">{{ d.day }} <span class="board__date">{{ d.date }}</span></h1>
+
+        <p class="board__label">First lesson</p>
+        <p class="board__lesson">
+          <time class="digits digits--big" [attr.datetime]="f.date + 'T' + f.start">{{ f.start.slice(0, 5) }}</time>
           <app-time-source source="timetable" />
-        </dd>
-      </div>
-      <div class="row row--key">
-        <dt>Leave by</dt>
-        <dd>
-          <span class="time time--big">{{ s.leaveBy.time }}</span>
-          <app-time-source [source]="s.leaveBy.source" />
-        </dd>
-      </div>
-      <div class="row">
-        <dt>{{ s.line.name }} <span class="muted">{{ s.line.departure }}</span></dt>
-        <dd>
-          <span class="delay" [class.delay--late]="(s.line.delayMinutes ?? 0) > 0">{{ delayText() }}</span>
-          <app-time-source [source]="s.line.source" />
-        </dd>
-      </div>
-    </dl>
+        </p>
+        @if (f.subject) {
+          <p class="board__subject">{{ f.subject }}</p>
+        }
+
+        <div class="board__leave">
+          <p class="board__label">Leave by</p>
+          <p class="board__pending">
+            {{ h.routes?.length ? 'Not calculated yet' : 'Needs a saved route' }}
+          </p>
+        </div>
+      } @else {
+        <h1 id="today-heading" class="board__day">Your day</h1>
+        @if (!s) {
+          <p class="board__message">Your timetable could not be loaded. Reload the page in a moment.</p>
+        } @else if (!s.connected) {
+          <p class="board__message">WebUntis is not connected, so LeoWay doesn't know your first lesson.</p>
+          <a class="btn btn--amber" routerLink="/connect">Connect WebUntis</a>
+        } @else if (!s.available) {
+          <p class="board__message">WebUntis can't be reached right now. Your first lesson shows here once it's back.</p>
+        } @else {
+          <p class="board__message">No lessons found for the next school days.</p>
+        }
+      }
+    </section>
+
+    <section class="card" aria-labelledby="route-heading">
+      <h2 id="route-heading">Your way to school</h2>
+      @if (h.routes === null) {
+        <p class="error">Your routes could not be loaded.</p>
+      } @else if (h.routes.length === 0) {
+        <p class="muted">No route saved yet. Saving a route is coming soon; then LeoWay works out your leave-by time.</p>
+      } @else {
+        @for (r of h.routes; track r.id) {
+          <p>{{ r.walkToStopMinutes }} min to the stop, {{ r.walkToSchoolMinutes }} min from the stop to school,
+            {{ r.bufferMinutes }} min buffer</p>
+        }
+      }
+    </section>
+  }
+
+  <section class="card" aria-labelledby="live-heading">
+    <h2 id="live-heading">Live bus and tram data</h2>
+    <p class="feed" role="status">
+      <span [class]="'feed__dot feed__dot--' + (feed() ?? 'checking').toLowerCase()" aria-hidden="true"></span>
+      {{ feedText(feed()) }}
+    </p>
+    <p class="muted">Linz AG departures at Limesstraße and Meixnerkreuzung, checked every 30 seconds.</p>
   </section>
-
-  <nav class="actions" aria-label="Actions">
-    <a class="btn" routerLink="/connections">View another connection</a>
-    <a class="btn" routerLink="/disruptions">Report disruption</a>
-    <a class="btn" routerLink="/lateness">My lateness / draft appeal</a>
-    <a class="btn" routerLink="/route">Route and alerts</a>
-  </nav>
+} @else {
+  <p role="status" class="muted">Loading…</p>
 }
-
-<p class="api muted" role="status">API status: {{ status() ?? 'Checking' }}</p>

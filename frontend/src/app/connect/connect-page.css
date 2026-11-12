@@ -1,26 +1,13 @@
-h1 { font-size: 1.4rem; margin: 0.25rem 0 0.25rem; }
-.lead { margin: 0 0 0.75rem; color: var(--muted); }
-.card {
-  display: flex; flex-direction: column; gap: 0.4rem;
-  border: 1px solid var(--line); border-radius: 0.75rem; padding: 0.75rem 1rem; background: var(--surface);
-}
+/* Form screens (Connect WebUntis, Route and alerts). Buttons, cards and type come from styles.css. */
+:host { display: flex; flex-direction: column; gap: 0.75rem; }
+h1 { margin-bottom: 0; }
+.lead { margin: 0; }
 label { font-weight: 600; margin-top: 0.4rem; }
 input {
   font: inherit; padding: 0.6rem 0.65rem; border: 1px solid var(--muted); border-radius: 0.4rem;
   background: var(--surface); color: var(--text); min-height: 2.75rem;
 }
-.btn {
-  margin-top: 0.75rem; min-height: 3rem; padding: 0.5rem 0.75rem; border: 0; border-radius: 0.5rem;
-  background: var(--accent); color: var(--on-accent); font: inherit; font-weight: 600; cursor: pointer;
-}
-.btn:hover { background: var(--accent-hover); }
-.btn[disabled] { opacity: 0.7; cursor: progress; }
-.error { color: var(--late); font-weight: 600; margin: 0.4rem 0 0; }
 details { margin-top: 0.75rem; }
 summary { cursor: pointer; color: var(--accent); font-weight: 600; }
-ol { padding-left: 1.2rem; margin: 0.4rem 0 0; }
-.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-h2 { font-size: 1.1rem; margin: 0; }
-a.btn { display: flex; align-items: center; justify-content: center; text-decoration: none; }
-.btn--secondary { background: var(--surface); color: var(--accent); border: 2px solid var(--accent); }
-.btn--secondary:hover { background: var(--prediction-bg); }
+ol, ul { padding-left: 1.2rem; margin: 0.4rem 0 0; }
+.card > .btn:first-of-type { margin-top: 0.5rem; }

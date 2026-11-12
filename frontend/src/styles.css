@@ -1,20 +1,34 @@
-/* Colours meet WCAG 2.1 AA contrast (U05). */
+/*
+ * LeoWay look: quiet white cards on platform grey, one dark departure board per screen with amber digits
+ * like the displays at Linz AG stops. Colours meet WCAG 2.1 AA contrast (U05).
+ * No web fonts: system fonts only, so no visitor data goes to a font service.
+ */
 :root {
-  --text: #14181f;
-  --muted: #4a5361;
+  --text: #13202e;
+  --muted: #4a5666;
   --surface: #ffffff;
-  --page: #f3f5f8;
-  --line: #d5dae1;
+  --page: #eef1f5;
+  --line: #d3d9e1;
   --accent: #0b4f8a;
   --accent-hover: #083b68;
   --on-accent: #ffffff;
+  --night: #0e2a47;
+  --night-line: #2a4868;
+  --on-night: #e8eef5;
+  --on-night-muted: #b4c3d4;
+  --amber: #f2b134;
   --late: #a61b1b;
+  --ok: #1d6b3a;
   --prediction-bg: #e3effb;
   --prediction-fg: #0b3f6e;
   --timetable-bg: #eceef1;
   --timetable-fg: #3a424d;
   --focus: #c25e00;
+  /* DIN-style signage numerals that ship with Windows, macOS/iOS and Android. */
+  --display: Bahnschrift, 'DIN Alternate', 'Roboto Condensed', 'Arial Narrow', system-ui, sans-serif;
+  --radius: 0.75rem;
 }
+
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body {
@@ -22,7 +36,51 @@ body {
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color: var(--text);
   background: var(--page);
-  line-height: 1.4;
+  line-height: 1.45;
 }
 a { color: var(--accent); }
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+h1 { font-size: 1.5rem; line-height: 1.2; margin: 0.25rem 0 0.5rem; letter-spacing: -0.01em; }
+h2 { font-size: 1.05rem; margin: 0; }
+p { margin: 0; }
+.lead { margin: 0 0 0.75rem; color: var(--muted); }
+.muted { color: var(--muted); font-size: 0.875rem; }
+.error { color: var(--late); font-weight: 600; margin: 0.4rem 0 0; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.card {
+  display: flex; flex-direction: column; gap: 0.4rem;
+  border: 1px solid var(--line); border-radius: var(--radius); padding: 0.85rem 1rem; background: var(--surface);
+}
+
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+  min-height: 3rem; margin-top: 0.75rem; padding: 0.5rem 0.9rem;
+  border: 0; border-radius: 0.5rem; background: var(--accent); color: var(--on-accent);
+  font: inherit; font-weight: 600; text-align: center; text-decoration: none; cursor: pointer;
+}
+.btn:hover { background: var(--accent-hover); }
+.btn[disabled] { opacity: 0.7; cursor: progress; }
+.btn--secondary { background: var(--surface); color: var(--accent); border: 2px solid var(--accent); }
+.btn--secondary:hover { background: var(--prediction-bg); }
+
+/* The departure board: the one dark, loud element on a screen. */
+.board {
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem 1.1rem;
+  background: var(--night);
+  color: var(--on-night);
+}
+.board a { color: var(--amber); }
+.digits {
+  font-family: var(--display);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--amber);
+  line-height: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

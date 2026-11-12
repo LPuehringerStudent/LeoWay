@@ -35,10 +35,12 @@
         </provider>
 
         <!-- Fires the leave-by alarm; only AlarmManager calls it. -->
-        <receiver android:name=".AlarmReceiver" android:exported="false" />
+        <!-- directBootAware: both receivers must run before the first unlock after a reboot. -->
+        <receiver android:name=".AlarmReceiver" android:exported="false" android:directBootAware="true" />
         <!-- Re-arms the stored alarm after reboot, app update and when the exact-alarm permission changes. -->
-        <receiver android:name=".BootReceiver" android:exported="true">
+        <receiver android:name=".BootReceiver" android:exported="true" android:directBootAware="true">
             <intent-filter>
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
                 <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
@@ -50,7 +52,10 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- SCHEDULE_EXACT_ALARM, not USE_EXACT_ALARM: the user can deny it, which is the case the spike must test. -->
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <!-- SCHEDULE_EXACT_ALARM is user-revocable and was reset by a reboot on a Galaxy A55 (#15). USE_EXACT_ALARM
+         (API 33+) is granted at install for alarm-clock apps; Play allows it only for that core use. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 </manifest>

@@ -38,7 +38,7 @@ issue with tasks and acceptance criteria on GitHub. Sizes: S = up to a day, M = 
 | Leave-by calculation | Laurenz | Latest journey that arrives in time (spec 5.4); live delay when available, otherwise "timetable only"; tests for cancelled first lesson, nothing fits and daylight-saving changes (A02) | M | [#58](https://github.com/LPuehringerStudent/LeoWay/issues/58) |
 | Background timetable sync | Laurenz | First lesson synced evening, morning and noon; a lesson cancelled overnight moves the stored first lesson; no keys or school data in logs | M | [#59](https://github.com/LPuehringerStudent/LeoWay/issues/59) |
 | Route editor | David | Route can be saved and edited in Route and alerts with keyboard only at 360 px; Lighthouse accessibility ≥ 90 | M | [#60](https://github.com/LPuehringerStudent/LeoWay/issues/60) |
-| Home with real data | Laurenz | Home shows the real first lesson, leave-by time and bus delay on production; every time labelled (U03); fits 360 px (U01) | M | [#61](https://github.com/LPuehringerStudent/LeoWay/issues/61) |
+| Home with real data | Laurenz | Home shows the real first lesson (done in Sprint 1, #72), leave-by time and bus delay on production; every time labelled (U03); fits 360 px (U01) | M | [#61](https://github.com/LPuehringerStudent/LeoWay/issues/61) |
 
 ---
 
@@ -116,6 +116,6 @@ time per route).
 ## Key Deliverables
 
 1. **Leave-by time:** students save a route and see when to leave for their first real lesson.
-2. **Home with real data:** first lesson, leave-by time and live delay replace the mock.
+2. **Home with real data:** leave-by time and live delay join the real first lesson (mock removed in Sprint 1, #72).
 3. **Delay warnings:** a warning with an alternative connection when the bus makes the student late, sent to Discord.
 4. **Recorder fixed:** one trip id per departure (#69). A09 check, restore test and stale alert were done in Sprint 1.

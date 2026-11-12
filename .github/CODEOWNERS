@@ -1,2 +1,3 @@
-# Every change needs approval from the project lead.
-* @LPuehringerStudent
+# Every change needs one approval from a team member other than the author (Sprint 1 review).
+# Before, only the project lead was code owner, so his own PRs could only be merged by bypassing the review.
+* @LPuehringerStudent @ayan2310 @David-Fruehwirt @BehrangEl11

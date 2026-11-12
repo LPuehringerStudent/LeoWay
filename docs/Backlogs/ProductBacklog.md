@@ -2,7 +2,8 @@
 
 **Product:** LeoWay, a commute assistant for HTL Leonding
 **Product Owner:** Behrang (@BehrangEl11, [#11](https://github.com/LPuehringerStudent/LeoWay/issues/11))
-**Last updated:** 2026-11-05 (Sprint 1 review)
+**Last updated:** 2026-11-12 (Sprint 1 review)
+**Priorities** are also set as `priority: high/medium/low` labels on the GitHub issues.
 
 Items with an issue number are tracked on GitHub ([Sprint1](https://github.com/users/LPuehringerStudent/projects/14),
 [Sprint2](https://github.com/users/LPuehringerStudent/projects/15),
@@ -51,6 +52,7 @@ system specification and are not broken down yet. F01–F12 and A01–A14 refer 
 | PB-37 | [#26](https://github.com/LPuehringerStudent/LeoWay/issues/26) | Technical Improvement | Discord notifications for GitHub activity | Low | To Do | Sprint 2 | New issues and pull requests are posted to the team's Discord. |
 | PB-38 | [#13](https://github.com/LPuehringerStudent/LeoWay/issues/13) | Spike | Follow up on VAO Start access | Low | Blocked | Sprint 2 | Key received, or the decision to use only Linz AG is written into the specification. VAO has not answered since 2026-10-09. |
 | PB-39 | [#10](https://github.com/LPuehringerStudent/LeoWay/issues/10) | Spike | Ask form teachers what a delay appeal must show | Medium | To Do | Backlog | Format of the appeal email agreed with at least one form teacher. |
+| PB-40 | [#69](https://github.com/LPuehringerStudent/LeoWay/issues/69) | Bug Fix | Recorder stores one departure under two trip ids when `AVMSTripID` is missing | High | To Do | Sprint 2 | A departure that loses and regains `AVMSTripID` keeps one trip id; one day on production adds no split departures. Existing rows stay (S04). |
 | PB-40 | – | User Story | As a student, I want the way home after my last lesson (F05) | Medium | To Do | Backlog | A05 standard and non-standard cases pass. |
 | PB-41 | – | User Story | As a student, I want to write my own alert rules in auspex-lang (F06) | Low | To Do | Backlog | A06 standard and non-standard cases pass. |
 | PB-42 | – | User Story | As a student, I want to prepare a delay appeal for my form teacher in three taps (F07, U02) | High | To Do | Backlog | A07 standard and non-standard cases pass. |

@@ -2,19 +2,22 @@
 
 ## Workflow
 
-1. Pick an issue in **Ready to pick up** on the [Sprint1 board](https://github.com/users/LPuehringerStudent/projects/14),
-   assign yourself and move it to **In Progress**.
+1. Pick an issue in **Ready to pick up** on the [Sprint 2 board](https://github.com/users/LPuehringerStudent/projects/15),
+   highest priority first (`priority: high`, `medium`, `low` labels). Assign yourself, move it to **In Progress**
+   and fill in **Estimate (h)**.
 2. Create a branch from `main`:
    `<type>/<issue>-<short-name>`, for example `feat/22-connect-webuntis` or `fix/41-leave-by-dst`.
    Types: `feat`, `fix`, `docs`, `infra`, `test`, `refactor`, `spike`.
 3. Commit in small steps. Message style: `feat(backend): add saved route endpoint (#22)`.
 4. Open a pull request against `main`, move the issue to **In Review**, and write in the description:
    what changed, how you tested it, and `Closes #<issue>` (or `Part of #<issue>` if work remains).
-5. Merge after CI is green and the review is done. Use **squash merge** and delete the branch.
+5. Merge after CI is green and the review is approved. Use **squash merge** and delete the branch.
+6. When the issue is done, enter the hours you worked on it in **Spent (h)** on the board.
 
 ## Reviews (M03)
 
-- Every pull request needs the approval of the project lead (`.github/CODEOWNERS`).
+- Every pull request needs one approval from a team member other than the author (`.github/CODEOWNERS`).
+- Nobody merges with the admin bypass, also not the project lead. If a review is urgent, ask in Discord.
 - Teammates are welcome to review too; answer every review comment before merging, or in a follow-up PR.
 - **Stacked PRs:** if your PR builds on another open PR, say so at the top. Merge the base first, then rebase
   yours onto `main`; deleting the base branch closes PRs that still target it.

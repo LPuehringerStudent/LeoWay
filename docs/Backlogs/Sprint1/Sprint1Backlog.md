@@ -32,11 +32,11 @@ No time estimates were recorded for this sprint, so this backlog lists the statu
 
 | Task | Who | Definition of Done | Status | Issue / PR |
 |------|-----|--------------------|--------|------------|
-| Linz AG live data spike | Ayan | Coverage, trip ids and delay changes measured for the lines near school | Done (morning run in Sprint 2) | [#3](https://github.com/LPuehringerStudent/LeoWay/issues/3) / #32 |
+| Linz AG live data spike | Ayan | Coverage, trip ids and delay changes measured for the lines near school | Done (morning run 2026-11-06, see below) | [#3](https://github.com/LPuehringerStudent/LeoWay/issues/3) / #32 |
 | Feed adapter interface and feed health | Ayan | Each feed polled on its own thread with backoff; STALE five minutes after the last success; `/api/admin/feeds` for admins | Done | [#19](https://github.com/LPuehringerStudent/LeoWay/issues/19) / #45 |
 | Delay recorder | Laurenz | Linz AG departures stored as one row per change, in UTC, without duplicates, also after a restart; tests with a recorded feed | Done | [#6](https://github.com/LPuehringerStudent/LeoWay/issues/6) / #45 |
 | Fix: failed save skipped records | Ayan | A failed batch is stored again by the next poll | Done | [#46](https://github.com/LPuehringerStudent/LeoWay/issues/46) / #47 |
-| Recorder test on the server (A09) | Laurenz | Every row has source and collection time; no duplicates; broken feed turns STALE after five minutes | Partly done (see carry-over) | [#24](https://github.com/LPuehringerStudent/LeoWay/issues/24) / #52, #53 |
+| Recorder test on the server (A09) | Laurenz | Every row has source and collection time; no duplicates; broken feed turns STALE after five minutes | Done (one-week check 2026-11-12, see below) | [#24](https://github.com/LPuehringerStudent/LeoWay/issues/24) / #52, #53, docs/a09-followup |
 
 ---
 
@@ -59,6 +59,7 @@ No time estimates were recorded for this sprint, so this backlog lists the statu
 | App shell and Home layout | Laurenz | Routes, Home as in the specification sketch (mock data), labels for predicted and timetable times (U03); fits 360 px (U01); Lighthouse accessibility 100 | Done | [#21](https://github.com/LPuehringerStudent/LeoWay/issues/21) / #35 |
 | Hosting on the R740 | Laurenz | Database, API and app in Docker on CT 104; public at https://leoway.lpuehringer.dev; encrypted daily backups; Uptime Kuma alert tested | Done | [#8](https://github.com/LPuehringerStudent/LeoWay/issues/8) / #25, #39, #40 |
 | Feed health endpoint for alerts | Ayan | `/api/health/feeds` answers 503 when a feed is stale, without error details | Merged, monitor in Sprint 2 | [#50](https://github.com/LPuehringerStudent/LeoWay/issues/50) / #54 |
+| Server power schedule (S06) | Laurenz | Recorder runs from 05:00 on school days | Done (server runs 24/7 since 2026-11-08) | [#51](https://github.com/LPuehringerStudent/LeoWay/issues/51) |
 | Android alarm spike | Behrang | Capacitor spike app with exact alarm, versioned pushes, re-arm after reboot; builds | Code merged, phone test in Sprint 2 | [#15](https://github.com/LPuehringerStudent/LeoWay/issues/15) / #67 |
 
 ---
@@ -68,10 +69,10 @@ No time estimates were recorded for this sprint, so this backlog lists the statu
 | Epic | Tasks | Done | Focus Area |
 |------|-------|------|------------|
 | Project foundation | 5 | 5 | Skeleton, CI, schema, docs |
-| Delay recorder | 5 | 4 | Data history (F09, A09) |
+| Delay recorder | 5 | 5 | Data history (F09, A09) |
 | WebUntis and accounts | 5 | 5 | F01, S01, S02, S05, L02 |
-| App and hosting | 4 | 2 | U01, U03, deployment |
-| **TOTAL** | **19 tasks** | **16** | |
+| App and hosting | 5 | 3 | U01, U03, deployment, S06 |
+| **TOTAL** | **20 tasks** | **18** | |
 
 ---
 
@@ -103,16 +104,34 @@ No time estimates were recorded for this sprint, so this backlog lists the statu
 
 ## Carried over to Sprint 2
 
-| Item | Why |
-|------|-----|
-| [#3](https://github.com/LPuehringerStudent/LeoWay/issues/3), [#27](https://github.com/LPuehringerStudent/LeoWay/issues/27) Morning poll | The server was off overnight and the 06:00 run was lost; rescheduled for 2026-11-06. |
-| [#24](https://github.com/LPuehringerStudent/LeoWay/issues/24) Recorder test (A09) | Three days of data were not possible by the review; no stale alert yet; restore test with recorder data still open. |
-| [#50](https://github.com/LPuehringerStudent/LeoWay/issues/50) Stale alert | Endpoint merged; deploy and Kuma monitor missing. |
-| [#15](https://github.com/LPuehringerStudent/LeoWay/issues/15) Android alarm spike | Code merged; test on a real phone missing. |
-| [#51](https://github.com/LPuehringerStudent/LeoWay/issues/51) Server power schedule | Found during the A09 test. |
-| [#55](https://github.com/LPuehringerStudent/LeoWay/issues/55) Deletion after restore | Split from #20. |
-| [#13](https://github.com/LPuehringerStudent/LeoWay/issues/13) VAO | No answer from VAO. |
-| [#26](https://github.com/LPuehringerStudent/LeoWay/issues/26) Discord notifications for GitHub | Low priority. |
+Status as of 2026-11-12; see "Finished after the review" below.
+
+| Item | Why | Status |
+|------|-----|--------|
+| [#3](https://github.com/LPuehringerStudent/LeoWay/issues/3), [#27](https://github.com/LPuehringerStudent/LeoWay/issues/27) Morning poll | The server was off overnight and the 06:00 run was lost; rescheduled for 2026-11-06. | Done 2026-11-12 |
+| [#24](https://github.com/LPuehringerStudent/LeoWay/issues/24) Recorder test (A09) | Three days of data were not possible by the review; no stale alert yet; restore test with recorder data still open. | Done 2026-11-12 |
+| [#50](https://github.com/LPuehringerStudent/LeoWay/issues/50) Stale alert | Endpoint merged; deploy and Kuma monitor missing. | Open: deploy and Kuma monitor |
+| [#15](https://github.com/LPuehringerStudent/LeoWay/issues/15) Android alarm spike | Code merged; test on a real phone missing. | Open: phone test |
+| [#51](https://github.com/LPuehringerStudent/LeoWay/issues/51) Server power schedule | Found during the A09 test. | Done 2026-11-12 |
+| [#55](https://github.com/LPuehringerStudent/LeoWay/issues/55) Deletion after restore | Split from #20. | Open (Sprint 2) |
+| [#13](https://github.com/LPuehringerStudent/LeoWay/issues/13) VAO | No answer from VAO. | Open |
+| [#26](https://github.com/LPuehringerStudent/LeoWay/issues/26) Discord notifications for GitHub | Low priority. | Open (Sprint 2) |
+
+## Finished after the review
+
+Done between the review on 2026-11-05 and the end of Sprint 1. Counted in the summary above.
+
+| Item | Result | Issue / PR |
+|------|--------|------------|
+| Morning poll | Full run 2026-11-06 06:00–08:30, 600 polls, 0 failed. Every line near school has real-time data within 15 min of leaving, line 11 included. Results in #3 | [#27](https://github.com/LPuehringerStudent/LeoWay/issues/27), [#3](https://github.com/LPuehringerStudent/LeoWay/issues/3) |
+| Recorder test (A09) | One week on production: 16,617 records, 4,479 departures, about 2,700 records per school day. 0 missing source or time, 0 duplicate keys. Restore of the 2026-11-12 backup matches production exactly. Volume estimate in spec section 4 corrected (about 4 records per departure) | [#24](https://github.com/LPuehringerStudent/LeoWay/issues/24), [A09 results](../../test-results/sprint1-A09.md) |
+| Server power schedule | Server runs 24/7 since 2026-11-08; no outage of our host in 05:00–10:00 | [#51](https://github.com/LPuehringerStudent/LeoWay/issues/51) |
+
+Found in the follow-up, for Sprint 2:
+
+- One departure can be stored under two trip ids when Linz AG leaves out `AVMSTripID` (659 departures) → [#69](https://github.com/LPuehringerStudent/LeoWay/issues/69).
+- S06's 99 % (05:00–10:00) was missed on three of five school days by a few minutes, all caused by Linz AG errors
+  (HTTP 302/503, timeouts), not by our server.
 
 ## Decisions in Sprint 1
 
@@ -121,3 +140,4 @@ No time estimates were recorded for this sprint, so this backlog lists the statu
 - Behrang is product owner (#11).
 - The student survey is dropped (#12).
 - Interim hosting on the R740 with a Cloudflare Tunnel, no Cloudflare Access login in front (#8).
+- The server runs 24/7, so S06 stays at "from 05:00" (#51).

@@ -14,12 +14,16 @@ issue with tasks and acceptance criteria on GitHub. Sizes: S = up to a day, M = 
 
 ## Epic 1: Sprint 1 carry-over
 
+#27/#3, #24 and #51 were finished before Sprint 1 closed and are counted there
+([Sprint 1 backlog](../Sprint1/Sprint1Backlog.md#finished-after-the-review)).
+
 | Task | Who | Definition of Done | Size | Issue |
 |------|-----|--------------------|------|-------|
-| Linz AG morning poll | Laurenz | Full 06:00–08:30 run on 2026-11-06; results posted in #3; #3 and #27 closed | S | [#27](https://github.com/LPuehringerStudent/LeoWay/issues/27), [#3](https://github.com/LPuehringerStudent/LeoWay/issues/3) |
-| Recorder test on the server (A09) | Laurenz | At least three days of data checked against the ~15,000 records/day estimate; restore tested with recorder data; results file updated | S | [#24](https://github.com/LPuehringerStudent/LeoWay/issues/24) |
+| ~~Linz AG morning poll~~ (done in Sprint 1) | Laurenz | Full 06:00–08:30 run on 2026-11-06; results posted in #3; #3 and #27 closed | S | [#27](https://github.com/LPuehringerStudent/LeoWay/issues/27), [#3](https://github.com/LPuehringerStudent/LeoWay/issues/3) |
+| ~~Recorder test on the server (A09)~~ (done in Sprint 1) | Laurenz | At least three days of data checked against the ~15,000 records/day estimate; restore tested with recorder data; results file updated | S | [#24](https://github.com/LPuehringerStudent/LeoWay/issues/24) |
 | Stale feed alert | Ayan, Laurenz | `/api/health/feeds` deployed; Kuma monitor alerts the team when a feed is stale | S | [#50](https://github.com/LPuehringerStudent/LeoWay/issues/50) |
-| Server power schedule vs. S06 | Laurenz | Power-on moved to before 05:00, or S06 changed in the specification | S | [#51](https://github.com/LPuehringerStudent/LeoWay/issues/51) |
+| ~~Server power schedule vs. S06~~ (done in Sprint 1) | Laurenz | Power-on moved to before 05:00, or S06 changed in the specification | S | [#51](https://github.com/LPuehringerStudent/LeoWay/issues/51) |
+| Recorder: one trip id per departure | open | A departure losing and regaining `AVMSTripID` keeps one trip id (recorded feed test); 0 split departures in new production data | S | [#69](https://github.com/LPuehringerStudent/LeoWay/issues/69) |
 | Deleted accounts stay deleted after restore | – | After restoring an older backup, deleted accounts are gone again (A13) | S | [#55](https://github.com/LPuehringerStudent/LeoWay/issues/55) |
 | Android alarm spike: phone test | Behrang | Spike app tested on a real Android 10+ phone: permission denied, Doze, reboot, push moves the alarm; results in #15 | S | [#15](https://github.com/LPuehringerStudent/LeoWay/issues/15) |
 
@@ -76,19 +80,19 @@ time per route).
 
 | Epic | Tasks | Focus Area |
 |------|-------|------------|
-| Sprint 1 carry-over | 6 | A09, S06, A13, Android spike |
+| Sprint 1 carry-over | 7 (3 done in Sprint 1) | A09, S06, A13, Android spike, #69 |
 | Leave-by time | 6 | F02, A02, U01, U03 |
 | Delay warnings | 3 | F03, F04, A03, A04 |
 | Operations | 3 | Admin, team notifications, VAO |
-| **TOTAL** | **18 tasks** | |
+| **TOTAL** | **19 tasks** | |
 
 | Who | Tasks |
 |-----|-------|
-| Laurenz | #27/#3, #24, #50 (with Ayan), #51, #58, #59, #61, #13 |
+| Laurenz | #50 (with Ayan), #58, #59, #61, #13 (#27/#3, #24, #51 done in Sprint 1) |
 | Ayan | #50, #56, #57, #63 |
 | David | #60, #65 |
 | Behrang | #15, #64 |
-| open | #55, #62, #26 |
+| open | #55, #62, #26, #69 |
 
 ---
 
@@ -114,4 +118,4 @@ time per route).
 1. **Leave-by time:** students save a route and see when to leave for their first real lesson.
 2. **Home with real data:** first lesson, leave-by time and live delay replace the mock.
 3. **Delay warnings:** a warning with an alternative connection when the bus makes the student late, sent to Discord.
-4. **Recorder verified:** three days of data, stale alert and restore test (A09 complete).
+4. **Recorder verified:** stale alert live (A09 data check and restore test done in Sprint 1); trip id fix (#69).

@@ -14,7 +14,7 @@ issue with tasks and acceptance criteria on GitHub. Sizes: S = up to a day, M = 
 
 ## Epic 1: Sprint 1 carry-over
 
-#27/#3, #24, #50 and #51 were finished before Sprint 1 closed and are counted there
+#27/#3, #24, #50, #51 and #15 were finished before Sprint 1 closed and are counted there
 ([Sprint 1 backlog](../Sprint1/Sprint1Backlog.md#finished-after-the-review)).
 
 | Task | Who | Definition of Done | Size | Issue |
@@ -25,7 +25,7 @@ issue with tasks and acceptance criteria on GitHub. Sizes: S = up to a day, M = 
 | ~~Server power schedule vs. S06~~ (done in Sprint 1) | Laurenz | Power-on moved to before 05:00, or S06 changed in the specification | S | [#51](https://github.com/LPuehringerStudent/LeoWay/issues/51) |
 | Recorder: one trip id per departure | open | A departure losing and regaining `AVMSTripID` keeps one trip id (recorded feed test); 0 split departures in new production data | S | [#69](https://github.com/LPuehringerStudent/LeoWay/issues/69) |
 | Deleted accounts stay deleted after restore | – | After restoring an older backup, deleted accounts are gone again (A13) | S | [#55](https://github.com/LPuehringerStudent/LeoWay/issues/55) |
-| Android alarm spike: phone test | Behrang | Spike app tested on a real Android 10+ phone: permission denied, Doze, reboot, push moves the alarm; results in #15 | S | [#15](https://github.com/LPuehringerStudent/LeoWay/issues/15) |
+| ~~Android alarm spike: phone test~~ (done in Sprint 1) | Behrang | Spike app tested on a real Android 10+ phone: permission denied, Doze, reboot, push moves the alarm; results in #15 | S | [#15](https://github.com/LPuehringerStudent/LeoWay/issues/15) |
 
 ---
 
@@ -80,7 +80,7 @@ time per route).
 
 | Epic | Tasks | Focus Area |
 |------|-------|------------|
-| Sprint 1 carry-over | 7 (4 done in Sprint 1) | A09, S06, A13, Android spike, #69 |
+| Sprint 1 carry-over | 7 (5 done in Sprint 1) | A09, S06, A13, Android spike, #69 |
 | Leave-by time | 6 | F02, A02, U01, U03 |
 | Delay warnings | 3 | F03, F04, A03, A04 |
 | Operations | 3 | Admin, team notifications, VAO |
@@ -91,7 +91,7 @@ time per route).
 | Laurenz | #58, #59, #61, #13 (#27/#3, #24, #50, #51 done in Sprint 1) |
 | Ayan | #56, #57, #63 (#50 done in Sprint 1) |
 | David | #60, #65 |
-| Behrang | #15, #64 |
+| Behrang | #64 (#15 done in Sprint 1) |
 | open | #55, #62, #26, #69 |
 
 ---

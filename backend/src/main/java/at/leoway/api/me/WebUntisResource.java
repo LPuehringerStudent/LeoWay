@@ -28,7 +28,8 @@ public class WebUntisResource {
     static final ZoneId SCHOOL_ZONE = ZoneId.of("Europe/Vienna");
 
     /**
-     * {@code available} is false if WebUntis could not be reached; then {@code firstLesson} is unknown.
+     * {@code available} is false only if WebUntis could not be reached; then {@code firstLesson} is unknown. A key
+     * WebUntis no longer accepts is not an outage: then {@code available} stays true and {@code needsReconnect} is true.
      * {@code needsReconnect} is true when WebUntis no longer accepts the stored key; the student logs in again.
      * {@code syncedAt} is when the first lesson was last read from WebUntis.
      */

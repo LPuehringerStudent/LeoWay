@@ -1,0 +1,9 @@
+[Unit]
+Description=Deploy the newest LeoWay main from GHCR
+After=docker.service network-online.target
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/leoway/deploy/auto-deploy.sh

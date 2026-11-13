@@ -39,6 +39,43 @@ Secrets:
 
 ## Deploying a new version
 
+### Automatically (#83)
+
+Every push to `main` that passes CI is built by `.github/workflows/publish.yml` and pushed to GHCR as
+`ghcr.io/lpuehringerstudent/leoway-{backend,web}:<commit>` and `:main`. On the server, `leoway-deploy.timer` runs
+`auto-deploy.sh` every 5 minutes. The server only pulls: GitHub has no SSH key, no port is open and no self-hosted
+runner runs here (the repository is public, so pull requests from forks could run code on such a runner).
+
+`auto-deploy.sh`, when `:main` has a commit that is not deployed yet:
+
+1. waits during the quiet window, school days 06:00–08:30 Vienna time (`AUTO_DEPLOY_QUIET=1-5,06:00-08:30`, `off`
+   disables it)
+2. runs `backup.sh`; if the backup fails, nothing is deployed
+3. tags the new images as `leoway-*:latest` and runs `docker compose up -d --wait`
+4. if the containers don't become healthy within 3 minutes, puts the previous images back and does not try that
+   commit again; the next merge deploys again
+5. sends the result to `AUTO_DEPLOY_NOTIFY_URL` (an ntfy topic URL), if set
+
+A rollback does not undo database migrations. Flyway ignores migrations newer than the code, so old code still
+starts; if a migration itself broke data, use `restore.sh` with the backup from step 2.
+
+Setup, once:
+
+```sh
+# GitHub: Packages leoway-backend and leoway-web -> Package settings -> Change visibility -> Public
+# (the images hold no secrets; .env stays on the server). Then on the server:
+rsync -a --exclude .env deploy/ leoway:/opt/leoway/deploy/
+ssh leoway 'cp /opt/leoway/deploy/systemd/leoway-deploy.* /etc/systemd/system/ \
+  && systemctl daemon-reload && systemctl enable --now leoway-deploy.timer'
+ssh leoway 'systemctl start leoway-deploy.service; journalctl -u leoway-deploy -n 20'
+```
+
+Pause it with `systemctl stop leoway-deploy.timer`, e.g. to pin an older version or to test with `ship.sh`. While the
+timer runs, a newer `main` replaces anything shipped by hand. Changes in `deploy/` itself (compose file, scripts) are
+not deployed by it; copy those with the `rsync` line above.
+
+### By hand
+
 The images are built on a developer machine and copied over SSH, so the server needs no GitHub access:
 
 ```sh

@@ -78,8 +78,13 @@ fresh scratch database in one transaction. Only if that works does it swap the d
 as `leoway_before_restore` until you drop it. So a broken backup never touches the live data, and tables that are
 newer than the backup don't stay behind.
 
-**Deleted accounts:** a restore brings back accounts deleted after the backup was made. Until #20 handles this,
-re-apply account deletions after every restore (spec A13).
+**Deleted accounts (A13, #55):** deleting an account writes its id (no username) to `deleted_account`. Before the
+swap, `restore.sh` reads that list from the live database, deletes those students in the restored copy again
+(their keys, routes and lateness entries go with them) and copies the list over. Student ids continue after the
+highest id the live database used, so a deleted id is never given to a new account. If the backup is older than
+`deleted_account` (before V6), the deletions are still applied, but the list is not carried over; keep
+`leoway_before_restore` until the next backup has run. If the live database is lost completely, deletions made after
+the newest backup cannot be recovered; repeat them by hand from the support requests.
 
 Restore tests on 2026-11-04: normal restore, a truncated backup (rejected, live DB untouched) and a backup older
 than the schema (newer table gone after the restore).

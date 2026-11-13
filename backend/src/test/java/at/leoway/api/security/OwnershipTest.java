@@ -4,7 +4,9 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import at.leoway.api.domain.DeletedAccount;
 import at.leoway.api.domain.LatenessEntry;
 import at.leoway.api.domain.SavedRoute;
 import at.leoway.api.domain.Student;
@@ -51,7 +53,10 @@ class OwnershipTest {
 
     @AfterEach
     void clean() {
-        QuarkusTransaction.requiringNew().run(() -> Student.delete("username in ('anna', 'ben')"));
+        QuarkusTransaction.requiringNew().run(() -> {
+            Student.delete("username in ('anna', 'ben')");
+            DeletedAccount.deleteById(benId);
+        });
     }
 
     @Test
@@ -106,6 +111,8 @@ class OwnershipTest {
             assertEquals(0, WebUntisCredential.count("studentId", benId));
             assertEquals(0, SavedRoute.count("studentId", benId));
             assertEquals(0, LatenessEntry.count("studentId", benId));
+            DeletedAccount gone = DeletedAccount.findById(benId);
+            assertNotNull(gone, "kept for backup restores (#55)");
         });
         given().get("/api/me").then().statusCode(403);
     }

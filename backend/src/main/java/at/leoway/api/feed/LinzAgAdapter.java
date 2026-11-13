@@ -111,7 +111,7 @@ public class LinzAgAdapter implements FeedAdapter {
 
     /** True for the fallback id built by {@link #tripId}; real AVMSTripIDs never contain {@code #}. */
     static boolean isFallbackTripId(String tripId) {
-        return tripId.contains("#");
+        return tripId != null && tripId.contains("#");
     }
 
     private static String text(JsonNode n, String field) {

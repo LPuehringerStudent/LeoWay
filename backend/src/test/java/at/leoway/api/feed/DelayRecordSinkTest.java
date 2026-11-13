@@ -1,7 +1,9 @@
 package at.leoway.api.feed;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import at.leoway.api.domain.DelayRecord;
 import io.quarkus.narayana.jta.QuarkusTransaction;
@@ -136,5 +138,37 @@ class DelayRecordSinkTest {
         fresh.store("test", T0, List.of(obs(1), obs("trip-sink-test-2", 1)));
         assertEquals(1, rows());
         assertEquals(1, rows("trip-sink-test-2"));
+    }
+
+    @Test
+    void fallbackSightingIsSkippedWhenTwoVehiclesShareTheDeparture() {
+        // #77: a -1 regular trip and a -2 extra trip with the same planned time. The fallback can't be assigned.
+        DelayRecordSink fresh = new DelayRecordSink();
+        fresh.store("test", T0, List.of(obs(1), obs("trip-sink-test-2", 3)));
+        fresh.store("test", T0.plusSeconds(30), List.of(obs(FALLBACK, 5)));
+        assertEquals(1, rows());
+        assertEquals(1, rows("trip-sink-test-2"));
+        assertEquals(0, rows(FALLBACK));
+
+        // Both vehicles keep recording under their own ids.
+        fresh.store("test", T0.plusSeconds(60), List.of(obs(2), obs("trip-sink-test-2", 4)));
+        assertEquals(2, rows());
+        assertEquals(2, rows("trip-sink-test-2"));
+    }
+
+    @Test
+    void secondVehicleIsFoundAfterARestart() {
+        new DelayRecordSink().store("test", T0, List.of(obs(1)));
+        new DelayRecordSink().store("test", T0.plusSeconds(30), List.of(obs("trip-sink-test-2", 3)));
+        new DelayRecordSink().store("test", T0.plusSeconds(60), List.of(obs(FALLBACK, 5)));
+        assertEquals(1, rows());
+        assertEquals(1, rows("trip-sink-test-2"));
+        assertEquals(0, rows(FALLBACK));
+    }
+
+    @Test
+    void missingTripIdIsNoFallback() {
+        assertFalse(LinzAgAdapter.isFallbackTripId(null));
+        assertTrue(LinzAgAdapter.isFallbackTripId(FALLBACK));
     }
 }

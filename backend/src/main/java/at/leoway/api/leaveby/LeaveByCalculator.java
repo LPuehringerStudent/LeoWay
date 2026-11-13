@@ -40,12 +40,16 @@ public final class LeaveByCalculator {
             Connection c = inTime.get();
             return new LeaveBy.InTime(c.departure().minus(toStop), c, c.arrival().plus(toSchool), source(c));
         }
+        // Earliest arrival. Among equal arrivals the latest departure wins: same time at school, less waiting at home.
         return reachable.stream()
                 .min(Comparator.comparing(Connection::arrival).thenComparing(Comparator.comparing(Connection::departure).reversed()))
                 .<LeaveBy>map(c -> {
+                    Instant leaveAt = c.departure().minus(toStop);
                     Instant atSchool = c.arrival().plus(toSchool);
-                    long late = Math.max(0, Duration.between(lessonStart, atSchool).toMinutes());
-                    return new LeaveBy.Late(c.departure().minus(toStop), c, atSchool, source(c), late);
+                    if (!atSchool.isAfter(lessonStart)) return new LeaveBy.NoBuffer(leaveAt, c, atSchool, source(c));
+                    // Rounded up: 30 seconds late is still late.
+                    long late = (Duration.between(lessonStart, atSchool).toSeconds() + 59) / 60;
+                    return new LeaveBy.Late(leaveAt, c, atSchool, source(c), late);
                 })
                 .orElse(new LeaveBy.NoConnection());
     }

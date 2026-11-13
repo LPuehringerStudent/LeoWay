@@ -8,6 +8,10 @@ export interface WebUntisStatus {
   /** False if WebUntis could not be reached; firstLesson is then unknown. */
   available: boolean;
   firstLesson: { date: string; start: string; subject: string | null } | null;
+  /** WebUntis no longer accepts the stored key; the student has to log in again. */
+  needsReconnect: boolean;
+  /** When the first lesson was last read from WebUntis (ISO instant), or null. */
+  syncedAt: string | null;
 }
 
 @Injectable({ providedIn: 'root' })

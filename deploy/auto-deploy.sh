@@ -32,8 +32,12 @@ in_quiet_window() {
     && [[ ! "$now" < "${window%-*}" ]] && [[ ! "$now" > "${window#*-}" ]]
 }
 
-docker pull -q "$registry/leoway-backend:main" >/dev/null
-docker pull -q "$registry/leoway-web:main" >/dev/null
+for app in backend web; do
+  if ! docker pull -q "$registry/leoway-$app:main" >/dev/null; then
+    notify "deploy stopped: cannot pull $registry/leoway-$app:main (registry down, or package not public?)"
+    exit 1
+  fi
+done
 new=$(revision "$registry/leoway-backend:main")
 [ -n "$new" ] || { notify "deploy stopped: image has no revision label"; exit 1; }
 [ "$new" = "$(revision "$registry/leoway-web:main")" ] || { echo "backend and web images differ, waiting for both"; exit 0; }
@@ -55,6 +59,12 @@ done
 if LEOWAY_VERSION=latest docker compose up -d --wait --wait-timeout 180; then
   echo "$new" > "$state"
   notify "deployed $new"
+  # Keep the last KEEP commit tags for LEOWAY_VERSION=<commit> rollbacks; tagged images are not "dangling".
+  for app in backend web; do
+    docker image ls "leoway-$app" --format '{{.CreatedAt}}\t{{.Tag}}' | sort -r | cut -f2 \
+      | grep -Ev '^(latest|previous)$' | tail -n +"$((${AUTO_DEPLOY_KEEP:-5} + 1))" \
+      | while read -r t; do docker image rm "leoway-$app:$t" >/dev/null || true; done
+  done
   docker image prune -f >/dev/null
   exit 0
 fi
@@ -68,5 +78,7 @@ if docker image inspect leoway-backend:previous >/dev/null 2>&1; then
     exit 1
   fi
 fi
+# Remember it here too (also when there was no previous image), so the timer does not retry a known-bad version.
+echo "$new" > "$state"
 notify "deploy of $new FAILED and rollback did not get healthy. LeoWay may be down: ssh leoway, cd /opt/leoway/deploy, docker compose ps"
 exit 1

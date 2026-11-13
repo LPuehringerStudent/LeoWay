@@ -48,7 +48,7 @@ runner runs here (the repository is public, so pull requests from forks could ru
 
 `auto-deploy.sh`, when `:main` has a commit that is not deployed yet:
 
-1. waits during the quiet window, school days 06:00–08:30 Vienna time (`AUTO_DEPLOY_QUIET=1-5,06:00-08:30`, `off`
+1. waits during the quiet window, Mon–Fri 06:00–08:30 Vienna time (no holiday calendar) (`AUTO_DEPLOY_QUIET=1-5,06:00-08:30`, `off`
    disables it)
 2. runs `backup.sh`; if the backup fails, nothing is deployed
 3. tags the new images as `leoway-*:latest` and runs `docker compose up -d --wait`
@@ -56,8 +56,9 @@ runner runs here (the repository is public, so pull requests from forks could ru
    commit again; the next merge deploys again
 5. sends the result to `AUTO_DEPLOY_NOTIFY_URL` (an ntfy topic URL), if set
 
-A rollback does not undo database migrations. Flyway ignores migrations newer than the code, so old code still
-starts; if a migration itself broke data, use `restore.sh` with the backup from step 2.
+A rollback does not undo database migrations. Flyway ignores migrations newer than the code (its default
+`ignoreMigrationPatterns=*:future`; don't set `quarkus.flyway.ignore-migration-patterns` without keeping it), so old
+code still starts; if a migration itself broke data, use `restore.sh` with the backup from step 2.
 
 Setup, once:
 
@@ -71,7 +72,9 @@ ssh leoway 'systemctl start leoway-deploy.service; journalctl -u leoway-deploy -
 ```
 
 Pause it with `systemctl stop leoway-deploy.timer`, e.g. to pin an older version or to test with `ship.sh`. While the
-timer runs, a newer `main` replaces anything shipped by hand. Changes in `deploy/` itself (compose file, scripts) are
+timer runs, a newer `main` replaces anything shipped by hand, and its rollback goes to the image it replaced, which
+may be the hand-shipped one. The last 5 deployed commits stay as `leoway-*:<commit>` (`AUTO_DEPLOY_KEEP`) for
+`LEOWAY_VERSION=<commit>`; older ones are removed. Changes in `deploy/` itself (compose file, scripts) are
 not deployed by it; copy those with the `rsync` line above.
 
 ### By hand

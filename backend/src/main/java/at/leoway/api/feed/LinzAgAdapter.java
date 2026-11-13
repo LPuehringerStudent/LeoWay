@@ -106,6 +106,11 @@ public class LinzAgAdapter implements FeedAdapter {
         return line.path("stateless").asText() + "#" + line.path("key").asText();
     }
 
+    /** True for the fallback id built by {@link #tripId}; real AVMSTripIDs never contain {@code #}. */
+    static boolean isFallbackTripId(String tripId) {
+        return tripId.contains("#");
+    }
+
     private static String text(JsonNode n, String field) {
         return n.hasNonNull(field) && !n.path(field).asText().isEmpty() ? n.path(field).asText() : null;
     }

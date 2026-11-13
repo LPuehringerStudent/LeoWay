@@ -1,5 +1,6 @@
 package at.leoway.api.me;
 
+import at.leoway.api.domain.DeletedAccount;
 import at.leoway.api.domain.Student;
 import at.leoway.api.security.CurrentStudent;
 import at.leoway.api.security.Roles;
@@ -38,7 +39,8 @@ public class MeResource {
 
     /**
      * Deletes the account. The foreign keys cascade to the WebUntis key, routes and lateness
-     * entries (L02, L03). Delay records are not personal data and stay.
+     * entries (L02, L03). Delay records are not personal data and stay. The id is kept in {@code deleted_account},
+     * so a backup restore deletes the account again (#55, A13).
      */
     @DELETE
     @Operation(summary = "Delete the account and all private data", description = "Removes the WebUntis key, saved routes and lateness entries (L02, L03).")
@@ -49,6 +51,9 @@ public class MeResource {
     public void delete() {
         long id = current.id();
         Student.deleteById(id);
+        DeletedAccount gone = new DeletedAccount();
+        gone.studentId = id;
+        gone.persist();
         // Id only: usernames are personal data and stay out of the log.
         LOG.infof("account %d deleted", id);
     }

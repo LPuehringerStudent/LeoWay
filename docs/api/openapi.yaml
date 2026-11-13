@@ -90,6 +90,10 @@ components:
           type: boolean
         firstLesson:
           $ref: "#/components/schemas/FirstLesson"
+        needsReconnect:
+          type: boolean
+        syncedAt:
+          $ref: "#/components/schemas/Instant"
     HealthResponse:
       type: object
       properties:
@@ -256,6 +260,8 @@ paths:
     get:
       summary: Connection status and the next first lesson (today or the next school
         day)
+      description: Served from the last background sync; WebUntis is only asked if
+        that is outdated (#59).
       tags:
       - WebUntis
       responses:

@@ -22,4 +22,8 @@ public class WebUntisCredential extends PanacheEntityBase {
 
     @Column(name = "key_version", nullable = false)
     public int keyVersion;
+
+    /** When WebUntis stopped accepting the key, or null while it works (#59). */
+    @Column(name = "rejected_at")
+    public java.time.Instant rejectedAt;
 }

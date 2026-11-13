@@ -34,6 +34,7 @@ public class WebUntisConnection {
         credential.webUntisUsername = username;
         credential.encryptedAccessKey = cipher.encrypt(accessKey, studentId);
         credential.keyVersion = KeyCipher.VERSION;
+        credential.rejectedAt = null;
         credential.persist();
     }
 
@@ -65,7 +66,8 @@ public class WebUntisConnection {
         return withClient(studentId, c -> Optional.of(c.absences(from, to)));
     }
 
-    private <T> Optional<T> withClient(long studentId, java.util.function.Function<WebUntisClient, Optional<T>> work) {
+    /** Logs in with the stored key and runs {@code work}. Empty if the student has no WebUntis connection. */
+    <T> Optional<T> withClient(long studentId, java.util.function.Function<WebUntisClient, Optional<T>> work) {
         WebUntisCredential credential = WebUntisCredential.findById(studentId);
         if (credential == null) return Optional.empty();
         String key = cipher.decrypt(credential.encryptedAccessKey, studentId);

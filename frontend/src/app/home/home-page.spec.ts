@@ -12,6 +12,8 @@ const lesson = (over: Partial<WebUntisStatus> = {}): WebUntisStatus => ({
   username: 'max.muster',
   available: true,
   firstLesson: { date: '2026-11-16', start: '08:00:00', subject: 'Mathematics' },
+  needsReconnect: false,
+  syncedAt: '2026-11-15T19:00:00Z',
   ...over,
 });
 const student = (webUntis: WebUntisStatus | null, routes: SavedRoute[] | null = []): HomeData => ({
@@ -69,6 +71,9 @@ describe('HomePage', () => {
     TestBed.resetTestingModule();
     expect((await render(student(lesson({ available: false, firstLesson: null })))).text())
       .toContain("WebUntis can't be reached right now");
+    TestBed.resetTestingModule();
+    expect((await render(student(lesson({ needsReconnect: true, firstLesson: null })))).text())
+      .toContain('WebUntis no longer accepts your access key');
     TestBed.resetTestingModule();
     expect((await render(student(lesson({ firstLesson: null })))).text()).toContain('No lessons found');
     TestBed.resetTestingModule();

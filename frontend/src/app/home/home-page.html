@@ -44,6 +44,9 @@
         } @else if (!s.connected) {
           <p class="board__message">WebUntis is not connected, so LeoWay doesn't know your first lesson.</p>
           <a class="btn btn--amber" routerLink="/connect">Connect WebUntis</a>
+        } @else if (s.needsReconnect) {
+          <p class="board__message">WebUntis no longer accepts your access key. Log in again to update your timetable.</p>
+          <a class="btn btn--amber" routerLink="/connect">Log in again</a>
         } @else if (!s.available) {
           <p class="board__message">WebUntis can't be reached right now. Your first lesson shows here once it's back.</p>
         } @else {

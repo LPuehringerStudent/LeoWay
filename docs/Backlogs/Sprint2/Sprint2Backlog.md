@@ -10,6 +10,15 @@
 This finishes Block A of the specification (F02) and starts Block B (F03, first channel of F04). Every task has an
 issue with tasks and acceptance criteria on GitHub. Sizes: S = up to a day, M = several days.
 
+### From the Sprint 1 review (2026-11-12)
+
+| Feedback | What we do in Sprint 2 |
+|----------|------------------------|
+| Time tracking | Everyone logs hours in the teachers' time-tracking Excel on SharePoint (link from the teachers, not in this public repo). At the end of the sprint a copy goes to `docs/time-tracking/Sprint2.xlsx`. |
+| Done Done column | GitHub moves issues to **Done** on merge. **Done Done** is set by hand when the whole Definition of Done below is met and Behrang accepted it. |
+| No bypassing code reviews | Every pull request needs one approval from a team member other than the author; all four are code owners now. Nobody merges with the admin bypass. |
+| Priority tags | Every open issue has a `priority: high`, `priority: medium` or `priority: low` label, taken from the [product backlog](../ProductBacklog.md). Work starts with `high`. |
+
 ---
 
 ## Epic 1: Sprint 1 carry-over
@@ -98,7 +107,10 @@ time per route).
 
 ## Definition of Done (Sprint 2)
 
-- [ ] **Code merged** to `main` through a reviewed pull request with green CI (backend, frontend, authors)
+- [ ] **Code merged** to `main` through a pull request approved by a team member other than the author, with green CI
+  (backend, frontend, authors); no admin bypass
+- [ ] **Time tracked:** hours logged in the teachers' time-tracking Excel
+- [ ] **Accepted** by the product owner, then moved to **Done Done** on the board
 - [ ] **Tests:** new logic has tests; time calculations include daylight-saving cases
 - [ ] **API docs:** `docs/api/openapi.yaml` regenerated for new endpoints
 - [ ] **Database:** changes only through new Flyway migrations

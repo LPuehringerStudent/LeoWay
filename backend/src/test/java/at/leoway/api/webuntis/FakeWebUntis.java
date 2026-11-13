@@ -8,6 +8,8 @@ import java.io.UncheckedIOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /** A local stand-in for WebUntis that replays synthetic responses from src/test/resources/webuntis. */
@@ -18,12 +20,19 @@ public class FakeWebUntis implements AutoCloseable {
     public static final String KEY = "JBSWY3DPEHPK3PXP";
 
     public final List<String> requests = new CopyOnWriteArrayList<>();
+    /** WebUntis users whose key is accepted. Remove one to simulate a revoked key. */
+    public final Set<String> users = ConcurrentHashMap.newKeySet();
+    /** Replaces timetable.json / absences.json when set, e.g. to cancel a lesson overnight. */
+    public volatile String timetable;
+    public volatile String absences;
     private final HttpServer server;
 
     public FakeWebUntis(int port) throws IOException {
         server = HttpServer.create(new InetSocketAddress("127.0.0.1", port), 0);
         server.createContext("/", this::handle);
         server.start();
+        users.add(USER);
+        users.add(ADMIN);
     }
 
     String baseUrl() {
@@ -39,7 +48,7 @@ public class FakeWebUntis implements AutoCloseable {
 
         switch (path) {
             case "/WebUntis/jsonrpc_intern.do" -> {
-                if ((body.contains("\"user\":\"" + USER + "\"") || body.contains("\"user\":\"" + ADMIN + "\"")) && body.matches("(?s).*\"otp\":\"\\d{6}\".*")) {
+                if (users.stream().anyMatch(u -> body.contains("\"user\":\"" + u + "\"")) && body.matches("(?s).*\"otp\":\"\\d{6}\".*")) {
                     ex.getResponseHeaders().add("Set-Cookie", "JSESSIONID=fake-session; Path=/WebUntis");
                     reply(ex, 200, "{\"jsonrpc\":\"2.0\",\"id\":\"leoway\",\"result\":{}}");
                 } else {
@@ -48,19 +57,19 @@ public class FakeWebUntis implements AutoCloseable {
             }
             case "/WebUntis/jsonrpc.do" -> {
                 if (!session) reply(ex, 200, "{\"error\":{\"code\":-8520,\"message\":\"not authenticated\"}}");
-                else if (body.contains("\"getTimetable\"")) reply(ex, 200, resource("timetable.json"));
+                else if (body.contains("\"getTimetable\"")) reply(ex, 200, timetable != null ? timetable : resource("timetable.json"));
                 else if (body.contains("\"getTimegridUnits\"")) reply(ex, 200, "{\"result\":[{\"day\":2,\"timeUnits\":[{\"startTime\":800,\"endTime\":850}]}]}");
                 else if (body.contains("\"logout\"")) reply(ex, 200, "{\"result\":null}");
                 else reply(ex, 200, "{\"error\":{\"code\":-32601,\"message\":\"unknown\"}}");
             }
             case "/WebUntis/api/app/config" -> reply(ex, session ? 200 : 401, resource("app-config.json"));
-            case "/WebUntis/api/classreg/absences/students" -> reply(ex, session ? 200 : 401, resource("absences.json"));
+            case "/WebUntis/api/classreg/absences/students" -> reply(ex, session ? 200 : 401, absences != null ? absences : resource("absences.json"));
             case "/WebUntis/api/exams" -> reply(ex, session ? 200 : 401, resource("exams.json"));
             default -> reply(ex, 404, "{}");
         }
     }
 
-    private static String resource(String name) {
+    static String resource(String name) {
         try (InputStream in = FakeWebUntis.class.getResourceAsStream("/webuntis/" + name)) {
             return new String(in.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {

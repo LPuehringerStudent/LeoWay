@@ -8,7 +8,11 @@
     <p>WebUntis <strong>not connected</strong></p>
     <a class="btn" routerLink="/connect">Connect WebUntis</a>
   } @else if (status(); as s) {
-    @if (s.connected) {
+    @if (s.connected && s.needsReconnect) {
+      <p class="error" role="alert">WebUntis no longer accepts your access key. Log in again to reconnect.</p>
+      <a class="btn" routerLink="/connect">Log in again</a>
+      <button type="button" class="btn btn--secondary" (click)="disconnect()">Disconnect WebUntis</button>
+    } @else if (s.connected) {
       <p>Connected as <strong>{{ s.username }}</strong>@if (s.firstLesson; as f) {<span>, first lesson
         {{ dayLabel(f.date) }} <strong>{{ f.start.slice(0, 5) }}</strong></span>}</p>
       @if (!s.available) {

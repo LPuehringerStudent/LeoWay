@@ -137,6 +137,16 @@ Found in the follow-up, for Sprint 2:
 - S06's 99 % (05:00–10:00) was missed on three of five school days by a few minutes, all caused by Linz AG errors
   (HTTP 302/503, timeouts), not by our server.
 
+## Sprint review feedback (2026-11-12)
+
+- **Time tracking:** we did not record hours in Sprint 1. From Sprint 2 everyone logs hours in the teachers'
+  time-tracking Excel.
+- **Done Done column:** GitHub moves issues to Done on merge, so the boards got a final **Done Done** column for items
+  that meet the whole Definition of Done. All 19 Sprint 1 items were accepted at the review and are in Done Done.
+- **No bypassing code reviews:** several Sprint 1 PRs were merged with the admin bypass, because the project lead
+  was the only code owner and could not approve his own PRs. From Sprint 2 any other team member approves.
+- **Priority tags:** priorities were only in the product backlog. From Sprint 2 every issue carries a priority label.
+
 ## Decisions in Sprint 1
 
 - WebUntis access keys are stored encrypted on the server (teachers agreed; #9).

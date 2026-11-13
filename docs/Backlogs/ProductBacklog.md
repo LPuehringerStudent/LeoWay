@@ -2,7 +2,8 @@
 
 **Product:** LeoWay, a commute assistant for HTL Leonding
 **Product Owner:** Behrang (@BehrangEl11, [#11](https://github.com/LPuehringerStudent/LeoWay/issues/11))
-**Last updated:** 2026-11-05 (Sprint 1 review)
+**Last updated:** 2026-11-12 (Sprint 1 review)
+**Priorities** are also set as `priority: high/medium/low` labels on the GitHub issues.
 
 Items with an issue number are tracked on GitHub ([Sprint1](https://github.com/users/LPuehringerStudent/projects/14),
 [Sprint2](https://github.com/users/LPuehringerStudent/projects/15),
@@ -60,3 +61,4 @@ system specification and are not broken down yet. F01–F12 and A01–A14 refer 
 | PB-46 | – | User Story | As a student, I want statistics on how late my connection usually is (F12) | Medium | To Do | Backlog | A12 standard and non-standard cases pass. |
 | PB-47 | – | User Story | As a student, I want push and email alerts as well as Discord (F04) | Medium | To Do | Backlog | One message per chosen channel within 60 seconds (A04). |
 | PB-48 | – | Technical Improvement | Load, phone-width, keyboard and browser checks before release (A14) | High | To Do | Backlog | Load targets met; results recorded. |
+| PB-49 | [#69](https://github.com/LPuehringerStudent/LeoWay/issues/69) | Bug Fix | Recorder stores one departure under two trip ids when `AVMSTripID` is missing | High | To Do | Sprint 2 | A departure that loses and regains `AVMSTripID` keeps one trip id; one day on production adds no split departures. Existing rows stay (S04). |

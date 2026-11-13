@@ -224,4 +224,25 @@ class TimetableSyncTest {
         given().get("/api/me/webuntis").then().statusCode(200);
         assertEquals(before, fake.requests.size(), "second request comes from the cache");
     }
+
+    @Test
+    void parallelFirstSyncsStoreOneRowWithoutFailing() throws Exception {
+        // #81: the endpoint's on-demand sync and a scheduled run can meet on a cold cache.
+        for (int round = 0; round < 10; round++) {
+            QuarkusTransaction.requiringNew().run(() -> FirstLessonCache.deleteById(a));
+            var start = new java.util.concurrent.CountDownLatch(1);
+            var pool = java.util.concurrent.Executors.newFixedThreadPool(4);
+            List<java.util.concurrent.Future<?>> runs = new java.util.ArrayList<>();
+            for (int i = 0; i < 4; i++) {
+                runs.add(pool.submit(() -> {
+                    start.await();
+                    return sync.sync(a, THURSDAY);
+                }));
+            }
+            start.countDown();
+            for (var r : runs) r.get(); // throws if one sync failed
+            pool.shutdown();
+            assertEquals(Instant.parse("2026-11-05T07:55:00Z"), cached(a).startAt);
+        }
+    }
 }

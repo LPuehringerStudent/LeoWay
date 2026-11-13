@@ -7,6 +7,7 @@ import io.quarkus.narayana.jta.QuarkusTransaction;
 import io.quarkus.scheduler.Scheduled;
 import io.quarkus.scheduler.Scheduled.ConcurrentExecution;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
 import java.time.Clock;
@@ -30,6 +31,8 @@ import org.jboss.logging.Logger;
 public class TimetableSync {
     private static final Logger LOG = Logger.getLogger(TimetableSync.class);
     static final ZoneId SCHOOL_ZONE = ZoneId.of("Europe/Vienna");
+    /** First key of the advisory locks taken here, so they never clash with other locks. */
+    static final int LOCK_SPACE = 59;
 
     @Inject
     WebUntisConnection connection;
@@ -66,6 +69,7 @@ public class TimetableSync {
     }
 
     /** Syncs the first lesson from {@code from} on for every student whose key still works. */
+    @ActivateRequestContext
     public Result syncAll(LocalDate from) {
         return forEachStudent(id -> sync(id, from));
     }
@@ -74,6 +78,7 @@ public class TimetableSync {
      * Reads the next first lesson from {@code from} on and replaces the stored one. Fires {@link FirstLessonChanged}
      * if it moved. A rejected key is marked on the connection, then the exception is rethrown.
      */
+    @ActivateRequestContext
     public Optional<FirstLessonCache> sync(long studentId, LocalDate from) {
         Optional<Lesson> lesson;
         try {
@@ -85,6 +90,12 @@ public class TimetableSync {
         Instant now = clock.instant();
         Instant[] before = new Instant[1];
         Optional<FirstLessonCache> stored = QuarkusTransaction.requiringNew().call(() -> {
+            // One writer per student at a time (#81): the endpoint's on-demand sync and a scheduled run can meet on a
+            // cold cache, and both would INSERT. The lock ends with the transaction; the second writer then sees the
+            // first one's row and updates it.
+            FirstLessonCache.getEntityManager()
+                    .createNativeQuery("SELECT pg_advisory_xact_lock(" + LOCK_SPACE + ", hashtext(CAST(?1 AS text)))")
+                    .setParameter(1, studentId).getSingleResult();
             if (WebUntisCredential.findById(studentId) == null) return Optional.empty(); // disconnected meanwhile
             FirstLessonCache c = FirstLessonCache.findById(studentId);
             if (c == null) {
@@ -111,6 +122,7 @@ public class TimetableSync {
      * Stores lateness entries for {@code day}: absences that start in the first real lesson and end within it
      * (glossary). Longer absences are not matched. Entries already stored are not added again.
      */
+    @ActivateRequestContext
     public Result syncLateness(LocalDate day) {
         return forEachStudent(id -> {
             record Day(Optional<Lesson> first, List<Absence> absences) {}
@@ -161,6 +173,7 @@ public class TimetableSync {
         return new Result(ids.size() - failed, failed);
     }
 
+    /** Idempotent: a second call for the same failure (sync, then forEachStudent) only reads. */
     private void markRejected(long studentId) {
         Instant now = clock.instant();
         QuarkusTransaction.requiringNew().run(() -> {

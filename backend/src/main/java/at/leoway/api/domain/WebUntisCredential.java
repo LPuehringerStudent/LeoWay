@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.Instant;
 
 @Entity
 @Table(name = "webuntis_credential")
@@ -25,5 +26,5 @@ public class WebUntisCredential extends PanacheEntityBase {
 
     /** When WebUntis stopped accepting the key, or null while it works (#59). */
     @Column(name = "rejected_at")
-    public java.time.Instant rejectedAt;
+    public Instant rejectedAt;
 }

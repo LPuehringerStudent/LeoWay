@@ -5,6 +5,7 @@ import io.quarkus.narayana.jta.QuarkusTransaction;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * stored for the same departure (source, line, stop, bay, planned time), and the first id stored wins over a later
  * real id. Fallback sightings more than {@link #FALLBACK_HORIZON} away are skipped: the delay is always 0 that far out
  * (#3), and the real id usually arrives before the departure gets close.
+ *
+ * <p>Two real ids can share one departure: on trams 3, 4 and 19 a {@code -2} extra trip runs next to the regular
+ * {@code -1} trip, both are in the same poll with different delays (#77). Each real id keeps its own rows. A fallback
+ * sighting of such a departure is skipped, because it can't be told which vehicle it belongs to.
  */
 @ApplicationScoped
 public class DelayRecordSink implements ObservationSink {
@@ -36,17 +41,17 @@ public class DelayRecordSink implements ObservationSink {
     /** Last stored value per departure. Filled from the database on a miss, so restarts don't duplicate rows. */
     private final Map<Key, Last> last = new ConcurrentHashMap<>();
 
-    /** Trip id stored first per departure. Filled from the database on a miss, like {@link #last}. */
-    private final Map<Departure, String> tripIds = new ConcurrentHashMap<>();
+    /** Trip ids stored per departure, first stored first. Filled from the database on a miss, like {@link #last}. */
+    private final Map<Departure, List<String>> tripIds = new ConcurrentHashMap<>();
 
     @Override
     public void store(String source, Instant collectedAt, List<DepartureObservation> observations) {
         Map<Key, Last> stored = new HashMap<>();
-        Map<Departure, String> newIds = new HashMap<>();
+        Map<Departure, List<String>> newIds = new HashMap<>();
         QuarkusTransaction.requiringNew().run(() -> {
             for (DepartureObservation o : observations) {
                 Departure departure = new Departure(source, o.line(), o.stopId(), o.bay(), o.plannedAt());
-                String known = newIds.containsKey(departure) ? newIds.get(departure) : knownTripId(departure);
+                List<String> known = newIds.containsKey(departure) ? newIds.get(departure) : knownTripIds(departure);
                 String tripId = tripId(o, known, collectedAt);
                 if (tripId == null) continue;
                 Key key = new Key(source, tripId, o.stopId(), o.bay(), o.serviceDate());
@@ -66,7 +71,7 @@ public class DelayRecordSink implements ObservationSink {
                 r.collectedAt = collectedAt;
                 r.persist();
                 stored.put(key, now);
-                if (known == null) newIds.put(departure, tripId);
+                if (!known.contains(tripId)) newIds.put(departure, append(known, tripId));
             }
         });
         // Only after the commit: a failed batch must not count as stored.
@@ -78,29 +83,41 @@ public class DelayRecordSink implements ObservationSink {
     }
 
     /**
-     * The trip id to store, or null to skip the sighting. Real ids are kept unless the departure was first stored
-     * under a fallback id; fallback ids are replaced by any id already stored.
+     * The trip id to store, or null to skip the sighting. {@code known} holds the ids already stored for the
+     * departure, first stored first. Real ids are kept unless the departure was first stored under a fallback id;
+     * fallback ids are replaced by the first id stored, or skipped if two real ids were stored (#77).
      */
-    static String tripId(DepartureObservation o, String known, Instant collectedAt) {
+    static String tripId(DepartureObservation o, List<String> known, Instant collectedAt) {
         boolean fallback = LinzAgAdapter.isFallbackTripId(o.tripId());
-        if (known == null) {
+        if (known.isEmpty()) {
             boolean far = o.plannedAt().isAfter(collectedAt.plus(FALLBACK_HORIZON));
             return fallback && far ? null : o.tripId();
         }
-        return fallback || LinzAgAdapter.isFallbackTripId(known) ? known : o.tripId();
+        String first = known.getFirst();
+        if (fallback) {
+            long real = known.stream().filter(id -> !LinzAgAdapter.isFallbackTripId(id)).count();
+            return real > 1 ? null : first;
+        }
+        return LinzAgAdapter.isFallbackTripId(first) ? first : o.tripId();
     }
 
-    private String knownTripId(Departure d) {
-        String cached = tripIds.get(d);
+    private List<String> knownTripIds(Departure d) {
+        List<String> cached = tripIds.get(d);
         if (cached != null) return cached;
-        DelayRecord r = DelayRecord.<DelayRecord>find(
-                "source = ?1 and line = ?2 and stopId = ?3 and plannedAt = ?4 and "
-                        + (d.bay() == null ? "bay is null" : "bay = ?5") + " order by collectedAt",
-                d.bay() == null ? new Object[] {d.source(), d.line(), d.stopId(), d.plannedAt()}
-                        : new Object[] {d.source(), d.line(), d.stopId(), d.plannedAt(), d.bay()})
-                .firstResult();
-        if (r != null) tripIds.put(d, r.tripId);
-        return r == null ? null : r.tripId;
+        List<String> ids = DelayRecord.<DelayRecord>find(
+                        "source = ?1 and line = ?2 and stopId = ?3 and plannedAt = ?4 and "
+                                + (d.bay() == null ? "bay is null" : "bay = ?5") + " order by collectedAt, id",
+                        d.bay() == null ? new Object[] {d.source(), d.line(), d.stopId(), d.plannedAt()}
+                                : new Object[] {d.source(), d.line(), d.stopId(), d.plannedAt(), d.bay()})
+                .stream().map(r -> r.tripId).distinct().toList();
+        if (!ids.isEmpty()) tripIds.put(d, ids);
+        return ids;
+    }
+
+    private static List<String> append(List<String> ids, String id) {
+        List<String> all = new ArrayList<>(ids);
+        all.add(id);
+        return List.copyOf(all);
     }
 
     private Last latestStored(Key k) {

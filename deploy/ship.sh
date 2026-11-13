@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Build the backend and web images on this machine and load them onto the server.
-# The repo and images are private, so the server never needs GitHub credentials.
+# Manual alternative to auto-deploy.sh (#83): no GitHub or registry access needed. Stop leoway-deploy.timer first,
+# or the next newer main replaces what you ship.
 #   deploy/ship.sh [ssh-host]      (default: leoway)
 # Then on the server: cd /opt/leoway/deploy && docker compose up -d --wait
 set -euo pipefail

@@ -16,7 +16,13 @@ public sealed interface LeaveBy {
     /** The latest connection that gets the student to school in time. */
     record InTime(Instant leaveAt, Connection connection, Instant atSchool, Source source) implements LeaveBy {}
 
-    /** No connection is in time; this one arrives earliest. {@code minutesLate} counts against the lesson start. */
+    /**
+     * No connection leaves room for the buffer, but this one still reaches school by the lesson start. The UI says
+     * "no buffer left", not "late" (#81).
+     */
+    record NoBuffer(Instant leaveAt, Connection connection, Instant atSchool, Source source) implements LeaveBy {}
+
+    /** Every connection reaches school after the lesson starts; this one arrives earliest. {@code minutesLate} > 0. */
     record Late(Instant leaveAt, Connection connection, Instant atSchool, Source source, long minutesLate)
             implements LeaveBy {}
 

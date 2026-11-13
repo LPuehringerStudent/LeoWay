@@ -79,4 +79,23 @@ class LiveDelaysTest {
         assertNull(r.get(0).delayMinutes());
         assertNull(r.get(1).delayMinutes());
     }
+
+    @Test
+    void nullDelayFallsThroughToTheSchoolStop() {
+        record("t4", HOME, null, NOW.minusSeconds(30));
+        record("t4", SCHOOL, 2, NOW.minusSeconds(30));
+        assertEquals(2, delays.apply(List.of(conn("t4")), HOME, SCHOOL).getFirst().delayMinutes());
+    }
+
+    @Test
+    void severalConnectionsAreMatchedByTripAndServiceDate() {
+        record("t5", HOME, 1, NOW.minusSeconds(30));
+        record("t6", HOME, 7, NOW.minusSeconds(30));
+        Connection otherDay = new Connection("19", "t5", DAY.plusDays(1), Instant.parse("2026-11-17T06:31:00Z"),
+                Instant.parse("2026-11-17T06:47:00Z"), null);
+        List<Connection> r = delays.apply(List.of(conn("t5"), conn("t6"), otherDay), HOME, SCHOOL);
+        assertEquals(1, r.get(0).delayMinutes());
+        assertEquals(7, r.get(1).delayMinutes());
+        assertNull(r.get(2).delayMinutes());
+    }
 }

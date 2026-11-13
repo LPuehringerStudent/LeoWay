@@ -63,14 +63,24 @@ class LeaveByCalculatorTest {
 
     @Test
     void nothingFitsShowsTheEarliestArrival() {
-        var r = assertInstanceOf(Late.class, calc(MONDAY, "08:00", List.of(
+        var r = assertInstanceOf(LeaveBy.NoBuffer.class, calc(MONDAY, "08:00", List.of(
                 bus(MONDAY, "07:56", "08:12"), bus(MONDAY, "07:41", "07:57"))));
         assertEquals("07:41", local(r.connection().departure()));
-        assertEquals("08:00", local(r.atSchool()));
-        assertEquals(0, r.minutesLate(), "arrives on time but eats the buffer");
+        assertEquals("08:00", local(r.atSchool()), "arrives on time but eats the buffer: not late");
 
         var later = assertInstanceOf(Late.class, calc(MONDAY, "08:00", List.of(bus(MONDAY, "07:56", "08:12"))));
         assertEquals(15, later.minutesLate());
+
+        var halfMinute = new Connection("19", "x", MONDAY, at(MONDAY, "07:41"), at(MONDAY, "07:57").plusSeconds(30), null);
+        assertEquals(1, assertInstanceOf(Late.class, calc(MONDAY, "08:00", List.of(halfMinute))).minutesLate(),
+                "30 seconds late rounds up to 1 minute");
+    }
+
+    @Test
+    void equalArrivalsPreferTheLaterDeparture() {
+        var r = assertInstanceOf(Late.class, calc(MONDAY, "08:00", List.of(
+                bus(MONDAY, "07:40", "08:05"), bus(MONDAY, "07:50", "08:05"))));
+        assertEquals("07:50", local(r.connection().departure()));
     }
 
     @Test

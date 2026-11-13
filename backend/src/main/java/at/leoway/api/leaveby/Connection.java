@@ -8,6 +8,8 @@ import java.time.LocalDate;
  * One public-transport trip from the home stop to the school stop, with planned times. Where it comes from (Linz AG
  * trip request or the departure-monitor fallback) is decided in #56.
  *
+ * @param tripId the id the recorder stores in {@code delay_record.trip_id}: the {@code AVMSTripID}, or the first id
+ *               stored for the departure since #76 (see {@code DelayRecordSink}), so live delays can be found
  * @param serviceDate the trip's operating day; can differ from the calendar date of a departure after midnight
  * @param delayMinutes live delay, null if there is no real-time data ("timetable only", U03)
  */

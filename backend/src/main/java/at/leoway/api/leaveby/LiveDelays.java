@@ -14,7 +14,7 @@ import java.util.List;
  */
 @ApplicationScoped
 public class LiveDelays {
-    static final String SOURCE = "linz-ag";
+    static final String SOURCE = at.leoway.api.feed.LinzAgAdapter.ID;
     /** Older than this, a recorded delay is not "live" any more (the feed is STALE after five minutes, #19). */
     static final Duration FRESH = Duration.ofMinutes(5);
 
@@ -26,16 +26,24 @@ public class LiveDelays {
     }
 
     public List<Connection> apply(List<Connection> connections, String homeStopId, String schoolStopId) {
+        if (connections.isEmpty()) return connections;
         Instant since = clock.instant().minus(FRESH);
-        return connections.stream().map(c -> c.withDelay(latest(c, homeStopId, since)
-                .or(() -> latest(c, schoolStopId, since)).orElse(null))).toList();
+        // One query for all connections (#81). Only rows collected recently, newest first per trip and stop.
+        List<DelayRecord> rows = DelayRecord.<DelayRecord>find(
+                "source = ?1 and tripId in ?2 and stopId in ?3 and collectedAt >= ?4 order by collectedAt desc",
+                SOURCE, connections.stream().map(Connection::tripId).distinct().toList(),
+                List.of(homeStopId, schoolStopId), since).list();
+        record Key(String tripId, String stopId, java.time.LocalDate serviceDate) {}
+        java.util.Map<Key, DelayRecord> latest = new java.util.HashMap<>();
+        for (DelayRecord r : rows) latest.putIfAbsent(new Key(r.tripId, r.stopId, r.serviceDate), r);
+        return connections.stream().map(c -> c.withDelay(
+                delay(latest.get(new Key(c.tripId(), homeStopId, c.serviceDate())))
+                        .or(() -> delay(latest.get(new Key(c.tripId(), schoolStopId, c.serviceDate())))).orElse(null)))
+                .toList();
     }
 
-    private static java.util.Optional<Integer> latest(Connection c, String stopId, Instant since) {
-        DelayRecord r = DelayRecord.<DelayRecord>find(
-                "source = ?1 and tripId = ?2 and stopId = ?3 and serviceDate = ?4 order by collectedAt desc",
-                SOURCE, c.tripId(), stopId, c.serviceDate()).firstResult();
-        if (r == null || r.collectedAt.isBefore(since)) return java.util.Optional.empty();
-        return java.util.Optional.ofNullable(r.reportedDelay);
+    /** A row with no real-time data (null delay) counts as no delay known, so the next stop is tried. */
+    private static java.util.Optional<Integer> delay(DelayRecord r) {
+        return r == null ? java.util.Optional.empty() : java.util.Optional.ofNullable(r.reportedDelay);
     }
 }

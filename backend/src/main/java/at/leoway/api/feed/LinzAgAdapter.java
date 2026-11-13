@@ -44,9 +44,12 @@ public class LinzAgAdapter implements FeedAdapter {
 
     private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
 
+    /** Source id in {@code delay_record.source}. */
+    public static final String ID = "linz-ag";
+
     @Override
     public String id() {
-        return "linz-ag";
+        return ID;
     }
 
     @Override

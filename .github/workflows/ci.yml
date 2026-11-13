@@ -52,7 +52,7 @@ jobs:
           LEOWAY_KEY_ENCRYPTION_KEY: Y2ktb25seS1rZXktY2ktb25seS1rZXktY2ktb25seTE=
         run: |
           java -jar target/quarkus-app/quarkus-run.jar > api.log 2>&1 &
-          for i in $(seq 1 30); do
+          for _ in $(seq 1 30); do
             if curl -fsS http://localhost:8080/api/health/ready; then echo; exit 0; fi
             sleep 2
           done
@@ -75,3 +75,13 @@ jobs:
         run: npx ng test --watch=false
       - name: Build
         run: npx ng build
+
+  # Deploy scripts and workflows run on the server and in Actions with no other tests (#83).
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: shellcheck deploy scripts
+        run: shellcheck -x deploy/*.sh
+      - name: actionlint workflows
+        run: docker run --rm -v "$PWD":/repo -w /repo rhysd/actionlint:1.7.12 -no-color

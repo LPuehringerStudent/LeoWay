@@ -38,7 +38,7 @@ public class LiveDelays {
         for (DelayRecord r : rows) latest.putIfAbsent(new Key(r.tripId, r.stopId, r.serviceDate), r);
         return connections.stream().map(c -> c.withDelay(
                 delay(latest.get(new Key(c.tripId(), homeStopId, c.serviceDate())))
-                        .or(() -> delay(latest.get(new Key(c.tripId(), schoolStopId, c.serviceDate())))).orElse(null)))
+                        .or(() -> delay(latest.get(new Key(c.tripId(), schoolStopId, c.arrivalDate())))).orElse(null)))
                 .toList();
     }
 

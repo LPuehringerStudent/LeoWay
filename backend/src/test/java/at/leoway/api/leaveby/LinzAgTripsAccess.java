@@ -13,6 +13,15 @@ public class LinzAgTripsAccess {
     public void reset(Clock clock) {
         trips.clearCache();
         trips.useClock(clock);
+        trips.useMinGap(java.time.Duration.ZERO);
+    }
+
+    public void useClock(Clock clock) {
+        trips.useClock(clock);
+    }
+
+    public void useMinGap(java.time.Duration gap) {
+        trips.useMinGap(gap);
     }
 
     /** The trip id of the {@code index}th trip in trip-arrive-by.json. */

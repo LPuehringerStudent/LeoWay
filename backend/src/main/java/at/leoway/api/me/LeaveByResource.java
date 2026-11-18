@@ -62,7 +62,8 @@ public class LeaveByResource {
             OffsetDateTime plannedArrival, OffsetDateTime arrival) {}
 
     /**
-     * @param source TIMETABLE, or PREDICTION if real-time data moved the times (U03)
+     * @param source PREDICTION if the times come from real-time data (also when that data says "on time"),
+     *               TIMETABLE if there was none (U03)
      */
     @Schema(name = "LeaveByResult")
     public record Result(Status status, Long routeId, OffsetDateTime lessonStart, OffsetDateTime leaveAt,

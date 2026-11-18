@@ -10,7 +10,9 @@ import java.time.LocalDate;
  *
  * @param tripId the id of the first ride as the recorder stores it in {@code delay_record.trip_id}: the
  *               {@code AVMSTripID}, or {@code stateless#key} (see {@code DelayRecordSink}), so live delays can be found
- * @param serviceDate the trip's operating day; can differ from the calendar date of a departure after midnight
+ * @param serviceDate calendar date of the planned departure from the home stop, the way the recorder dates its rows
+ *                    (stop-local, not the operating day). At the school stop a trip after midnight has the next date;
+ *                    see {@link #arrivalDate()}.
  * @param delayMinutes live delay at the departure, null if there is no real-time data ("timetable only", U03)
  * @param arrivalDelayMinutes live delay at the arrival, null if unknown. With a change, a late first ride can still
  *                            reach the same last ride, so this can differ from the departure delay.
@@ -30,6 +32,11 @@ public record Connection(String line, String tripId, LocalDate serviceDate, Inst
 
     public Connection withDelay(Integer minutes) {
         return new Connection(line, tripId, serviceDate, plannedDeparture, plannedArrival, minutes, minutes);
+    }
+
+    /** Calendar date of the planned arrival at the school stop, as the recorder dates its rows there. */
+    public LocalDate arrivalDate() {
+        return plannedArrival.atZone(LeaveBy.VIENNA).toLocalDate();
     }
 
     public boolean predicted() {

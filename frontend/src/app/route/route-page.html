@@ -29,3 +29,7 @@
     <button type="button" class="btn btn--secondary" (click)="logout()">Log out</button>
   }
 </section>
+
+@if (!loading() && session.me() && !session.me()?.admin) {
+  <app-alerts-card />
+}

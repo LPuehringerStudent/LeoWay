@@ -2,6 +2,25 @@
 openapi: 3.1.0
 components:
   schemas:
+    AlertChannelStatus:
+      type: object
+      properties:
+        kind:
+          $ref: "#/components/schemas/Kind"
+        working:
+          type: boolean
+        since:
+          $ref: "#/components/schemas/Instant"
+        brokenAt:
+          $ref: "#/components/schemas/Instant"
+    DiscordInput:
+      type: object
+      required:
+      - webhookUrl
+      properties:
+        webhookUrl:
+          type: string
+          description: Webhook URL from the Discord channel's Integrations settings
     Errors:
       type: object
       properties:
@@ -36,6 +55,10 @@ components:
       format: date-time
       examples:
       - 2022-03-10T16:15:50Z
+    Kind:
+      type: string
+      enum:
+      - DISCORD
     LeaveByConnection:
       type: object
       properties:
@@ -304,6 +327,123 @@ paths:
           description: Not logged in
         "403":
           description: "No student account, or an administrator"
+      security:
+      - SecurityScheme:
+        - student
+  /api/me/alerts:
+    get:
+      summary: List the student's alert channels
+      description: Working or broken; never the target.
+      tags:
+      - Alerts
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AlertChannelStatus"
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - SecurityScheme:
+        - student
+  /api/me/alerts/discord:
+    put:
+      summary: Set the Discord webhook
+      description: Sends a test message to it and only stores it if Discord accepts
+        it. Replaces an older one.
+      tags:
+      - Alerts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DiscordInput"
+        required: true
+      responses:
+        "200":
+          description: Stored; the test message was sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlertChannelStatus"
+        "400":
+          description: "Not a Discord webhook URL, or Discord refused it"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Errors"
+        "429":
+          description: A test message was sent less than 10 s ago; see Retry-After
+        "503":
+          description: Discord can't be reached; nothing was stored
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - SecurityScheme:
+        - student
+  /api/me/alerts/{kind}:
+    delete:
+      summary: Remove an alert channel
+      tags:
+      - Alerts
+      parameters:
+      - name: kind
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Removed (or was not set)
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - SecurityScheme:
+        - student
+  /api/me/alerts/{kind}/test:
+    post:
+      summary: Send the test message again
+      tags:
+      - Alerts
+      parameters:
+      - name: kind
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlertChannelStatus"
+        "404":
+          description: No such channel
+        "409":
+          description: The channel refused it and is now marked broken
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Errors"
+        "429":
+          description: A test message was sent less than 10 s ago; see Retry-After
+        "503":
+          description: The channel can't be reached right now
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
       security:
       - SecurityScheme:
         - student
@@ -713,6 +853,8 @@ paths:
 tags:
 - name: Account
   description: The logged-in student's own account.
+- name: Alerts
+  description: Where the student gets alerts (F04). Targets are never returned.
 - name: Health
   description: Health checks for monitoring.
 - name: Leave-by

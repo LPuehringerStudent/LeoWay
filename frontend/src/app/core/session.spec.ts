@@ -20,7 +20,7 @@ describe('Session', () => {
     expect(req.request.body).toBe('j_username=max.muster&j_password=KEY123');
     req.flush('');
     await flush();
-    http.expectOne('/api/me').flush({ username: 'max.muster' });
+    http.expectOne('/api/session').flush({ username: 'max.muster', admin: false });
     expect(await result).toBe('ok');
     expect(session.me()?.username).toBe('max.muster');
   });
@@ -31,6 +31,24 @@ describe('Session', () => {
     await flush();
     http.expectOne('/api/session/webuntis-reachable').flush({ webUntisReachable: true });
     expect(await result).toBe('rejected');
+  });
+
+  it('recognizes an administrator without calling the student account API', async () => {
+    const result = session.refresh();
+    http.expectOne('/api/session').flush({ username: 'root.admin', admin: true });
+    expect((await result)?.admin).toBe(true);
+    http.expectNone('/api/me');
+  });
+
+  it('does not restore an old session when a request finishes after logout', async () => {
+    const refresh = session.refresh();
+    const oldRequest = http.expectOne('/api/session');
+    const logout = session.logout();
+    http.expectOne('/api/session/logout').flush(null);
+    await logout;
+    oldRequest.flush({ username: 'root.admin', admin: true });
+    expect(await refresh).toBeNull();
+    expect(session.me()).toBeNull();
   });
 
   it('reports unavailable when WebUntis is down', async () => {

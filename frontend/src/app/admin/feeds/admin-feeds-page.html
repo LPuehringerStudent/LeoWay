@@ -1,0 +1,84 @@
+<div class="page-heading">
+  <p class="eyebrow">Administration <span aria-hidden="true">/</span> Operations</p>
+  <h1>Feed status</h1>
+  <p class="lead">A clear view of the data behind every journey.</p>
+</div>
+
+@if (denied()) {
+  <section class="card access-card" aria-labelledby="access-title">
+    <span class="access-icon" aria-hidden="true">↗</span>
+    <p class="eyebrow">Restricted area</p>
+    <h2 id="access-title">Not allowed</h2>
+    <p>Feed monitoring is available to LeoWay administrators.</p>
+    @if (loggedOut()) {
+      <a class="btn" routerLink="/connect">Log in with WebUntis</a>
+    }
+    <a class="back-link" routerLink="/">Back to Home <span aria-hidden="true">→</span></a>
+  </section>
+} @else {
+  <section class="board overview" aria-labelledby="overview-title" [class.overview--attention]="stale() + down() > 0 || error()">
+    <div class="overview-top">
+      <p class="eyebrow">Network overview</p>
+      <span class="monitor-label"><span class="monitor-dot" aria-hidden="true"></span>30 s refresh</span>
+    </div>
+    <div class="overview-message" role="status" aria-live="polite">
+      <span class="overview-symbol" aria-hidden="true">{{ error() || stale() + down() > 0 ? '!' : feeds()?.length ? '✓' : '·' }}</span>
+      <h2 id="overview-title">{{ heading() }}</h2>
+    </div>
+    <p class="overview-description">{{ checkedAt() ? 'Latest reported health of your transit data sources.' : 'Connecting to the LeoWay monitoring service.' }}</p>
+    <div class="metrics" aria-label="Feed counts">
+      <div><span class="digits">{{ feeds() === null ? '—' : ok() }}</span><span>Operational</span></div>
+      <div><span class="digits">{{ feeds() === null ? '—' : stale() }}</span><span>Stale</span></div>
+      <div><span class="digits">{{ feeds() === null ? '—' : down() }}</span><span>Down</span></div>
+    </div>
+    <p class="last-checked">@if (checkedAt(); as checked) { Last checked <time [attr.datetime]="checked">{{ formatTime(checked) }}</time> · Vienna time } @else { Waiting for the first successful check }</p>
+  </section>
+
+  <section class="sources" aria-labelledby="sources-title">
+    <div class="sources-heading">
+      <div><h2 id="sources-title">Data sources <span class="source-count">{{ feeds()?.length ?? '—' }}</span></h2><p class="muted">Updates automatically every 30 seconds.</p></div>
+      <button class="refresh" type="button" (click)="refresh()" [disabled]="refreshing()">
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 7v5h-5M4 17v-5h5M6.1 6.1A8 8 0 0 1 20 12M4 12a8 8 0 0 0 13.9 5.9"/></svg>
+        {{ refreshing() ? 'Checking…' : 'Refresh' }}
+      </button>
+    </div>
+
+    @if (error()) {
+      <p class="notice" role="alert">{{ feeds() !== null ? 'Couldn’t refresh. Showing previously loaded data.' : 'Couldn’t load feed status. Try Refresh, or wait for the next automatic check.' }}</p>
+    }
+    @if (feeds(); as items) {
+      @if (items.length) {
+        <div class="feed-table-wrap">
+          <table class="feed-table">
+            <caption class="visually-hidden">Transit feeds, their reported health and most recent success and error. All times are in Europe/Vienna.</caption>
+            <thead><tr><th scope="col">Feed</th><th scope="col">Status</th><th scope="col">Last success</th><th scope="col">Last error</th></tr></thead>
+            <tbody>
+              @for (feed of items; track feed.feedId) {
+                <tr>
+                  <th scope="row"><span class="feed-name">{{ name(feed.feedId) }}</span><span class="feed-id">{{ feed.feedId }}</span></th>
+                  <td data-label="Status"><span class="badge" [class]="'badge badge--' + feed.state.toLowerCase()"><span aria-hidden="true">{{ feed.state === 'OK' ? '●' : feed.state === 'STALE' ? '▲' : '✕' }}</span>{{ feed.state }}</span><span class="cell-note">{{ stateText(feed.state) }}</span></td>
+                  <td data-label="Last success">@if (feed.lastSuccessAt; as success) {<time [attr.datetime]="success">{{ formatTime(success) }}</time>} @else {<span class="muted">Never received</span>}</td>
+                  <td data-label="Last error">@if (feed.lastErrorAt; as errorAt) {<time [attr.datetime]="errorAt">{{ formatTime(errorAt) }}</time>} @else {<span class="muted">None recorded</span>}
+                    @if (feed.lastError) {<details class="error-details"><summary>Error details</summary><p>{{ feed.lastError }}</p></details>}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <div class="card empty-state"><h3>Waiting for data sources</h3><p>The server hasn’t reported any feeds yet. This page will update automatically.</p></div>
+      }
+    } @else if (!error()) {
+      <div class="card empty-state" role="status"><p>Loading feed status…</p></div>
+    }
+  </section>
+
+  <aside class="legend" aria-label="Understanding feed status">
+    <h2>Reading the signals</h2>
+    <p><span class="legend-dot legend-dot--ok" aria-hidden="true"></span><strong>OK</strong> The source is delivering updates.</p>
+    <p><span class="legend-dot legend-dot--stale" aria-hidden="true"></span><strong>STALE</strong> No successful update for over five minutes.</p>
+    <p><span class="legend-dot legend-dot--down" aria-hidden="true"></span><strong>DOWN</strong> The source is currently unavailable.</p>
+    <p class="legend-foot">Feed health reflects the last server report. Historical errors stay visible after a feed recovers.</p>
+  </aside>
+}

@@ -17,6 +17,11 @@ applies migrations, and launches the API and Angular. Open <http://localhost:420
 Press Ctrl+C to stop both apps. Run `docker compose down` to stop PostgreSQL and keep its data.
 If PowerShell blocks `npm.ps1`, use `npm.cmd start`.
 
+Wait for Angular to finish compiling, then open <http://localhost:4200> for the website.
+Port 5080 serves the backend API; its root URL can show "Resource not found".
+Use <http://localhost:5080/q/swagger-ui> to browse the API instead.
+Angular analytics is disabled for this workspace so the first start does not wait for a consent prompt.
+
 ### Manual startup
 
 Run these commands from the repository root in PowerShell. If `.env` already exists, use it.
@@ -59,6 +64,28 @@ npm --prefix frontend test -- --watch=false
 Use `docker compose down` to stop PostgreSQL and keep its data.
 
 ## API documentation
+
+### Local administrator access
+
+The **Admin** navigation item appears between Home and Route for administrators and opens
+`/admin/feeds`. The page shows feed health, last success and last error, with a 30-second refresh.
+Students and logged-out visitors who open the URL directly see "Not allowed".
+
+To enable your WebUntis username as an administrator locally, stop the app, then run in PowerShell:
+
+```powershell
+$env:LEOWAY_ADMINS = 'your.webuntis.username'
+npm.cmd start
+```
+
+Alternatively, set `LEOWAY_ADMINS=username.one,username.two` in the root `.env` file;
+`npm start` passes this local setting to the backend. An existing shell variable takes precedence.
+
+Log out and back in through Connect WebUntis with your normal access key to receive the new role.
+Admin accounts have access to feeds and health only; they do not have student routes or timetable data.
+The local setting does not change the production allowlist in `deploy/.env`.
+
+### OpenAPI
 
 - **Swagger UI:** <http://localhost:5080/q/swagger-ui> while the API runs (`npm start` or the local profile).
 - **OpenAPI file:** [`docs/api/openapi.yaml`](docs/api/openapi.yaml). Every backend build regenerates it.

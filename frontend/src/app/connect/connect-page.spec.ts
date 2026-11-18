@@ -5,10 +5,11 @@ import { ConnectPage } from './connect-page';
 
 describe('ConnectPage', () => {
   const login = vi.fn();
+  const me = vi.fn();
 
   function render() {
     TestBed.configureTestingModule({
-      providers: [provideRouter([]), { provide: Session, useValue: { login } }],
+      providers: [provideRouter([]), { provide: Session, useValue: { login, me } }],
     });
     const fixture = TestBed.createComponent(ConnectPage);
     fixture.detectChanges();
@@ -30,7 +31,7 @@ describe('ConnectPage', () => {
     fixture.detectChanges();
   }
 
-  beforeEach(() => login.mockReset());
+  beforeEach(() => { login.mockReset(); me.mockReset().mockReturnValue(null); });
 
   it('shows the privacy information before the form (L01)', () => {
     const { page } = render();
@@ -67,5 +68,14 @@ describe('ConnectPage', () => {
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
     await fillAndSubmit(fixture, page);
     expect(navigate).toHaveBeenCalledWith('/route');
+  });
+
+  it('takes administrators directly to the feed panel', async () => {
+    login.mockResolvedValue('ok');
+    me.mockReturnValue({ username: 'admin', admin: true });
+    const { fixture, page } = render();
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    await fillAndSubmit(fixture, page);
+    expect(navigate).toHaveBeenCalledWith('/admin/feeds');
   });
 });

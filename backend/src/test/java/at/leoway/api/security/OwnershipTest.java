@@ -81,11 +81,12 @@ class OwnershipTest {
     }
 
     @Test
-    @TestSecurity(user = "root", roles = Roles.ADMIN)
-    void adminSeesFeedsButNoPrivateData() {
+    @TestSecurity(user = "anna", roles = {Roles.STUDENT, Roles.ADMIN})
+    void adminSeesFeedsAndOwnDataOnly() {
         given().get("/api/admin/feeds").then().statusCode(200);
-        given().get("/api/me").then().statusCode(403);
-        given().get("/api/me/routes/" + benRoute).then().statusCode(403);
+        given().get("/api/me").then().statusCode(200);
+        given().get("/api/me/routes/" + annaRoute).then().statusCode(200);
+        given().get("/api/me/routes/" + benRoute).then().statusCode(404);
     }
 
     @Test

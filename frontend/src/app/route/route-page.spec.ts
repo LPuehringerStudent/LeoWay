@@ -6,23 +6,22 @@ import { Session } from '../core/session';
 import { RoutePage } from './route-page';
 
 describe('RoutePage', () => {
-  it('shows an admin link without requesting student WebUntis data', async () => {
+  it('shows an admin’s own WebUntis connection like a student', async () => {
     TestBed.configureTestingModule({ providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()] });
     const http = TestBed.inject(HttpTestingController);
     const fixture = TestBed.createComponent(RoutePage);
     fixture.detectChanges();
     http.expectOne('/api/session').flush({ username: 'test.admin', admin: true });
+    await vi.waitFor(() => {
+      http.expectOne('/api/me/webuntis').flush({ connected: true, username: 'test.admin', available: true });
+    });
     const page = fixture.nativeElement as HTMLElement;
     await vi.waitFor(() => {
       fixture.detectChanges();
-      expect(page.textContent).toContain('signed in as an administrator');
+      expect(page.textContent).toContain('Connected as test.admin');
     });
-    expect(page.querySelector('a[href="/admin/feeds"]')?.textContent).toContain('Open admin panel');
     expect(page.querySelector('a[href="/connect"]')).toBeNull();
-    expect(page.textContent).not.toContain('Connected as');
     expect(page.textContent).not.toContain('Loading…');
-    http.expectNone('/api/me/webuntis');
-    http.expectNone('/api/me/alerts');
     expect(TestBed.inject(Session).me()?.admin).toBe(true);
     http.verify();
   });

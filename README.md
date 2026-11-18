@@ -82,7 +82,7 @@ Alternatively, set `LEOWAY_ADMINS=username.one,username.two` in the root `.env` 
 `npm start` passes this local setting to the backend. An existing shell variable takes precedence.
 
 Log out and back in through Connect WebUntis with your normal access key to receive the new role.
-Admin accounts have access to feeds and health only; they do not have student routes or timetable data.
+Admin accounts can use their own routes and timetable data as well as the admin panel.
 The local setting does not change the production allowlist in `deploy/.env`.
 
 ### OpenAPI

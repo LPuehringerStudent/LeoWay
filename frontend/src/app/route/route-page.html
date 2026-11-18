@@ -4,9 +4,6 @@
   <h2 id="webuntis-heading">WebUntis</h2>
   @if (loading()) {
     <p role="status">Loading…</p>
-  } @else if (session.me()?.admin) {
-    <p>You are signed in as an administrator. Routes and timetable data are only available to students.</p>
-    <a class="btn" routerLink="/admin/feeds">Open admin panel</a>
   } @else if (!session.me()) {
     <p>WebUntis <strong>not connected</strong></p>
     <a class="btn" routerLink="/connect">Connect WebUntis</a>

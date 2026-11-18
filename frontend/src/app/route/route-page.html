@@ -1,4 +1,4 @@
-<div class="page-intro"><div><p class="eyebrow">Your daily journey</p><h1>Route and alerts</h1><p class="lead">Less morning rush. More peace of mind.</p></div><span class="school-badge"><span aria-hidden="true">↗</span> HTL Leonding</span></div>
+<div class="page-intro"><div><p class="eyebrow">Commute settings</p><h1>Route and alerts</h1><p class="lead">Choose your stops and set your walking times.</p></div><span class="school-badge"><span aria-hidden="true">↗</span> HTL Leonding</span></div>
 
 <section class="card webuntis-card" aria-labelledby="webuntis-heading">
   <h2 id="webuntis-heading">WebUntis</h2>
@@ -30,7 +30,7 @@
 </section>
 
 @if (!loading() && session.me()) {
-  <div class="section-heading"><div><p class="eyebrow">A better start to the day</p><h2>Your way to school</h2></div><span class="small-note">Made around your first lesson</span></div>
+  <div class="section-heading"><div><p class="eyebrow">Route settings</p><h2>Your way to school</h2></div><span class="small-note">Stops, walking times and buffer</span></div>
   @if (notice()) {<p class="success-notice" role="status">✓ {{ notice() }}</p>}
   @if (routeError()) {<div class="route-error" role="alert"><p>{{ routeError() }}</p><button type="button" (click)="loadRoutes()" [disabled]="routesLoading()">Reload routes</button></div>}
   <div class="route-workspace">
@@ -42,7 +42,7 @@
         <div class="saved-heading"><h3 id="saved-title">Saved routes <span>{{ routes().length }}</span></h3><button class="add-route" type="button" (click)="edit(null)"><span aria-hidden="true">+</span> New route</button></div>
         @if (routesLoading()) {<p class="empty-text" role="status">Loading your routes…</p>}
         @else if (!routes().length) {
-          <div class="empty-route"><span class="empty-symbol" aria-hidden="true">A <span>····</span> B</span><h4>Your first route starts here</h4><p>Choose your usual stops and walking times. We’ll keep them ready for you.</p>@if (!editor()) {<button class="add-route" type="button" (click)="edit(null)">Create a route <span aria-hidden="true">→</span></button>}</div>
+          <div class="empty-route"><span class="empty-symbol" aria-hidden="true">A <span>····</span> B</span><h4>No saved routes</h4><p>Create a route with your home stop, school stop and walking times.</p>@if (!editor()) {<button class="add-route" type="button" (click)="edit(null)">Create a route <span aria-hidden="true">→</span></button>}</div>
         }
         @for (route of routes(); track route.id) {
           <article class="saved-route" [class.is-active]="route.id === activeId()" [attr.aria-label]="'Route from ' + stop(route.homeStopId)?.name + ' to ' + stop(route.schoolStopId)?.name">
@@ -61,7 +61,7 @@
     </div>
     <aside class="route-visual" aria-label="Route preview">
       <app-route-map [home]="mapHome()" [school]="mapSchool()" />
-      <div class="journey-note"><span aria-hidden="true">◷</span><div><h3>A little time makes a big difference</h3><p>Your walking times and buffer help LeoWay choose a connection that gets you to your first lesson in time.</p></div></div>
+      <div class="journey-note"><span aria-hidden="true">◷</span><div><h3>Walking times and buffer</h3><p>Include the walk to your home stop and from the school stop to school. The buffer adds extra time before your first lesson.</p></div></div>
     </aside>
   </div>
   <app-alerts-card />

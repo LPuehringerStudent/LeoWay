@@ -86,7 +86,7 @@ export class RoutePage implements OnInit {
     this.routes.update(routes => editing ? routes.map(r => r.id === route.id ? route : r) : [...routes, route]);
     this.activeId.set(route.id);
     this.closeEditor();
-    this.notice.set(editing ? 'Your route has been updated.' : 'Your route is saved. You’re ready for the next step.');
+    this.notice.set(editing ? 'Your route has been updated.' : 'Your route has been saved.');
   }
 
   protected async remove(route: SavedRoute) {

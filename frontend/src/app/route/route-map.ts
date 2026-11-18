@@ -8,7 +8,7 @@ import { Stop } from '../core/stops-api';
     <div class="map-shell">
       <div class="map-heading"><span class="map-label">YOUR COMMUTE</span><span class="map-mode">Stop overview</span></div>
       <div class="map-canvas" #canvas role="region" aria-label="Interactive map of your selected stops. Use arrow keys to pan, plus and minus to zoom."></div>
-      <div class="map-caption"><span class="caption-mark" aria-hidden="true">↗</span><div><strong>{{ home() && school() ? 'Two stops. One less thing to worry about.' : 'Your morning, mapped out.' }}</strong><p>{{ home() && school() ? mapped() ? 'The dashed line connects your stops. It is not the bus route.' : 'Stop positions are not available yet. You can still save this route.' : 'Select your stops to see them on the map.' }}</p></div></div>
+      <div class="map-caption"><span class="caption-mark" aria-hidden="true">↗</span><div><strong>{{ home() && school() ? 'Selected stops' : 'Stop map' }}</strong><p>{{ home() && school() ? mapped() ? 'The dashed line connects your stops. It is not the bus route.' : 'Stop positions are not available yet. You can still save this route.' : 'Select your stops to see them on the map.' }}</p></div></div>
     </div>
     @if (unavailable()) { <p class="map-notice" role="status">The map is unavailable right now. You can still choose stops and save your route.</p> }
     <p class="map-help">Map tiles from OpenStreetMap. Stop locations from Linz AG. No location tracking.</p>

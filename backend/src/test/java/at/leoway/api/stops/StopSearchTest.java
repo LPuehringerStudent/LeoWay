@@ -88,8 +88,8 @@ class StopSearchTest {
     }
 
     @Test
-    @TestSecurity(user = "root", roles = Roles.ADMIN)
-    void adminCannotSearch() {
-        given().queryParam("q", "auwiesen").get("/api/stops").then().statusCode(403);
+    @TestSecurity(user = "root", roles = {Roles.ADMIN, Roles.STUDENT})
+    void adminCanSearchStopsForOwnRoutes() {
+        given().queryParam("q", "auwiesen").get("/api/stops").then().statusCode(200);
     }
 }

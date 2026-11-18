@@ -20,7 +20,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-/** A13: student A can't reach B's data, admins can't use private endpoints, deletion removes private data. */
+/** A13: users, including admins, only reach their own private records; deletion removes private data. */
 @QuarkusTest
 class OwnershipTest {
     long annaRoute;
@@ -81,11 +81,12 @@ class OwnershipTest {
     }
 
     @Test
-    @TestSecurity(user = "root", roles = Roles.ADMIN)
-    void adminSeesFeedsButNoPrivateData() {
+    @TestSecurity(user = "anna", roles = {Roles.STUDENT, Roles.ADMIN})
+    void adminSeesFeedsAndOwnDataOnly() {
         given().get("/api/admin/feeds").then().statusCode(200);
-        given().get("/api/me").then().statusCode(403);
-        given().get("/api/me/routes/" + benRoute).then().statusCode(403);
+        given().get("/api/me").then().statusCode(200);
+        given().get("/api/me/routes/" + annaRoute).then().statusCode(200);
+        given().get("/api/me/routes/" + benRoute).then().statusCode(404);
     }
 
     @Test

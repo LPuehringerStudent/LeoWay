@@ -77,7 +77,7 @@ describe('RoutePage', () => {
     http.verify();
   });
 
-  it('shows the admin link without requesting student data', async () => {
+  it('shows an admin�s own WebUntis connection like a student', async () => {
     TestBed.configureTestingModule({
       providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
     });
@@ -89,16 +89,19 @@ describe('RoutePage', () => {
     const fixture = TestBed.createComponent(RoutePage);
     fixture.detectChanges();
     http.expectOne('/api/session').flush({ username: 'test.admin', admin: true });
+    await vi.waitFor(() => {
+      http
+        .expectOne('/api/me/webuntis')
+        .flush({ connected: true, username: 'test.admin', available: true });
+      http.expectOne('/api/me/routes').flush([]);
+    });
     const page = fixture.nativeElement as HTMLElement;
     await vi.waitFor(() => {
       fixture.detectChanges();
-      expect(page.textContent).toContain('signed in as an administrator');
+      expect(page.textContent).toContain('Connected as test.admin');
     });
-    expect(page.querySelector('a[href="/admin/feeds"]')).not.toBeNull();
-    http.expectNone('/api/me/webuntis');
-    http.expectNone('/api/me/routes');
-    http.expectNone('/api/me/alerts');
-    expect(page.textContent).not.toContain('Loading…');
+    expect(page.querySelector('a[href="/connect"]')).toBeNull();
+    expect(page.textContent).not.toContain('Loading�');
     expect(TestBed.inject(Session).me()?.admin).toBe(true);
     http.verify();
   });

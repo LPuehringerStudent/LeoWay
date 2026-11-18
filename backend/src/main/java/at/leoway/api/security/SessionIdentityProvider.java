@@ -31,9 +31,9 @@ public class SessionIdentityProvider implements IdentityProvider<TrustedAuthenti
     @Override
     public Uni<SecurityIdentity> authenticate(TrustedAuthenticationRequest request, AuthenticationRequestContext context) {
         String username = request.getPrincipal();
-        return Uni.createFrom().item(QuarkusSecurityIdentity.builder()
-                .setPrincipal(new QuarkusPrincipal(username))
-                .addRole(admins.orElse(Set.of()).contains(username) ? Roles.ADMIN : Roles.STUDENT)
-                .build());
+        var identity = QuarkusSecurityIdentity.builder()
+                .setPrincipal(new QuarkusPrincipal(username)).addRole(Roles.STUDENT);
+        if (admins.orElse(Set.of()).contains(username)) identity.addRole(Roles.ADMIN);
+        return Uni.createFrom().item(identity.build());
     }
 }

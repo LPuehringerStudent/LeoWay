@@ -9,6 +9,7 @@
 .plain { margin: 0.2rem 0 0.4rem; padding-left: 1.1rem; }
 
 /* Student board */
+.board--loading { min-height: 18.5rem; }
 .board__day { font-size: 1.25rem; margin: 0 0 0.75rem; color: var(--on-night); }
 .board__date { font-weight: 400; color: var(--on-night-muted); font-size: 1rem; margin-left: 0.25rem; }
 .board__label { font-size: 0.875rem; color: var(--on-night-muted); }

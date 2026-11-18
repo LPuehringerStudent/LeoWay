@@ -6,7 +6,7 @@ import { LeaveByResult } from '../core/leave-by-api';
 import { SavedRoute } from '../core/routes-api';
 import { WebUntisStatus } from '../core/webuntis-api';
 import { HomePage, REFRESH_MS } from './home-page';
-import { dayLabel, HomeData, HomeDataService } from './home-data';
+import { dayLabel, HomeData, HomeDataService, keepLastLeaveBy } from './home-data';
 
 const lesson = (over: Partial<WebUntisStatus> = {}): WebUntisStatus => ({
   connected: true,
@@ -185,6 +185,33 @@ describe('HomePage refresh', () => {
     fixture.destroy();
     await vi.advanceTimersByTimeAsync(3 * REFRESH_MS);
     expect(load).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('keepLastLeaveBy', () => {
+  const before = new Date('2026-11-16T07:00:00+01:00');
+  const good = student(lesson(), [ROUTE], leave());
+  const failed = { ...student(lesson(), [ROUTE], null), loadedAt: new Date(2026, 10, 16, 7, 1) };
+
+  it('keeps the last result while its lesson is ahead, marked as outdated', () => {
+    const kept = keepLastLeaveBy(good, failed, before);
+    expect(kept.kind === 'student' && kept.leaveBy).toEqual(leave());
+    expect(kept.kind === 'student' && kept.outdated).toBe(true);
+    expect(kept.kind === 'student' && kept.loadedAt).toEqual(new Date(2026, 10, 15, 20, 5));
+  });
+
+  it('lets a new answer win and drops a result whose lesson has started', () => {
+    const noRoute = student(lesson(), [], nothing('NO_ROUTE'));
+    expect(keepLastLeaveBy(good, noRoute, before)).toBe(noRoute);
+    expect(keepLastLeaveBy(good, failed, new Date('2026-11-16T08:00:00+01:00'))).toBe(failed);
+    expect(keepLastLeaveBy(null, failed, before)).toBe(failed);
+  });
+
+  it('says on Home that the time could not be updated', async () => {
+    const { text, page } = await render(keepLastLeaveBy(good, failed, before));
+    expect(page.querySelector('.digits--leave')?.textContent).toBe('07:17');
+    expect(text()).toContain("Can't update right now, last update 20:05");
+    expect(text()).not.toContain('No live data yet');
   });
 });
 

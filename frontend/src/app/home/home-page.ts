@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { FeedHealth, FeedState } from '../core/feed-health';
 import { clock, LeaveByResult } from '../core/leave-by-api';
 import { TimeSourceLabel } from '../shared/time-source';
-import { dayLabel, HomeData, HomeDataService } from './home-data';
+import { dayLabel, HomeData, HomeDataService, keepLastLeaveBy } from './home-data';
 
 /** How often Home reloads while it is open and visible (#61). */
 export const REFRESH_MS = 60_000;
@@ -36,7 +36,8 @@ export class HomePage implements OnInit {
   }
 
   private async reload() {
-    this.home.set(await this.data.load());
+    const next = await this.data.load();
+    this.home.set(keepLastLeaveBy(this.home(), next));
   }
 
   /** Short line under the leave-by time; null for a plain IN_TIME. */

@@ -46,7 +46,9 @@
             <p class="board__ride">
               Line {{ l!.connection!.line }} at <time [attr.datetime]="l!.connection!.departure">{{ clock(l!.connection!.departure) }}</time>@if (l!.connection!.departure !== l!.connection!.plannedDeparture) {&ngsp;<span class="board__planned">(planned {{ clock(l!.connection!.plannedDeparture) }})</span>}, at school <time [attr.datetime]="l!.atSchool">{{ clock(l!.atSchool!) }}</time>
             </p>
-            @if (l!.source !== 'PREDICTION') {
+            @if (h.outdated) {
+              <p class="board__updated" role="status">Can't update right now, last update {{ timeOfDay(h.loadedAt) }}</p>
+            } @else if (l!.source !== 'PREDICTION') {
               <p class="board__updated">No live data yet, updated {{ timeOfDay(h.loadedAt) }}</p>
             }
           } @else {
@@ -98,5 +100,9 @@
     <p class="muted">Linz AG departures at Limesstraße and Meixnerkreuzung, checked every 30 seconds.</p>
   </section>
 } @else {
-  <p role="status" class="muted">Loading…</p>
+  <!-- About the size of the student board, so little moves when the data arrives (CLS, U01). The feed card
+       only comes with the data for the same reason. -->
+  <section class="board board--loading" aria-busy="true">
+    <p role="status" class="board__message">Loading…</p>
+  </section>
 }

@@ -1,15 +1,97 @@
-:host { display: block; position: relative; min-width: 0; }
-label { display: block; margin-bottom: .45rem; font-weight: 650; font-size: .85rem; }
-.search-wrap { display: flex; align-items: center; gap: .6rem; padding: 0 .8rem; border: 1px solid #acbac9; border-radius: .6rem; background: var(--surface); }
-.search-wrap:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; border-color: var(--accent); }
-.search-wrap > svg { flex: none; color: var(--muted); }
-input { width: 100%; min-width: 0; min-height: 3rem; border: 0; background: transparent; color: var(--text); font: inherit; font-size: .9rem; }
-input:focus-visible { outline: 0; }
-.selected { border-color: var(--ok); }
-.invalid { border-color: var(--late); }
-.check { color: var(--ok); font-weight: 700; }
-.help { min-height: 1.1rem; color: var(--muted); font-size: .7rem; margin-top: .4rem; }
-ul { position: absolute; top: 4.5rem; left: 0; right: 0; z-index: 1100; margin: 0; padding: .35rem; list-style: none; background: white; border: 1px solid var(--line); border-radius: .6rem; box-shadow: 0 8px 24px #13202e20; max-height: 16rem; overflow-y: auto; }
-li { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .8rem .6rem; cursor: pointer; border-radius: .3rem; font-size: .85rem; }
-li.active, li:hover { background: var(--prediction-bg); color: var(--accent); }
-.stop-tag { flex: none; color: var(--muted); font-size: .65rem; border: 1px solid var(--line); border-radius: .25rem; padding: .1rem .25rem; }
+:host {
+  display: block;
+  position: relative;
+  min-width: 0;
+}
+label {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-weight: 650;
+  font-size: 0.85rem;
+}
+.search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0 0.8rem;
+  border: 1px solid #acbac9;
+  border-radius: 0.6rem;
+  background: var(--surface);
+}
+.search-wrap:focus-within {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+  border-color: var(--accent);
+}
+.search-wrap > svg {
+  flex: none;
+  color: var(--muted);
+}
+input {
+  width: 100%;
+  min-width: 0;
+  min-height: 3rem;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9rem;
+}
+input:focus-visible {
+  outline: 0;
+}
+.selected {
+  border-color: var(--ok);
+}
+.invalid {
+  border-color: var(--late);
+}
+.check {
+  color: var(--ok);
+  font-weight: 700;
+}
+.help {
+  min-height: 1.1rem;
+  color: var(--muted);
+  font-size: 0.7rem;
+  margin-top: 0.4rem;
+}
+ul {
+  position: absolute;
+  top: 4.5rem;
+  left: 0;
+  right: 0;
+  z-index: 1100;
+  margin: 0;
+  padding: 0.35rem;
+  list-style: none;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+  box-shadow: 0 8px 24px #13202e20;
+  max-height: 16rem;
+  overflow-y: auto;
+}
+li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.8rem 0.6rem;
+  cursor: pointer;
+  border-radius: 0.3rem;
+  font-size: 0.85rem;
+}
+li.active,
+li:hover {
+  background: var(--prediction-bg);
+  color: var(--accent);
+}
+.stop-tag {
+  flex: none;
+  color: var(--muted);
+  font-size: 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 0.25rem;
+  padding: 0.1rem 0.25rem;
+}

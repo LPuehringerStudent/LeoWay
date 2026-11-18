@@ -10,7 +10,14 @@ import { StopPicker } from './stop-picker';
 
 const home = { id: '60501810', name: 'Linz, Auwiesen' };
 const school = { id: '60500120', name: 'Leonding, Meixnerkreuzung' };
-const saved: SavedRoute = { id: 7, homeStopId: home.id, schoolStopId: school.id, walkToStopMinutes: 5, walkToSchoolMinutes: 5, bufferMinutes: 10 };
+const saved: SavedRoute = {
+  id: 7,
+  homeStopId: home.id,
+  schoolStopId: school.id,
+  walkToStopMinutes: 5,
+  walkToSchoolMinutes: 5,
+  bufferMinutes: 10,
+};
 
 describe('RouteEditor', () => {
   const create = vi.fn();
@@ -18,11 +25,19 @@ describe('RouteEditor', () => {
   beforeEach(() => {
     create.mockReset().mockReturnValue(of(saved));
     update.mockReset().mockReturnValue(of(saved));
-    TestBed.configureTestingModule({ providers: [
-      provideRouter([]),
-      { provide: RoutesApi, useValue: { create, update } },
-      { provide: StopsApi, useValue: { get: (id: string) => id === home.id ? home : school, resolve: (id: string) => of(id === home.id ? home : school) } },
-    ] });
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([]),
+        { provide: RoutesApi, useValue: { create, update } },
+        {
+          provide: StopsApi,
+          useValue: {
+            get: (id: string) => (id === home.id ? home : school),
+            resolve: (id: string) => of(id === home.id ? home : school),
+          },
+        },
+      ],
+    });
   });
 
   function render(route: SavedRoute | null = null) {
@@ -39,7 +54,9 @@ describe('RouteEditor', () => {
       fixture.detectChanges();
     };
     const submit = async () => {
-      page.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+      page
+        .querySelector('form')!
+        .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
       await fixture.whenStable();
       fixture.detectChanges();
     };
@@ -48,8 +65,15 @@ describe('RouteEditor', () => {
 
   it('creates a route with selected ids and the suggested ten-minute buffer', async () => {
     const { choose, submit, output } = render();
-    choose(); await submit();
-    expect(create).toHaveBeenCalledWith({ homeStopId: home.id, schoolStopId: school.id, walkToStopMinutes: 5, walkToSchoolMinutes: 5, bufferMinutes: 10 });
+    choose();
+    await submit();
+    expect(create).toHaveBeenCalledWith({
+      homeStopId: home.id,
+      schoolStopId: school.id,
+      walkToStopMinutes: 5,
+      walkToSchoolMinutes: 5,
+      bufferMinutes: 10,
+    });
     expect(output).toHaveBeenCalledWith(saved);
   });
 
@@ -64,9 +88,12 @@ describe('RouteEditor', () => {
   it('rejects the same stop and out-of-range or fractional minutes', async () => {
     const { fixture, page, choose, submit } = render();
     choose();
-    (fixture.debugElement.queryAll(By.directive(StopPicker))[1].componentInstance as StopPicker).selectedChange.emit(home);
+    (
+      fixture.debugElement.queryAll(By.directive(StopPicker))[1].componentInstance as StopPicker
+    ).selectedChange.emit(home);
     const input = page.querySelector('#walk-stop') as HTMLInputElement;
-    input.value = '60.5'; input.dispatchEvent(new Event('input'));
+    input.value = '60.5';
+    input.dispatchEvent(new Event('input'));
     await submit();
     expect(create).not.toHaveBeenCalled();
     expect(page.textContent).toContain('Choose two different stops');
@@ -77,15 +104,29 @@ describe('RouteEditor', () => {
     const { submit, page } = render(saved);
     expect((page.querySelector('#home-stop') as HTMLInputElement).value).toBe(home.name);
     await submit();
-    expect(update).toHaveBeenCalledWith(7, expect.objectContaining({ homeStopId: home.id, bufferMinutes: 10 }));
+    expect(update).toHaveBeenCalledWith(
+      7,
+      expect.objectContaining({ homeStopId: home.id, bufferMinutes: 10 }),
+    );
     expect(create).not.toHaveBeenCalled();
   });
 
   it('keeps choices and shows all server validation errors', async () => {
-    create.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 400, error: { errors: ['bufferMinutes must be 0 to 30 minutes', 'homeStopId is invalid'] } })));
+    create.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 400,
+            error: { errors: ['bufferMinutes must be 0 to 30 minutes', 'homeStopId is invalid'] },
+          }),
+      ),
+    );
     const { choose, submit, page } = render();
-    choose(); await submit();
-    expect(page.querySelector('[role="alert"]')?.textContent).toContain('Extra buffer must be 0 to 30');
+    choose();
+    await submit();
+    expect(page.querySelector('[role="alert"]')?.textContent).toContain(
+      'Extra buffer must be 0 to 30',
+    );
     expect(page.querySelector('[role="alert"]')?.textContent).toContain('Home stop is invalid');
     expect((page.querySelector('#home-stop') as HTMLInputElement).value).toBe(home.name);
   });
@@ -93,7 +134,8 @@ describe('RouteEditor', () => {
   it('lets the user retry after a save failure', async () => {
     create.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 503 })));
     const { choose, submit, page, output } = render();
-    choose(); await submit();
+    choose();
+    await submit();
     expect(page.textContent).toContain('Your choices are still here');
     await submit();
     expect(output).toHaveBeenCalledWith(saved);

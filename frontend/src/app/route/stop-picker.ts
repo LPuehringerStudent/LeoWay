@@ -1,5 +1,14 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, effect, inject, input, OnInit, output, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  effect,
+  inject,
+  input,
+  OnInit,
+  output,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, map, of, Subject, switchMap, timer } from 'rxjs';
 import { Stop, StopsApi } from '../core/stops-api';
@@ -26,24 +35,43 @@ export class StopPicker implements OnInit {
   protected readonly active = signal(-1);
 
   constructor() {
-    effect(() => { const stop = this.selected(); if (stop) this.query.set(stop.name); });
+    effect(() => {
+      const stop = this.selected();
+      if (stop) this.query.set(stop.name);
+    });
   }
 
   ngOnInit() {
-    this.queries.pipe(
-      switchMap(query => query.trim().length < 2 ? of(null) : timer(350).pipe(
-        switchMap(() => this.stops.search(query)),
-        map(stops => ({ stops, message: stops.length ? '' : 'No stops found. Try a different name.' })),
-        catchError((e: unknown) => of({ stops: [], message: e instanceof HttpErrorResponse && e.status === 429
-          ? 'Search is busy. Please try again shortly.' : 'Stop search unavailable. Please try again later.' })),
-      )),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe(result => {
-      this.busy.set(false);
-      this.results.set(result?.stops ?? []);
-      this.message.set(result?.message ?? '');
-      this.active.set(result?.stops.length ? 0 : -1);
-    });
+    this.queries
+      .pipe(
+        switchMap((query) =>
+          query.trim().length < 2
+            ? of(null)
+            : timer(350).pipe(
+                switchMap(() => this.stops.search(query)),
+                map((stops) => ({
+                  stops,
+                  message: stops.length ? '' : 'No stops found. Try a different name.',
+                })),
+                catchError((e: unknown) =>
+                  of({
+                    stops: [],
+                    message:
+                      e instanceof HttpErrorResponse && e.status === 429
+                        ? 'Search is busy. Please try again shortly.'
+                        : 'Stop search unavailable. Please try again later.',
+                  }),
+                ),
+              ),
+        ),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((result) => {
+        this.busy.set(false);
+        this.results.set(result?.stops ?? []);
+        this.message.set(result?.message ?? '');
+        this.active.set(result?.stops.length ? 0 : -1);
+      });
   }
 
   protected search(value: string) {
@@ -63,12 +91,15 @@ export class StopPicker implements OnInit {
   }
 
   protected key(event: KeyboardEvent) {
-    if (event.key === 'Escape') { this.open.set(false); return; }
+    if (event.key === 'Escape') {
+      this.open.set(false);
+      return;
+    }
     const count = this.results().length;
     if ((event.key === 'ArrowDown' || event.key === 'ArrowUp') && count) {
       event.preventDefault();
       this.open.set(true);
-      this.active.update(i => (i + (event.key === 'ArrowDown' ? 1 : -1) + count) % count);
+      this.active.update((i) => (i + (event.key === 'ArrowDown' ? 1 : -1) + count) % count);
     } else if (event.key === 'Enter' && this.open() && this.active() >= 0 && count) {
       event.preventDefault();
       this.choose(this.results()[this.active()]);

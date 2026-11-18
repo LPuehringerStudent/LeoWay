@@ -145,7 +145,7 @@ flowchart TD
 | Involved roles | Student; WebUntis |
 | Triggering event | The student saves a route, or a timetable sync finds a changed first lesson. |
 
-**Standard scenario.** The student picks home and school stops and walking times; LeoWay suggests a buffer (proposed: 5 minutes) and shows the leave-by time for the latest fitting connection.
+**Standard scenario.** The student picks home and school stops and walking times; LeoWay suggests a buffer (10 minutes in the route editor) and shows the leave-by time for the latest fitting connection.
 
 **Non-standard scenario.** The first lesson is cancelled overnight: the next sync moves the leave-by time and the phone alarm (F04). If no connection fits, LeoWay shows the earliest possible arrival.
 

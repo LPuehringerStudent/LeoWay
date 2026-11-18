@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, ElementRef, inject, input, OnInit, output, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { RoutesApi, SavedRoute } from '../core/routes-api';
 import { Stop, StopsApi } from '../core/stops-api';
@@ -17,7 +18,7 @@ export interface RoutePreview {
 
 @Component({
   selector: 'app-route-editor',
-  imports: [ReactiveFormsModule, StopPicker],
+  imports: [ReactiveFormsModule, StopPicker, RouterLink],
   templateUrl: './route-editor.html',
   styleUrl: './route-editor.css',
 })

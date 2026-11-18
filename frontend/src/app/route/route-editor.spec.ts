@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { RoutesApi, SavedRoute } from '../core/routes-api';
 import { StopsApi } from '../core/stops-api';
@@ -18,6 +19,7 @@ describe('RouteEditor', () => {
     create.mockReset().mockReturnValue(of(saved));
     update.mockReset().mockReturnValue(of(saved));
     TestBed.configureTestingModule({ providers: [
+      provideRouter([]),
       { provide: RoutesApi, useValue: { create, update } },
       { provide: StopsApi, useValue: { get: (id: string) => id === home.id ? home : school, resolve: (id: string) => of(id === home.id ? home : school) } },
     ] });

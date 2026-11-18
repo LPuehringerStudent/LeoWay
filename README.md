@@ -74,7 +74,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for branches, pull requests and commit ru
 - `docs/` — project proposal, system specification, VAO Start contract and `api/openapi.yaml`
 - `deploy/` — interim server deployment and backups (see `deploy/README.md`)
 - `webuntis-spike/` — feasibility test against HTL Leonding's WebUntis
-- `linz-ag-spike/` — feasibility test against the Linz AG live departures
+- `linz-ag-spike/` — feasibility test against the Linz AG live departures and trip planner
 
 ## System specification
 
@@ -115,4 +115,6 @@ cd linz-ag-spike
 node probe.mjs                 # one snapshot of the stops near school
 node probe.mjs poll 20         # poll for 20 minutes, writes to probe-output/
 node analyse.mjs probe-output/poll-<timestamp>.jsonl
+node trip.mjs stops Meixnerkr  # stop finder: name -> stop ids
+node trip.mjs trips 20261119 0750   # home stops -> school stops, arriving by 07:50
 ```

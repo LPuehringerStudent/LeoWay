@@ -105,7 +105,7 @@ public class StopFinder {
 
     private String request(String query) throws IOException, InterruptedException {
         // anyObjFilter_sf=2: stops only, so addresses and points of interest never come back (L02)
-        String params = "outputFormat=JSON&locationServerActive=1&stateless=1&type_sf=any&anyObjFilter_sf=2"
+        String params = "outputFormat=JSON&coordOutputFormat=WGS84%5BDD.DDDDD%5D&locationServerActive=1&stateless=1&type_sf=any&anyObjFilter_sf=2"
                 + "&name_sf=" + URLEncoder.encode(query, StandardCharsets.UTF_8);
         HttpRequest req = HttpRequest.newBuilder(URI.create(baseUrl + "/XML_STOPFINDER_REQUEST?" + params))
                 .timeout(Duration.ofSeconds(10)).header("User-Agent", "LeoWay-school-project").GET().build();

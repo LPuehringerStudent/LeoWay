@@ -1,7 +1,8 @@
 import { spawn } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { existsSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { parseEnv } from 'node:util';
 
 const root = resolve(import.meta.dirname, '..');
 const frontend = resolve(root, 'frontend');
@@ -67,10 +68,12 @@ async function start() {
   const config = await run('docker', ['compose', 'config', '--format', 'json'], { capture: true });
   if (interrupted) return;
   const password = JSON.parse(config).services.db.environment.POSTGRES_PASSWORD;
+  const localSettings = parseEnv(readFileSync(envFile, 'utf8'));
   const apiEnv = {
     ...process.env,
     QUARKUS_DATASOURCE_PASSWORD: password,
     QUARKUS_PROFILE: 'local',
+    LEOWAY_ADMINS: process.env.LEOWAY_ADMINS ?? localSettings.LEOWAY_ADMINS ?? '',
   };
 
   await run('docker', ['compose', 'up', '-d', '--wait', 'db']);

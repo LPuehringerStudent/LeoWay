@@ -1,0 +1,468 @@
+{
+ "trips": [
+  {
+   "duration": "00:12",
+   "interchange": "1",
+   "legs": [
+    {
+     "mode": {
+      "number": "3",
+      "type": "4",
+      "realtime": "0",
+      "diva": {
+       "stateless": "esg:01003:E:H:f26",
+       "tripCode": "168",
+       "attrs": [
+        {
+         "name": "OperatorURL",
+         "value": "http://www.linzag.at"
+        }
+       ]
+      }
+     },
+     "points": [
+      {
+       "name": "Linz/Donau Hauptbahnhof (Tiefgeschoß)",
+       "ref": {
+        "id": "60501720",
+        "platform": "0"
+       },
+       "dateTime": {
+        "date": "19.11.2026",
+        "time": "07:09",
+        "timeSec": "07:09:00",
+        "rtDate": "19.11.2026",
+        "rtTime": "07:09",
+        "rtTimeSec": "07:09:00"
+       }
+      },
+      {
+       "name": "Leonding Meixnerkreuzung",
+       "ref": {
+        "id": "60500120",
+        "platform": "8"
+       },
+       "dateTime": {
+        "date": "19.11.2026",
+        "time": "07:18",
+        "timeSec": "07:18:00",
+        "rtDate": "19.11.2026",
+        "rtTime": "07:18",
+        "rtTimeSec": "07:18:00"
+       }
+      }
+     ]
+    },
+    {
+     "mode": {
+      "number": "19",
+      "type": "3",
+      "realtime": "0",
+      "diva": {
+       "stateless": "esg:02019:E:R:f26",
+       "tripCode": "46",
+       "attrs": [
+        {
+         "name": "OperatorURL",
+         "value": "http://www.linzag.at"
+        }
+       ]
+      }
+     },
+     "points": [
+      {
+       "name": "Leonding Meixnerkreuzung (Schleife)",
+       "ref": {
+        "id": "60500120",
+        "platform": "4"
+       },
+       "dateTime": {
+        "date": "19.11.2026",
+        "time": "07:20",
+        "timeSec": "07:20:00",
+        "rtDate": "19.11.2026",
+        "rtTime": "07:20",
+        "rtTimeSec": "07:20:00"
+       }
+      },
+      {
+       "name": "Leonding Limesstraße",
+       "ref": {
+        "id": "60501780",
+        "platform": "0"
+       },
+       "dateTime": {
+        "date": "19.11.2026",
+        "time": "07:21",
+        "timeSec": "07:21:00",
+        "rtDate": "19.11.2026",
+        "rtTime": "07:21",
+        "rtTimeSec": "07:21:00"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "duration": "00:14",
+   "interchange": "1",
+   "legs": [
+    {
+     "mode": {
+      "number": "4",
+      "type": "4",
+      "realtime": "0",
+      "diva": {
+       "stateless": "esg:01004:E:H:f26",
+       "tripCode": "226",
+       "attrs": [
+        {
+         "name": "OperatorURL",
+         "value": "http://www.linzag.at"
+        },
+        {
+         "name": "AVMSTripID",
+         "value": "4711"
+        }
+       ]
+      }
+     },
+     "points": [
+      {
+       "name": "Linz/Donau Hauptbahnhof (Tiefgeschoß)",
+       "ref": {
+        "id": "60501720",
+        "platform": "0"
+       },
+       "dateTime": {
+        "date": "19.11.2026",
+        "time": "07:16",
+        "timeSec": "07:16:00",
+        "rtDate": "19.11.2026",
+        "rtTime": "07:16",
+        "rtTimeSec": "07:16:00"
+       }
+      },
+      {
+       "name": "Leonding Meixnerkreuzung",
+       "ref": {
+        "id": "60500120",
+        "platform": "8"
+       },
+       "dateTime": {
+        "date": "19.11.2026",
+        "time": "07:25",
+        "timeSec": "07:25:00",
+        "rtDate": "19.11.2026",
+        "rtTime": "07:25",
+        "rtTimeSec": "07:25:00"
+       }
+      }
+     ]
+    },
+    {
+     "mode": {
+      "number": "191",
+      "type": "3",
+      "realtime": "0",
+      "diva": {
+       "stateless": "esg:04191:E:R:f26",
+       "tripCode": "34",
+       "attrs": [
+        {
+         "name": "OperatorURL",
+         "value": "http://www.linzag.at"
+        }
+       ]
+      }
+     },
+     "points": [
+      {
+       "name": "Leonding Meixnerkreuzung (Ehrenfellner-Str.)",
+       "ref": {
+        "id": "60500120",
+        "platform": "6"
+       },
+       "dateTime": {
+        "date": "19.11.2026",
+        "time": "07:27",
+        "timeSec": "07:27:00",
+        "rtDate": "19.11.2026",
+        "rtTime": "07:27",
+        "rtTimeSec": "07:27:00"
+       }
+      },
+      {
+       "name": "Leonding Schulzentrum Hart",
+       "ref": {
+        "id": "60502390",
+        "platform": "1"
+       },
+       "dateTime": {
+        "date": "19.11.2026",
+        "time": "07:28",
+        "timeSec": "07:28:00",
+        "rtDate": "19.11.2026",
+        "rtTime": "07:28",
+        "rtTimeSec": "07:28:00"
+       }
+      }
+     ]
+    },
+    {
+     "mode": {
+      "number": "",
+      "type": "99",
+      "realtime": "0",
+      "diva": {
+       "stateless": ":: : :",
+       "tripCode": "0",
+       "attrs": []
+      }
+     },
+     "points": [
+      {
+       "name": "Leonding Schulzentrum Hart",
+       "ref": {
+        "id": "60502390",
+        "platform": "1"
+       },
+       "dateTime": {
+        "date": "19.11.2026",
+        "time": "07:28",
+        "timeSec": "07:28:00",
+        "rtDate": "19.11.2026",
+        "rtTime": "07:28",
+        "rtTimeSec": "07:28:00"
+       }
+      },
+      {
+       "name": "Leonding Limesstraße",
+       "ref": {
+        "id": "60501780",
+        "platform": ""
+       },
+       "dateTime": {
+        "date": "19.11.2026",
+        "time": "07:30",
+        "timeSec": "07:30:00",
+        "rtDate": "19.11.2026",
+        "rtTime": "07:30",
+        "rtTimeSec": "07:30:00"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "duration": "00:12",
+   "interchange": "1",
+   "legs": [
+    {
+     "mode": {
+      "number": "3",
+      "type": "4",
+      "realtime": "0",
+      "diva": {
+       "stateless": "esg:01003:E:H:f26",
+       "tripCode": "170",
+       "attrs": [
+        {
+         "name": "OperatorURL",
+         "value": "http://www.linzag.at"
+        }
+       ]
+      }
+     },
+     "points": [
+      {
+       "name": "Linz/Donau Hauptbahnhof (Tiefgeschoß)",
+       "ref": {
+        "id": "60501720",
+        "platform": "0"
+       },
+       "dateTime": {
+        "date": "19.11.2026",
+        "time": "07:24",
+        "timeSec": "07:24:00",
+        "rtDate": "19.11.2026",
+        "rtTime": "07:24",
+        "rtTimeSec": "07:24:00"
+       }
+      },
+      {
+       "name": "Leonding Meixnerkreuzung",
+       "ref": {
+        "id": "60500120",
+        "platform": "8"
+       },
+       "dateTime": {
+        "date": "19.11.2026",
+        "time": "07:33",
+        "timeSec": "07:33:00",
+        "rtDate": "19.11.2026",
+        "rtTime": "07:33",
+        "rtTimeSec": "07:33:00"
+       }
+      }
+     ]
+    },
+    {
+     "mode": {
+      "number": "11",
+      "type": "3",
+      "realtime": "0",
+      "diva": {
+       "stateless": "esg:02011:E:R:f26",
+       "tripCode": "73",
+       "attrs": [
+        {
+         "name": "OperatorURL",
+         "value": "http://www.linzag.at"
+        }
+       ]
+      }
+     },
+     "points": [
+      {
+       "name": "Leonding Meixnerkreuzung (Schleife)",
+       "ref": {
+        "id": "60500120",
+        "platform": "4"
+       },
+       "dateTime": {
+        "date": "19.11.2026",
+        "time": "07:35",
+        "timeSec": "07:35:00",
+        "rtDate": "19.11.2026",
+        "rtTime": "07:35",
+        "rtTimeSec": "07:35:00"
+       }
+      },
+      {
+       "name": "Leonding Limesstraße",
+       "ref": {
+        "id": "60501780",
+        "platform": "0"
+       },
+       "dateTime": {
+        "date": "19.11.2026",
+        "time": "07:36",
+        "timeSec": "07:36:00",
+        "rtDate": "19.11.2026",
+        "rtTime": "07:36",
+        "rtTimeSec": "07:36:00"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "duration": "00:12",
+   "interchange": "1",
+   "legs": [
+    {
+     "mode": {
+      "number": "3",
+      "type": "4",
+      "realtime": "1",
+      "diva": {
+       "stateless": "esg:01003:E:H:f26",
+       "tripCode": "172",
+       "attrs": [
+        {
+         "name": "OperatorURL",
+         "value": "http://www.linzag.at"
+        }
+       ]
+      }
+     },
+     "points": [
+      {
+       "name": "Linz/Donau Hauptbahnhof (Tiefgeschoß)",
+       "ref": {
+        "id": "60501720",
+        "platform": "0"
+       },
+       "dateTime": {
+        "date": "19.11.2026",
+        "time": "07:39",
+        "timeSec": "07:39:00",
+        "rtDate": "19.11.2026",
+        "rtTime": "07:42",
+        "rtTimeSec": "07:42:00"
+       }
+      },
+      {
+       "name": "Leonding Meixnerkreuzung",
+       "ref": {
+        "id": "60500120",
+        "platform": "8"
+       },
+       "dateTime": {
+        "date": "19.11.2026",
+        "time": "07:48",
+        "timeSec": "07:48:00",
+        "rtDate": "19.11.2026",
+        "rtTime": "07:51",
+        "rtTimeSec": "07:51:00"
+       }
+      }
+     ]
+    },
+    {
+     "mode": {
+      "number": "19",
+      "type": "3",
+      "realtime": "1",
+      "diva": {
+       "stateless": "esg:02019:E:R:f26",
+       "tripCode": "47",
+       "attrs": [
+        {
+         "name": "OperatorURL",
+         "value": "http://www.linzag.at"
+        }
+       ]
+      }
+     },
+     "points": [
+      {
+       "name": "Leonding Meixnerkreuzung (Schleife)",
+       "ref": {
+        "id": "60500120",
+        "platform": "4"
+       },
+       "dateTime": {
+        "date": "19.11.2026",
+        "time": "07:50",
+        "timeSec": "07:50:00",
+        "rtDate": "19.11.2026",
+        "rtTime": "07:50",
+        "rtTimeSec": "07:50:00"
+       }
+      },
+      {
+       "name": "Leonding Limesstraße",
+       "ref": {
+        "id": "60501780",
+        "platform": "0"
+       },
+       "dateTime": {
+        "date": "19.11.2026",
+        "time": "07:51",
+        "timeSec": "07:51:00",
+        "rtDate": "19.11.2026",
+        "rtTime": "07:53",
+        "rtTimeSec": "07:53:00"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

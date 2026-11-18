@@ -83,6 +83,10 @@ async function start() {
   }
   if (interrupted) return;
 
+  console.log('\nWebsite: http://localhost:4200 (wait for Angular to finish compiling)');
+  console.log('API documentation: http://localhost:5080/q/swagger-ui');
+  console.log('Port 5080 serves the API; open port 4200 for the website.\n');
+
   await Promise.race([
     run('java', ['-jar', 'target/quarkus-app/quarkus-run.jar'], { cwd: backend, env: apiEnv }),
     run(process.execPath, ['node_modules/@angular/cli/bin/ng.js', 'serve'], { cwd: frontend }),

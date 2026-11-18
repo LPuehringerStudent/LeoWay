@@ -17,6 +17,11 @@ applies migrations, and launches the API and Angular. Open <http://localhost:420
 Press Ctrl+C to stop both apps. Run `docker compose down` to stop PostgreSQL and keep its data.
 If PowerShell blocks `npm.ps1`, use `npm.cmd start`.
 
+Wait for Angular to finish compiling, then open <http://localhost:4200> for the website.
+Port 5080 serves the backend API; its root URL can show "Resource not found".
+Use <http://localhost:5080/q/swagger-ui> to browse the API instead.
+Angular analytics is disabled for this workspace so the first start does not wait for a consent prompt.
+
 ### Manual startup
 
 Run these commands from the repository root in PowerShell. If `.env` already exists, use it.

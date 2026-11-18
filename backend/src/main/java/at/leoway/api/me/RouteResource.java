@@ -1,5 +1,6 @@
 package at.leoway.api.me;
 
+import at.leoway.api.Errors;
 import at.leoway.api.domain.SavedRoute;
 import at.leoway.api.security.CurrentStudent;
 import at.leoway.api.security.Roles;
@@ -11,7 +12,6 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -113,7 +113,7 @@ public class RouteResource {
 
     /** Validates everything first and reports all problems at once, so the editor can show them together. */
     private static void apply(SavedRoute route, RouteInput input) {
-        if (input == null) throw invalid(List.of("route body is missing"));
+        if (input == null) throw Errors.badRequest("route body is missing");
         List<String> errors = new ArrayList<>();
         String home = stopId(input.homeStopId(), "homeStopId", errors);
         String school = stopId(input.schoolStopId(), "schoolStopId", errors);
@@ -122,20 +122,12 @@ public class RouteResource {
         minutes(input.walkToSchoolMinutes(), "walkToSchoolMinutes", MAX_WALK_MINUTES, errors);
         int buffer = input.bufferMinutes() == null ? DEFAULT_BUFFER_MINUTES : input.bufferMinutes();
         minutes(buffer, "bufferMinutes", MAX_BUFFER_MINUTES, errors);
-        if (!errors.isEmpty()) throw invalid(errors);
+        if (!errors.isEmpty()) throw Errors.badRequest(errors);
         route.homeStopId = home;
         route.schoolStopId = school;
         route.walkToStopMinutes = input.walkToStopMinutes();
         route.walkToSchoolMinutes = input.walkToSchoolMinutes();
         route.bufferMinutes = buffer;
-    }
-
-    /** Every problem with the input, in field order. */
-    public record Errors(List<String> errors) {}
-
-    private static BadRequestException invalid(List<String> errors) {
-        return new BadRequestException(Response.status(400).type(MediaType.APPLICATION_JSON)
-                .entity(new Errors(errors)).build());
     }
 
     private static String stopId(String value, String field, List<String> errors) {

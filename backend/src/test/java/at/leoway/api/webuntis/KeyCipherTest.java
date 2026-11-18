@@ -30,6 +30,16 @@ class KeyCipherTest {
     }
 
     @Test
+    void aPurposeKeepsSecretsApart() {
+        // #62: a webhook copied into the access key column (or back) must not decrypt.
+        KeyCipher c = new KeyCipher(K1);
+        byte[] webhook = c.encrypt("123/token", 1, "alert:DISCORD");
+        assertEquals("123/token", c.decrypt(webhook, 1, "alert:DISCORD"));
+        assertThrows(IllegalStateException.class, () -> c.decrypt(webhook, 1));
+        assertThrows(IllegalStateException.class, () -> c.decrypt(c.encrypt("JBSWY3DPEHPK3PXP", 1), 1, "alert:DISCORD"));
+    }
+
+    @Test
     void rejectsShortKeys() {
         assertThrows(IllegalStateException.class, () -> new KeyCipher("c2hvcnQ="));
     }

@@ -1,0 +1,21 @@
+{
+  "parameters": [{"name": "serverID", "value": "efa10-linzag"}],
+  "stopFinder": {
+    "message": [{"name": "code", "value": "-8011"}],
+    "input": {"input": "auwiesen"},
+    "points": [
+      {"usage": "sf", "type": "any", "name": "Linz/Donau, Sportanlage Auwiesen", "anyType": "stop", "quality": "944",
+       "object": "Sportanlage Auwiesen", "mainLoc": "Linz/Donau",
+       "ref": {"id": "60502210", "gid": "at:44:41241", "place": "Linz/Donau", "coords": "14.304309,48.246869"}},
+      {"usage": "sf", "type": "any", "name": "Linz/Donau, Auwiesen", "anyType": "stop", "quality": "1000",
+       "object": "Auwiesen", "mainLoc": "Linz/Donau",
+       "ref": {"id": "60501810", "gid": "at:44:41102", "place": "Linz/Donau", "coords": "14.307999,48.248771"}},
+      {"usage": "sf", "type": "any", "name": "Linz/Donau, Auwiesenstraße 12", "anyType": "street", "quality": "990",
+       "object": "Auwiesenstraße 12", "mainLoc": "Linz/Donau",
+       "ref": {"id": "streetID:1500000123", "place": "Linz/Donau", "coords": "14.30,48.25"}},
+      {"usage": "sf", "type": "any", "name": "Linz/Donau, Tennishalle Auwiesen", "anyType": "stop", "quality": "944",
+       "object": "Tennishalle Auwiesen", "mainLoc": "Linz/Donau",
+       "ref": {"id": "60508077", "gid": "at:44:41530", "place": "Linz/Donau", "coords": "14.301559,48.245135"}}
+    ]
+  }
+}

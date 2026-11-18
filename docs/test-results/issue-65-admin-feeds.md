@@ -23,7 +23,9 @@ Local validation on 2026-11-18, branch `feat/65-admin-feed-status`.
   the already running app; packaging into `target/admin-verify` succeeded with tests skipped after that test run.
 - Frontend: unit tests cover role-based navigation, admin login destination, polling interval, manual refresh,
   component cleanup, overlapping requests, empty/loading/error states, recovery, denied access and escaped error text.
-  All 35 tests pass, including actual router navigation after logout and the late-session-response regression.
+  All 37 tests pass, including actual router navigation after logout and the late-session-response regression.
+  Admin sessions on Home and Route never call student-only APIs: Home shows its guest view, while Route
+  explains the admin role and links to the admin panel. Both paths have regression tests that retain the admin session.
 - Production Angular build succeeds. The page stylesheet is approximately 6.1 kB after compilation, above
   the 4 kB warning threshold and below the 8 kB error threshold.
 - Playwright: desktop 1280 px and mobile 360 px have no horizontal overflow. Admin is between Home and Route.

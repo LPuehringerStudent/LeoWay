@@ -21,7 +21,7 @@ export class RoutePage implements OnInit {
 
   async ngOnInit() {
     const me = await this.session.refresh();
-    if (me) {
+    if (me && !me.admin) {
       this.status.set(await firstValueFrom(this.webUntis.status()).catch(() => null));
     }
     this.loading.set(false);

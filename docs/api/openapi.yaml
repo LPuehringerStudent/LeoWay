@@ -114,6 +114,13 @@ components:
           maximum: 30
           minimum: 0
           default: 5
+    Session:
+      type: object
+      properties:
+        username:
+          type: string
+        admin:
+          type: boolean
     State:
       type: string
       enum:
@@ -409,6 +416,24 @@ paths:
       security:
       - SecurityScheme:
         - student
+  /api/session:
+    get:
+      summary: Show the current session and whether it can access administration
+      tags:
+      - Session
+      responses:
+        "200":
+          description: The authenticated session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        "401":
+          description: Not logged in
+        "403":
+          description: Not Allowed
+      security:
+      - SecurityScheme: []
   /api/session/logout:
     post:
       summary: "Log out: removes the session cookie"

@@ -32,7 +32,7 @@ export class ConnectPage {
     this.busy.set(false);
     if (result === 'ok') {
       this.accessKey = '';
-      await this.router.navigateByUrl('/route');
+      await this.router.navigateByUrl(this.session.me()?.admin ? '/admin/feeds' : '/route');
     } else {
       this.result.set(result);
     }

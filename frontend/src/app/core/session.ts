@@ -5,6 +5,7 @@ import { ApiClient } from './api-client';
 
 export interface Me {
   username: string;
+  admin?: boolean;
 }
 
 export type LoginResult = 'ok' | 'rejected' | 'unavailable';
@@ -21,7 +22,7 @@ export class Session {
 
   async refresh(): Promise<Me | null> {
     try {
-      const me = await firstValueFrom(this.api.get<Me>('/api/me'));
+      const me = await firstValueFrom(this.api.get<Me>('/api/session'));
       this.me.set(me);
       return me;
     } catch {

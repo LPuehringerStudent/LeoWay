@@ -44,6 +44,8 @@ class LoginTest {
         assertNotNull(session);
 
         given().cookie(session).get("/api/me").then().statusCode(200).body("username", equalTo(FakeWebUntis.USER));
+        given().cookie(session).get("/api/session").then().statusCode(200)
+                .body("username", equalTo(FakeWebUntis.USER)).body("admin", equalTo(false));
         QuarkusTransaction.requiringNew().run(() -> {
             Student s = Student.find("username", FakeWebUntis.USER).firstResult();
             WebUntisCredential c = WebUntisCredential.findById(s.id);
@@ -66,6 +68,8 @@ class LoginTest {
     void adminGetsFeedsButNoAccount() {
         Cookie session = login(FakeWebUntis.ADMIN, FakeWebUntis.KEY, 200);
         given().cookie(session).get("/api/admin/feeds").then().statusCode(200);
+        given().cookie(session).get("/api/session").then().statusCode(200)
+                .body("username", equalTo(FakeWebUntis.ADMIN)).body("admin", equalTo(true));
         given().cookie(session).get("/api/me").then().statusCode(403);
         assertEquals(0L, QuarkusTransaction.requiringNew().call(() -> Student.count("username", FakeWebUntis.ADMIN)));
     }
@@ -109,5 +113,10 @@ class LoginTest {
     @Test
     void reachabilityNeedsNoLogin() {
         given().get("/api/session/webuntis-reachable").then().statusCode(200).body("webUntisReachable", equalTo(true));
+    }
+
+    @Test
+    void sessionRequiresLogin() {
+        given().get("/api/session").then().statusCode(401);
     }
 }

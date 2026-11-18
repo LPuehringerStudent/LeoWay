@@ -28,6 +28,17 @@ public class SessionResource {
 
     public record Reachability(boolean webUntisReachable) {}
 
+    public record Session(String username, boolean admin) {}
+
+    @GET
+    @Authenticated
+    @Operation(summary = "Show the current session and whether it can access administration")
+    @APIResponse(responseCode = "200", description = "The authenticated session")
+    @APIResponse(responseCode = "401", description = "Not logged in")
+    public Session session() {
+        return new Session(identity.getPrincipal().getName(), identity.hasRole(Roles.ADMIN));
+    }
+
     /** After a failed login: lets the app tell "key not accepted" from "WebUntis is down". */
     @GET
     @Path("/webuntis-reachable")

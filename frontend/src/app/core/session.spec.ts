@@ -20,7 +20,7 @@ describe('Session', () => {
     expect(req.request.body).toBe('j_username=max.muster&j_password=KEY123');
     req.flush('');
     await flush();
-    http.expectOne('/api/me').flush({ username: 'max.muster' });
+    http.expectOne('/api/session').flush({ username: 'max.muster', admin: false });
     expect(await result).toBe('ok');
     expect(session.me()?.username).toBe('max.muster');
   });
@@ -32,6 +32,14 @@ describe('Session', () => {
     http.expectOne('/api/session/webuntis-reachable').flush({ webUntisReachable: true });
     expect(await result).toBe('rejected');
   });
+
+  it('recognizes an administrator without calling the student account API', async () => {
+    const result = session.refresh();
+    http.expectOne('/api/session').flush({ username: 'root.admin', admin: true });
+    expect((await result)?.admin).toBe(true);
+    http.expectNone('/api/me');
+  });
+
 
   it('reports unavailable when WebUntis is down', async () => {
     const result = session.login('max.muster', 'KEY123');

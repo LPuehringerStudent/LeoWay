@@ -27,7 +27,7 @@ export class HomeDataService {
 
   async load(): Promise<HomeData> {
     const me = await this.session.refresh();
-    if (!me) return { kind: 'guest' };
+    if (!me || me.admin) return { kind: 'guest' };
     const [webUntis, routes] = await Promise.all([
       firstValueFrom(this.webUntis.status()).catch(() => null),
       firstValueFrom(this.routesApi.list()).catch(() => null),

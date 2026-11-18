@@ -16,6 +16,24 @@
     <a class="back-link" routerLink="/">Back to Home <span aria-hidden="true">→</span></a>
   </section>
 } @else {
+  <section class="board overview" aria-labelledby="overview-title" [class.overview--attention]="stale() + down() > 0 || error()">
+    <div class="overview-top">
+      <p class="eyebrow">Network overview</p>
+      <span class="monitor-label"><span class="monitor-dot" aria-hidden="true"></span>30 s refresh</span>
+    </div>
+    <div class="overview-message" role="status" aria-live="polite">
+      <span class="overview-symbol" aria-hidden="true">{{ error() || stale() + down() > 0 ? '!' : feeds()?.length ? '✓' : '·' }}</span>
+      <h2 id="overview-title">{{ heading() }}</h2>
+    </div>
+    <p class="overview-description">{{ checkedAt() ? 'Latest reported health of your transit data sources.' : 'Connecting to the LeoWay monitoring service.' }}</p>
+    <div class="metrics" aria-label="Feed counts">
+      <div><span class="digits">{{ feeds() === null ? '—' : ok() }}</span><span>Operational</span></div>
+      <div><span class="digits">{{ feeds() === null ? '—' : stale() }}</span><span>Stale</span></div>
+      <div><span class="digits">{{ feeds() === null ? '—' : down() }}</span><span>Down</span></div>
+    </div>
+    <p class="last-checked">@if (checkedAt(); as checked) { Last checked <time [attr.datetime]="checked">{{ formatTime(checked) }}</time> · Vienna time } @else { Waiting for the first successful check }</p>
+  </section>
+
   <section class="sources" aria-labelledby="sources-title">
     <div class="sources-heading">
       <div><h2 id="sources-title">Data sources <span class="source-count">{{ feeds()?.length ?? '—' }}</span></h2><p class="muted">Updates automatically every 30 seconds.</p></div>
@@ -55,4 +73,12 @@
       <div class="card empty-state" role="status"><p>Loading feed status…</p></div>
     }
   </section>
+
+  <aside class="legend" aria-label="Understanding feed status">
+    <h2>Reading the signals</h2>
+    <p><span class="legend-dot legend-dot--ok" aria-hidden="true"></span><strong>OK</strong> The source is delivering updates.</p>
+    <p><span class="legend-dot legend-dot--stale" aria-hidden="true"></span><strong>STALE</strong> No successful update for over five minutes.</p>
+    <p><span class="legend-dot legend-dot--down" aria-hidden="true"></span><strong>DOWN</strong> The source is currently unavailable.</p>
+    <p class="legend-foot">Feed health reflects the last server report. Historical errors stay visible after a feed recovers.</p>
+  </aside>
 }

@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { catchError, exhaustMap, filter, map, merge, of, Subject, timer } from 'rxjs';
@@ -21,6 +21,17 @@ export class AdminFeedsPage implements OnInit {
   protected readonly loggedOut = signal(false);
   protected readonly error = signal(false);
   protected readonly checkedAt = signal<string | null>(null);
+  protected readonly ok = computed(() => this.feeds()?.filter(f => f.state === 'OK').length ?? 0);
+  protected readonly stale = computed(() => this.feeds()?.filter(f => f.state === 'STALE').length ?? 0);
+  protected readonly down = computed(() => this.feeds()?.filter(f => f.state === 'DOWN').length ?? 0);
+  protected readonly heading = computed(() => {
+    if (this.error()) return this.feeds() ? 'Status may be out of date' : 'Feed status unavailable';
+    const feeds = this.feeds();
+    if (feeds === null) return 'Checking data sources';
+    if (!feeds.length) return 'No feeds reporting yet';
+    const issues = this.stale() + this.down();
+    return issues ? `${issues} ${issues === 1 ? 'feed needs' : 'feeds need'} attention` : 'All feeds operational';
+  });
 
   ngOnInit() {
     merge(timer(0, 30_000), this.requests).pipe(

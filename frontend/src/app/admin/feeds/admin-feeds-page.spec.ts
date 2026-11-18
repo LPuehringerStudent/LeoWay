@@ -27,6 +27,7 @@ describe('AdminFeedsPage', () => {
 
   it('shows a semantic feed table, explicit status text and Vienna timestamps', async () => {
     const { page, text } = await render();
+    expect(text()).toContain('All feeds operational');
     expect(text()).toContain('Linz AG');
     expect(text()).toContain('09:00:00');
     expect(text()).toContain('None recorded');
@@ -66,8 +67,10 @@ describe('AdminFeedsPage', () => {
     fixture.detectChanges();
     expect(text()).toContain('Showing previously loaded data');
     expect(text()).toContain('Linz AG');
+    expect(text()).toContain('Status may be out of date');
     await vi.advanceTimersByTimeAsync(30_000);
     fixture.detectChanges();
+    expect(text()).toContain('All feeds operational');
     expect(text()).not.toContain('Showing previously loaded data');
   });
 
@@ -86,6 +89,7 @@ describe('AdminFeedsPage', () => {
       { ...feed, feedId: 'other', state: 'DOWN', lastSuccessAt: null },
     ]));
     const { page, text } = await render();
+    expect(text()).toContain('2 feeds need attention');
     expect(text()).toContain('STALE');
     expect(text()).toContain('DOWN');
     expect(text()).toContain('Never received');
@@ -97,6 +101,7 @@ describe('AdminFeedsPage', () => {
   it('distinguishes an empty report from a failed initial request', async () => {
     list.mockReturnValue(of([]));
     const { fixture, text } = await render();
+    expect(text()).toContain('No feeds reporting yet');
     list.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 503 })));
     await vi.advanceTimersByTimeAsync(30_000);
     fixture.detectChanges();

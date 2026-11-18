@@ -5,6 +5,22 @@
 .eyebrow span { margin: 0 0.4rem; color: var(--muted); }
 h1 { font-family: var(--display); font-size: 2rem; margin-bottom: 0.5rem; }
 .lead { margin: 0; font-size: 0.9rem; }
+.overview { position: relative; overflow: hidden; padding: 1.25rem; border: 1px solid var(--night-line); }
+.overview--attention { border-color: var(--amber); }
+.overview::after { content: ''; position: absolute; width: 10rem; height: 10rem; right: -5rem; top: -5rem; border: 1px solid var(--night-line); border-radius: 50%; pointer-events: none; box-shadow: 0 0 0 1.6rem #ffffff03, 0 0 0 3.2rem #ffffff03; }
+.overview-top { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; color: var(--on-night-muted); }
+.monitor-label { display: flex; gap: 0.35rem; align-items: center; font-size: 0.7rem; white-space: nowrap; }
+.monitor-dot { width: 0.35rem; height: 0.35rem; background: var(--amber); border-radius: 50%; }
+.overview-message { display: flex; align-items: center; gap: 0.6rem; margin: 1.1rem 0 0.45rem; }
+.overview-message h2 { font-family: var(--display); font-size: 1.45rem; line-height: 1.2; }
+.overview-symbol { display: grid; place-items: center; flex-shrink: 0; width: 1.65rem; height: 1.65rem; border: 1px solid var(--on-night-muted); border-radius: 50%; color: var(--amber); font-weight: 700; }
+.overview-description { color: var(--on-night-muted); font-size: 0.8rem; }
+.metrics { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 1.3rem; padding: 1rem 0; border-top: 1px solid var(--night-line); border-bottom: 1px solid var(--night-line); }
+.metrics > div { display: flex; flex-direction: column; gap: 0.35rem; }
+.metrics > div + div { padding-left: 1rem; border-left: 1px solid var(--night-line); }
+.metrics .digits { font-size: 2rem; }
+.metrics div > span:last-child { font-size: 0.7rem; color: var(--on-night-muted); }
+.last-checked { margin-top: 0.75rem; font-size: 0.68rem; color: var(--on-night-muted); }
 .sources-heading { display: flex; justify-content: space-between; align-items: center; gap: 0.65rem; margin-bottom: 0.8rem; }
 .sources-heading h2 { display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.15rem; }
 .sources-heading .muted { font-size: 0.72rem; }
@@ -31,6 +47,15 @@ time { font-variant-numeric: tabular-nums; }
 .notice { padding: 0.8rem; margin-bottom: 0.8rem; border: 1px solid #cfac5f; border-radius: 0.5rem; color: #674000; background: #fff4d9; font-size: 0.8rem; }
 .empty-state { padding: 1.3rem; color: var(--muted); font-size: 0.85rem; }
 .empty-state h3 { margin: 0; color: var(--text); font-size: 1rem; }
+.legend { display: flex; flex-direction: column; gap: 0.6rem; border-top: 1px solid var(--line); padding: 1rem 0 0.25rem; }
+.legend h2 { font-size: 0.8rem; margin-bottom: 0.15rem; }
+.legend p { display: flex; align-items: baseline; gap: 0.4rem; font-size: 0.72rem; color: var(--muted); }
+.legend strong { min-width: 2.8rem; color: var(--text); font-size: 0.65rem; }
+.legend-dot { flex-shrink: 0; width: 0.4rem; height: 0.4rem; border-radius: 50%; }
+.legend-dot--ok { background: var(--ok); }
+.legend-dot--stale { background: #926000; }
+.legend-dot--down { background: var(--late); }
+.legend .legend-foot { display: block; margin-top: 0.25rem; font-size: 0.68rem; }
 .access-card { align-items: flex-start; gap: 0.7rem; padding: 1.5rem; }
 .access-icon { display: grid; place-items: center; height: 2.5rem; width: 2.5rem; border-radius: 0.65rem; background: var(--page); color: var(--accent); font-size: 1.5rem; }
 .access-card .eyebrow { color: var(--muted); }
@@ -48,4 +73,5 @@ time { font-variant-numeric: tabular-nums; }
   .cell-note { display: inline; margin-left: 0.5rem; }
   .feed-table td + td { border-top: 1px solid #edf0f4; }
   .feed-table tbody tr + tr { border-top: 3px solid var(--line); }
+  .overview { padding: 1rem; }
 }

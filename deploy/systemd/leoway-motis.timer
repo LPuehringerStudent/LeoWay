@@ -1,0 +1,11 @@
+[Unit]
+Description=Nightly LeoWay MOTIS data update
+
+[Timer]
+# After the backup (02:30) and well before school-day mornings.
+OnCalendar=*-*-* 03:15:00 Europe/Vienna
+Persistent=true
+RandomizedDelaySec=10m
+
+[Install]
+WantedBy=timers.target

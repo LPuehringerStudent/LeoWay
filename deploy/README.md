@@ -21,7 +21,7 @@ Availability depends on home power and internet. Outages show up as gaps in the 
 ## First setup on a new host
 
 ```sh
-apt-get install -y docker.io docker-compose age rsync git curl   # curl: backup heartbeat
+apt-get install -y docker.io docker-compose age rsync git curl osmium-tool   # curl: heartbeat, osmium: MOTIS map
 mkdir -p /opt/leoway && cd /opt/leoway
 git clone https://github.com/LPuehringerStudent/LeoWay.git repo && cp -r repo/deploy . && cd deploy
 cp .env.example .env && chmod 600 .env   # fill in passwords and keys (see comments in the file)
@@ -97,12 +97,61 @@ Flyway applies new migrations when the backend starts. Roll back by setting `LEO
 | `db` | PostgreSQL 17 | `127.0.0.1:5432` in the container only |
 | `backend` | Quarkus API, migrations at start | compose network only |
 | `web` | Angular app in nginx, proxies `/api` and `/health/live` | `http://192.168.178.11:8080` on the LAN |
+| `motis` | MOTIS trip planner on the MVO timetables (#104), not used by the backend yet | compose network only |
 
 Uptime Kuma checks `http://192.168.178.11:8080/api/health/ready` (database included).
 
 A second Kuma HTTP monitor on `http://192.168.178.11:8080/api/health/feeds` alerts the team when a feed stops working
 (F09). It answers 503 when a feed is `STALE` or `DOWN`, or has no status yet. Give the monitor at least one retry, because
 a feed has no status for a moment on a brand-new database. `/api/admin/feeds` has the error details.
+
+## MOTIS trip planner (#104)
+
+MOTIS plans trips on the free MVO GTFS timetables instead of VAO (#93). It runs as the `motis` service from the
+official image `ghcr.io/motis-project/motis` (version pinned in `MOTIS_VERSION`) and reads its data from
+`MOTIS_DIR` (default `/opt/leoway/motis`), read-only.
+
+`motis-update.sh` keeps the data fresh. `leoway-motis.timer` runs it every night at 03:15 Vienna time, after the
+backup. Each run:
+1. downloads the MVO GTFS data sets rail (66), Linz AG (69) and Upper Austria (77) for this timetable year, and
+   for the next one once MVO publishes it (timetable change in mid-December)
+2. refreshes the street map once a week: Geofabrik Austria, cropped to Upper Austria with `osmium`
+3. imports into a new folder `data-<time>` in its own container (about 1 minute; at most 3 cores and 4 GB, peak
+   about 2.1 GB)
+4. points `current` at it, restarts `motis` (a few seconds without answers), and checks the health and a test trip
+   Linz Hauptbahnhof → Limesstraße
+5. if the check fails, points `current` back at the old data and restarts again
+
+A failed download or import changes nothing. Results go to `AUTO_DEPLOY_NOTIFY_URL` if set, otherwise to the journal
+(`journalctl -u leoway-motis`). The data before the current one stays for a manual rollback
+(`ln -sfn data-<older> current && docker compose up -d --force-recreate motis`). Disk use: about 2 GB
+(two data folders of ~0.8 GB, the GTFS zips and the map).
+
+App deploys (`auto-deploy.sh`) only start `db`, `backend` and `web`, so a MOTIS problem never rolls back an app
+deploy.
+
+Setup, once:
+1. Create a free account on [data.mobilitaetsverbuende.at](https://data.mobilitaetsverbuende.at) and accept the
+   terms of data sets 66, 69 and 77 (otherwise downloads answer HTTP 451). Accept them again for each new
+   timetable year.
+2. Put `MVO_USER` and `MVO_PASSWORD` into `.env`. The password goes to MVO through stdin, never on a command line.
+3. Then:
+
+```sh
+rsync -a --exclude .env deploy/ leoway:/opt/leoway/deploy/
+ssh leoway 'apt-get install -y osmium-tool && cd /opt/leoway/deploy && ./motis-update.sh'
+ssh leoway 'cp /opt/leoway/deploy/systemd/leoway-motis.* /etc/systemd/system/ \
+  && systemctl daemon-reload && systemctl enable --now leoway-motis.timer'
+```
+
+Check it from inside the compose network:
+
+```sh
+docker compose exec motis wget -qO- 'http://127.0.0.1:8080/api/v1/geocode?text=Limesstrasse' | head -c 300
+```
+
+Licence: the MVO data must be credited ("Data source: Mobilitätsverbünde Österreich OG"). The credit in the app
+comes with the backend switch to MOTIS (#93 follow-ups).
 
 ## Backup and restore
 

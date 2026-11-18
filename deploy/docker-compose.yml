@@ -56,5 +56,25 @@ services:
     ports:
       - "${LEOWAY_HTTP_PORT:-8080}:80"
 
+  # Trip planner on the free MVO timetables (#93, #104). Not used by the backend yet. The data comes from
+  # motis-update.sh (nightly, leoway-motis.timer): it imports into a new folder under MOTIS_DIR and points
+  # "current" at it. Until the first import ran, this container restarts; app deploys don't wait for it.
+  motis:
+    image: ghcr.io/motis-project/motis:${MOTIS_VERSION:-2.11.4}
+    restart: unless-stopped
+    user: "${MOTIS_UID:-10093}:${MOTIS_UID:-10093}"
+    command: ["/motis", "server", "-d", "/data/current"]
+    volumes:
+      - ${MOTIS_DIR:-/opt/leoway/motis}:/data:ro
+    # Server needs 0.2-0.3 GB on CT 104 (#93); the import runs in its own container.
+    mem_limit: 1g
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/api/v1/geocode?text=Limesstrasse"]
+      interval: 30s
+      timeout: 5s
+      start_period: 60s
+      retries: 3
+    # No port: only the compose network (later the backend) talks to it.
+
 volumes:
   db-data:

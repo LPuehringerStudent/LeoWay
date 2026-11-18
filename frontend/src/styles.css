@@ -1,5 +1,3 @@
-@import 'leaflet/dist/leaflet.css';
-
 /*
  * LeoWay look: quiet white cards on platform grey, one dark departure board per screen with amber digits
  * like the displays at Linz AG stops. Colours meet WCAG 2.1 AA contrast (U05).
@@ -88,8 +86,3 @@ p { margin: 0; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 
-.commute-pin span { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50% 50% 50% 4px; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 3px 12px #102b4740; background: var(--night); color: white; font: 700 14px var(--display); }
-.commute-pin b { transform: rotate(45deg); }
-.commute-pin--b span { background: var(--amber); color: var(--night); }
-.leaflet-top.leaflet-right { top: 3.25rem; }
-.leaflet-container { font-family: inherit; }

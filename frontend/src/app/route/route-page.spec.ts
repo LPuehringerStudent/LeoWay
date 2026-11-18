@@ -12,6 +12,24 @@ import { Stop } from '../core/stops-api';
 class MapStub { readonly home = input<Stop | null>(null); readonly school = input<Stop | null>(null); }
 
 describe('RoutePage', () => {
+  it('shows a reconnect message after a 403 from private endpoints', async () => {
+    TestBed.configureTestingModule({ providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()] });
+    TestBed.overrideComponent(RoutePage, { remove: { imports: [RouteMap] }, add: { imports: [MapStub] } });
+    const http = TestBed.inject(HttpTestingController);
+    const fixture = TestBed.createComponent(RoutePage);
+    fixture.detectChanges();
+    http.expectOne('/api/session').flush({ username: 'student', admin: false });
+    await vi.waitFor(() => {
+      http.expectOne('/api/me/webuntis').flush(null, { status: 403, statusText: 'Forbidden' });
+      http.expectOne('/api/me/routes').flush(null, { status: 403, statusText: 'Forbidden' });
+    });
+    const page = fixture.nativeElement as HTMLElement;
+    await vi.waitFor(() => { fixture.detectChanges(); expect(page.textContent).toContain('Please log out and reconnect WebUntis'); });
+    expect(page.querySelector('a[href="/connect"]')).not.toBeNull();
+    expect(page.textContent).not.toContain('could not be loaded');
+    http.verify();
+  });
+
   it('shows the admin link without requesting student data', async () => {
     TestBed.configureTestingModule({ providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()] });
     TestBed.overrideComponent(RoutePage, { remove: { imports: [RouteMap] }, add: { imports: [MapStub] } });
@@ -27,7 +45,7 @@ describe('RoutePage', () => {
     expect(page.querySelector('a[href="/admin/feeds"]')).not.toBeNull();
     http.expectNone('/api/me/webuntis');
     http.expectNone('/api/me/routes');
-    expect(page.textContent).not.toContain('Loadingâ€¦');
+    expect(page.textContent).not.toContain('Loading…');
     expect(TestBed.inject(Session).me()?.admin).toBe(true);
     http.verify();
   });

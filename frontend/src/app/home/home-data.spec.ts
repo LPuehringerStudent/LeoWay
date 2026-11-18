@@ -5,6 +5,19 @@ import { Session } from '../core/session';
 import { HomeDataService } from './home-data';
 
 describe('HomeDataService', () => {
+  it('asks the user to reconnect when student endpoints return 403', async () => {
+    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    const http = TestBed.inject(HttpTestingController);
+    const result = TestBed.inject(HomeDataService).load();
+    http.expectOne('/api/session').flush({ username: 'student', admin: false });
+    await vi.waitFor(() => {
+      http.expectOne('/api/me/webuntis').flush(null, { status: 403, statusText: 'Forbidden' });
+      http.expectOne('/api/me/routes').flush(null, { status: 403, statusText: 'Forbidden' });
+    });
+    expect(await result).toEqual({ kind: 'student', username: 'student', webUntis: null, routes: null, reconnectRequired: true });
+    http.verify();
+  });
+
   it('shows the guest view for an admin without requesting student data', async () => {
     TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
     const http = TestBed.inject(HttpTestingController);

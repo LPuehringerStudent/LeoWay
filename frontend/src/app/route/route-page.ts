@@ -9,6 +9,8 @@ import { RoutesApi, SavedRoute } from '../core/routes-api';
 import { Stop, StopsApi } from '../core/stops-api';
 import { RouteEditor, RoutePreview } from './route-editor';
 import { RouteMap } from './route-map';
+import { HttpErrorResponse } from '@angular/common/http';
+import { RECONNECT_REQUIRED } from '../core/session-errors';
 
 /** Route and alerts: WebUntis (F01), saved routes and map (#60), alert channels (#62, F04). */
 @Component({
@@ -27,6 +29,8 @@ export class RoutePage implements OnInit {
 
   protected readonly status = signal<WebUntisStatus | null>(null);
   protected readonly loading = signal(true);
+  protected readonly reconnectRequired = signal(false);
+  protected readonly reconnectMessage = RECONNECT_REQUIRED;
   protected readonly routes = signal<SavedRoute[]>([]);
   protected readonly routesLoading = signal(false);
   protected readonly routeError = signal('');
@@ -45,7 +49,10 @@ export class RoutePage implements OnInit {
     const me = await this.session.refresh();
     if (me && !me.admin) {
       await Promise.all([
-        firstValueFrom(this.webUntis.status()).then(status => this.status.set(status)).catch(() => this.status.set(null)),
+        firstValueFrom(this.webUntis.status()).then(status => this.status.set(status)).catch(error => {
+          this.status.set(null);
+          if (error instanceof HttpErrorResponse && error.status === 403) this.reconnectRequired.set(true);
+        }),
         this.loadRoutes(),
       ]);
     }
@@ -63,7 +70,12 @@ export class RoutePage implements OnInit {
         this.stops.resolve(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
       }
       if (!routes.length) this.edit(null);
-    } catch { this.routeError.set('Your saved routes could not be loaded. Please try again.'); }
+    } catch (error) {
+      if (error instanceof HttpErrorResponse && error.status === 403) {
+        this.reconnectRequired.set(true);
+        this.routeError.set(RECONNECT_REQUIRED);
+      } else this.routeError.set('Your saved routes could not be loaded. Please try again.');
+    }
     finally { this.routesLoading.set(false); }
   }
 

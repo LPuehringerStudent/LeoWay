@@ -1,15 +1,18 @@
-<div class="page-intro"><div><p class="eyebrow">Commute settings</p><h1>Route and alerts</h1><p class="lead">Choose your stops and set your walking times.</p></div><span class="school-badge"><span aria-hidden="true">↗</span> HTL Leonding</span></div>
+<div class="page-intro"><div><p class="eyebrow">Commute settings</p><h1>Route and alerts</h1><p class="lead">Choose your stops and set your walking times.</p></div><span class="school-badge"><span aria-hidden="true">â†—</span> HTL Leonding</span></div>
 
 <section class="card webuntis-card" aria-labelledby="webuntis-heading">
   <h2 id="webuntis-heading">WebUntis</h2>
   @if (loading()) {
-    <p role="status">Loading…</p>
+    <p role="status">Loadingâ€¦</p>
   } @else if (session.me()?.admin) {
     <p>Route settings are available to student accounts. You are signed in as an administrator.</p>
     <a class="btn" routerLink="/admin/feeds">Open admin panel</a>
   } @else if (!session.me()) {
     <p>WebUntis <strong>not connected</strong></p>
     <a class="btn" routerLink="/connect">Connect WebUntis</a>
+  } @else if (reconnectRequired()) {
+    <p class="error" role="alert">{{ reconnectMessage }}</p>
+    <a class="btn" routerLink="/connect">Reconnect WebUntis</a>
   } @else if (status(); as s) {
     @if (s.connected && s.needsReconnect) {
       <p class="error" role="alert">WebUntis no longer accepts your access key. Log in again to reconnect.</p>
@@ -34,7 +37,7 @@
 
 @if (!loading() && session.me() && !session.me()?.admin) {
   <div class="section-heading"><div><p class="eyebrow">Route settings</p><h2>Your way to school</h2></div><span class="small-note">Stops, walking times and buffer</span></div>
-  @if (notice()) {<p class="success-notice" role="status">✓ {{ notice() }}</p>}
+  @if (notice()) {<p class="success-notice" role="status">âœ“ {{ notice() }}</p>}
   @if (routeError()) {<div class="route-error" role="alert"><p>{{ routeError() }}</p><button type="button" (click)="loadRoutes()" [disabled]="routesLoading()">Reload routes</button></div>}
   <div class="route-workspace">
     <div class="route-controls">
@@ -43,9 +46,9 @@
       }
       <section class="saved-routes" aria-labelledby="saved-title">
         <div class="saved-heading"><h3 id="saved-title">Saved routes <span>{{ routes().length }}</span></h3><button class="add-route" type="button" (click)="edit(null)"><span aria-hidden="true">+</span> New route</button></div>
-        @if (routesLoading()) {<p class="empty-text" role="status">Loading your routes…</p>}
+        @if (routesLoading()) {<p class="empty-text" role="status">Loading your routesâ€¦</p>}
         @else if (!routes().length) {
-          <div class="empty-route"><span class="empty-symbol" aria-hidden="true">A <span>····</span> B</span><h4>No saved routes</h4><p>Create a route with your home stop, school stop and walking times.</p>@if (!editor()) {<button class="add-route" type="button" (click)="edit(null)">Create a route <span aria-hidden="true">→</span></button>}</div>
+          <div class="empty-route"><span class="empty-symbol" aria-hidden="true">A <span>Â·Â·Â·Â·</span> B</span><h4>No saved routes</h4><p>Create a route with your home stop, school stop and walking times.</p>@if (!editor()) {<button class="add-route" type="button" (click)="edit(null)">Create a route <span aria-hidden="true">â†’</span></button>}</div>
         }
         @for (route of routes(); track route.id) {
           <article class="saved-route" [class.is-active]="route.id === activeId()" [attr.aria-label]="'Route from ' + stop(route.homeStopId)?.name + ' to ' + stop(route.schoolStopId)?.name">
@@ -56,15 +59,15 @@
               <span class="route-stop"><span class="mini-pin school" aria-hidden="true">B</span><strong>{{ stop(route.schoolStopId)?.name }}</strong></span>
               <span class="route-meta"><span>{{ route.walkToStopMinutes + route.walkToSchoolMinutes }} min walking</span><span>{{ route.bufferMinutes }} min buffer</span></span>
             </button>
-            <div class="route-actions"><button type="button" (click)="edit(route)" [attr.aria-label]="'Edit route from ' + stop(route.homeStopId)?.name">Edit route <span aria-hidden="true">↗</span></button><button class="delete-route" type="button" (click)="deleteId.set(route.id)" [attr.aria-label]="'Delete route from ' + stop(route.homeStopId)?.name">Delete</button></div>
-            @if (deleteId() === route.id) {<div class="delete-confirm" role="group" aria-label="Confirm route deletion"><p>Delete this saved route?</p><div><button class="confirm-delete" type="button" (click)="remove(route)" [disabled]="deleting()">{{ deleting() ? 'Deleting…' : 'Yes, delete route' }}</button><button type="button" (click)="deleteId.set(null)" [disabled]="deleting()">Keep route</button></div></div>}
+            <div class="route-actions"><button type="button" (click)="edit(route)" [attr.aria-label]="'Edit route from ' + stop(route.homeStopId)?.name">Edit route <span aria-hidden="true">â†—</span></button><button class="delete-route" type="button" (click)="deleteId.set(route.id)" [attr.aria-label]="'Delete route from ' + stop(route.homeStopId)?.name">Delete</button></div>
+            @if (deleteId() === route.id) {<div class="delete-confirm" role="group" aria-label="Confirm route deletion"><p>Delete this saved route?</p><div><button class="confirm-delete" type="button" (click)="remove(route)" [disabled]="deleting()">{{ deleting() ? 'Deletingâ€¦' : 'Yes, delete route' }}</button><button type="button" (click)="deleteId.set(null)" [disabled]="deleting()">Keep route</button></div></div>}
           </article>
         }
       </section>
     </div>
     <aside class="route-visual" aria-label="Route preview">
       <app-route-map [home]="mapHome()" [school]="mapSchool()" />
-      <div class="journey-note"><span aria-hidden="true">◷</span><div><h3>Walking times and buffer</h3><p>Include the walk to your home stop and from the school stop to school. The buffer adds extra time before your first lesson.</p></div></div>
+      <div class="journey-note"><span aria-hidden="true">â—·</span><div><h3>Walking times and buffer</h3><p>Include the walk to your home stop and from the school stop to school. The buffer adds extra time before your first lesson.</p></div></div>
     </aside>
   </div>
   <app-alerts-card />

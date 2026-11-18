@@ -70,6 +70,13 @@ async function render(data: HomeData) {
 }
 
 describe('HomePage', () => {
+  it('shows a reconnect message instead of generic load errors after a 403', async () => {
+    const { page, text } = await render({ kind: 'student', username: 'student', webUntis: null, routes: null, reconnectRequired: true });
+    expect(text()).toContain('Please log out and reconnect WebUntis');
+    expect(text()).not.toContain('could not be loaded');
+    expect(page.querySelector('a[href="/connect"]')).not.toBeNull();
+  });
+
   it('invites a guest to connect WebUntis and shows no times', async () => {
     const { page, text } = await render({ kind: 'guest' });
     expect(text()).toContain('Know when to leave for school');

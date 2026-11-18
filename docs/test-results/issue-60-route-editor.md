@@ -18,10 +18,10 @@ Validated locally on 2026-11-18, branch `feat/60-route-editor`.
 
 ## Checks
 
-- **53 frontend tests pass**, covering the form, keyboard picker, debounce, stale results, Retry-After,
+- **68 frontend tests pass**, covering the form, keyboard picker, debounce, stale results, Retry-After,
   create/update requests, validation, failed-save retry, delete confirmation and delete retry.
-- **155 backend tests pass**, including admin login and ownership, optional/malformed coordinates, stop filtering
-  and requesting WGS84 coordinates. Full `mvn verify` succeeds with packaging in `target/route-verify` to avoid
+- **183 backend tests pass**, including admin login and ownership, optional/malformed coordinates, stop filtering
+  and requesting WGS84 coordinates. Full `mvn verify` succeeds with packaging in `target/merge-verify` to avoid
   Windows file locks from the already running app. OpenAPI was regenerated into `docs/api`.
 - Production frontend build passes. Existing admin CSS and the route stylesheet exceed the 4 kB warning
   threshold but remain below the 8 kB error threshold. Leaflet 1.9.4 also has the expected CommonJS warning;
@@ -57,7 +57,7 @@ Time tracking and product owner acceptance remain separate sprint requirements.
 
 - Privacy information names OpenStreetMap and Linz AG and explains IP/map-area and stop-search sharing.
   The editor links to that information.
-- The suggested buffer is 10 minutes in the UI, API, OpenAPI schema, entity and database default. Migration V7
+- The suggested buffer is 10 minutes in the UI, API, OpenAPI schema, entity and database default. Migration V8
   changes future inserts only; existing students' saved values are unchanged.
 - Stop-id resolution uses one shared queue with duplicate requests shared. Tests cover four distinct stops,
   duplicate ids and continuing after a failed lookup; a production-build browser check used six routes and
@@ -67,3 +67,7 @@ Time tracking and product owner acceptance remain separate sprint requirements.
   only when the map opens. The initial stylesheet is back to 2.21 kB; a production browser check verified both
   lazy assets and Leaflet's CommonJS/default-export compatibility.
 - Prettier formats the route files. The keyed editor loop explains why it recreates the editor.
+- Merged main's Home leave-by times (#100) and Discord alerts (#102). A route-page integration test checks
+  that the route editor and real Discord alerts card load together. Home's leave-by tests remain in place.
+- Renamed the buffer migration to V8 so main's V7 alert-channel migration remains unchanged. A fresh test
+  database successfully applies all eight migrations.

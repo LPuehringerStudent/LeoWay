@@ -4,15 +4,15 @@ import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { Session } from '../core/session';
 import { WebUntisApi, WebUntisStatus } from '../core/webuntis-api';
-import { AlertsCard } from './alerts-card';
 import { RoutesApi, SavedRoute } from '../core/routes-api';
 import { Stop, StopsApi } from '../core/stops-api';
 import { RouteEditor, RoutePreview } from './route-editor';
 import { RouteMap } from './route-map';
+import { AlertsCard } from './alerts-card';
 import { HttpErrorResponse } from '@angular/common/http';
 import { RECONNECT_REQUIRED } from '../core/session-errors';
 
-/** Route and alerts: WebUntis (F01), saved routes and map (#60), alert channels (#62, F04). */
+/** Students' own saved routes and WebUntis connection. */
 @Component({
   selector: 'app-route-page',
   imports: [RouterLink, RouteEditor, RouteMap, AlertsCard],

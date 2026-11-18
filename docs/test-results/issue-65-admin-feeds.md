@@ -2,8 +2,8 @@
 
 Local validation on 2026-11-18, branch `feat/65-admin-feed-status`.
 
-This records the initial #65 checks. The later #60 work allows admins to use their own student features too;
-see `issue-60-route-editor.md` for the updated role model and current validation.
+This records the initial #65 checks. The route editor keeps the existing admin-only boundaries;
+any student-feature access for admins is a separate security proposal requiring team/PO approval.
 
 ## Implementation
 

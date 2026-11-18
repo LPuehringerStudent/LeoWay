@@ -1,4 +1,4 @@
-import { afterNextRender, Component, DestroyRef, effect, ElementRef, inject, input, signal, viewChild } from '@angular/core';
+import { afterNextRender, Component, computed, DestroyRef, effect, ElementRef, inject, input, signal, viewChild } from '@angular/core';
 import type * as Leaflet from 'leaflet';
 import { Stop } from '../core/stops-api';
 
@@ -8,7 +8,7 @@ import { Stop } from '../core/stops-api';
     <div class="map-shell">
       <div class="map-heading"><span class="map-label">YOUR COMMUTE</span><span class="map-mode">Stop overview</span></div>
       <div class="map-canvas" #canvas role="region" aria-label="Interactive map of your selected stops. Use arrow keys to pan, plus and minus to zoom."></div>
-      <div class="map-caption"><span class="caption-mark" aria-hidden="true">↗</span><div><strong>{{ home() && school() ? 'Two stops. One less thing to worry about.' : 'Your morning, mapped out.' }}</strong><p>{{ home() && school() ? 'The dashed line connects your stops. It is not the bus route.' : 'Select your stops to see them on the map.' }}</p></div></div>
+      <div class="map-caption"><span class="caption-mark" aria-hidden="true">↗</span><div><strong>{{ home() && school() ? 'Two stops. One less thing to worry about.' : 'Your morning, mapped out.' }}</strong><p>{{ home() && school() ? mapped() ? 'The dashed line connects your stops. It is not the bus route.' : 'Stop positions are not available yet. You can still save this route.' : 'Select your stops to see them on the map.' }}</p></div></div>
     </div>
     @if (unavailable()) { <p class="map-notice" role="status">The map is unavailable right now. You can still choose stops and save your route.</p> }
     <p class="map-help">Map tiles from OpenStreetMap. Stop locations from Linz AG. No location tracking.</p>
@@ -37,6 +37,7 @@ export class RouteMap {
   private readonly destroyRef = inject(DestroyRef);
   protected readonly unavailable = signal(false);
   private readonly ready = signal(false);
+  protected readonly mapped = computed(() => [this.home(), this.school()].every(stop => typeof stop?.latitude === 'number' && typeof stop.longitude === 'number'));
   private map: Leaflet.Map | undefined;
   private layer: Leaflet.LayerGroup | undefined;
   private leaflet: typeof Leaflet | undefined;
@@ -59,7 +60,7 @@ export class RouteMap {
         maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).on('tileerror', () => this.unavailable.set(true)).addTo(this.map);
       this.layer = L.layerGroup().addTo(this.map);
-      const observer = new ResizeObserver(() => this.map?.invalidateSize());
+      const observer = new ResizeObserver(() => { this.map?.invalidateSize(); this.draw(this.home(), this.school()); });
       observer.observe(this.canvas().nativeElement);
       this.destroyRef.onDestroy(() => observer.disconnect());
       this.ready.set(true);

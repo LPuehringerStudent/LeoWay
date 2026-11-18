@@ -32,7 +32,8 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  */
 @ApplicationScoped
 public class StopFinder {
-    public record Stop(String id, String name) {}
+    /** Public stop coordinates are returned for map display only; saved routes still contain ids only. */
+    public record Stop(String id, String name, Double latitude, Double longitude) {}
 
     /** Linz AG is busy; the caller should try again shortly. */
     public static class Busy extends RuntimeException {
@@ -127,9 +128,26 @@ public class StopFinder {
                 .filter(p -> "stop".equals(p.path("anyType").asText()))
                 .filter(p -> !p.path("ref").path("id").asText().isBlank())
                 .sorted(Comparator.comparingInt((JsonNode p) -> p.path("quality").asInt()).reversed())
-                .map(p -> new Stop(p.path("ref").path("id").asText(), p.path("name").asText()))
+                .map(StopFinder::stop)
                 .distinct()
                 .limit(MAX_RESULTS)
                 .toList();
+    }
+
+    private static Stop stop(JsonNode p) {
+        Double latitude = null;
+        Double longitude = null;
+        String[] coords = p.path("ref").path("coords").asText().split(",");
+        if (coords.length == 2) {
+            try {
+                double lon = Double.parseDouble(coords[0]);
+                double lat = Double.parseDouble(coords[1]);
+                if (Double.isFinite(lat) && Double.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180) {
+                    latitude = lat;
+                    longitude = lon;
+                }
+            } catch (NumberFormatException ignored) { /* A stop can still be selected without a map position. */ }
+        }
+        return new Stop(p.path("ref").path("id").asText(), p.path("name").asText(), latitude, longitude);
     }
 }

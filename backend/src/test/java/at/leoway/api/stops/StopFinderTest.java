@@ -43,13 +43,21 @@ class StopFinderTest {
     @Test
     void parsesOneMatchAsObjectAndSeveralAsArray() throws Exception {
         ObjectMapper json = new ObjectMapper();
-        assertEquals(List.of(new Stop("60500120", "Leonding, Meixnerkreuzung")),
+        assertEquals(List.of(new Stop("60500120", "Leonding, Meixnerkreuzung", 48.262799, 14.258649)),
                 StopFinder.parse(json.readTree(getClass().getResourceAsStream("/linz-ag/stopfinder-one.json"))));
         assertEquals(List.of("60501810", "60502210", "60508077"),
                 StopFinder.parse(json.readTree(getClass().getResourceAsStream("/linz-ag/stopfinder-many.json")))
                         .stream().map(Stop::id).toList());
         assertEquals(List.of(),
                 StopFinder.parse(json.readTree(getClass().getResourceAsStream("/linz-ag/stopfinder-none.json"))));
+    }
+
+    @Test
+    void missingOrInvalidCoordinatesDoNotHideAStop() throws Exception {
+        for (String coords : List.of("", "bad,coords", "NaN,48", "181,48")) {
+            var body = new ObjectMapper().readTree("{\"stopFinder\":{\"points\":[{\"anyType\":\"stop\",\"name\":\"Test\",\"ref\":{\"id\":\"1\",\"coords\":\"" + coords + "\"}}]}}");
+            assertEquals(List.of(new Stop("1", "Test", null, null)), StopFinder.parse(body));
+        }
     }
 
     @Test

@@ -1,0 +1,4 @@
+{
+  "parameters": [{"name": "serverID", "value": "efa10-linzag"}],
+  "stopFinder": {"message": [{"name": "code", "value": "-8011"}], "input": {"input": "xyzzy"}, "points": null}
+}

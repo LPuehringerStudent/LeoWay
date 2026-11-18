@@ -2,6 +2,13 @@
 openapi: 3.1.0
 components:
   schemas:
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: string
     FeedHealth:
       type: object
       properties:
@@ -73,6 +80,40 @@ components:
         bufferMinutes:
           type: integer
           format: int32
+    RouteInput:
+      type: object
+      required:
+      - homeStopId
+      - schoolStopId
+      - walkToStopMinutes
+      - walkToSchoolMinutes
+      properties:
+        homeStopId:
+          type: string
+          description: Stop id from GET /api/stops
+          examples:
+          - "60501720"
+        schoolStopId:
+          type: string
+          description: Stop id from GET /api/stops
+          examples:
+          - "60500120"
+        walkToStopMinutes:
+          type: integer
+          format: int32
+          maximum: 60
+          minimum: 0
+        walkToSchoolMinutes:
+          type: integer
+          format: int32
+          maximum: 60
+          minimum: 0
+        bufferMinutes:
+          type: integer
+          format: int32
+          maximum: 30
+          minimum: 0
+          default: 5
     State:
       type: string
       enum:
@@ -94,6 +135,13 @@ components:
           type: boolean
         syncedAt:
           $ref: "#/components/schemas/Instant"
+    Stop:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
     HealthResponse:
       type: object
       properties:
@@ -211,7 +259,76 @@ paths:
       security:
       - SecurityScheme:
         - student
+    post:
+      summary: Save a new route
+      tags:
+      - Routes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RouteInput"
+        required: true
+      responses:
+        "201":
+          description: Saved; Location points to the new route
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Route"
+        "400":
+          description: "Invalid stops, walking times or buffer"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Errors"
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - SecurityScheme:
+        - student
   /api/me/routes/{id}:
+    put:
+      summary: Change one saved route
+      tags:
+      - Routes
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RouteInput"
+        required: true
+      responses:
+        "200":
+          description: Changed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Route"
+        "400":
+          description: "Invalid stops, walking times or buffer"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Errors"
+        "404":
+          description: No such route for this student
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - SecurityScheme:
+        - student
     get:
       summary: Show one saved route
       tags:
@@ -318,6 +435,32 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Reachability"
+  /api/stops:
+    get:
+      summary: "Search stops by name, best matches first (at most 10)"
+      tags:
+      - Stops
+      parameters:
+      - description: "Part of the stop name, e.g. Meixnerkr"
+        name: q
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Matching stops; empty if none match
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Stop"
+        "400":
+          description: "q is missing, shorter than 2 or longer than 60 characters"
+        "429":
+          description: Too many new searches right now; see Retry-After (seconds)
+        "503":
+          description: The Linz AG stop finder can't be reached
   /q/health:
     description: MicroProfile Health Endpoint
     summary: MicroProfile Health provides a way for your application to distribute
@@ -446,6 +589,9 @@ tags:
 - name: Session
   description: "Login: POST /j_security_check with j_username and j_password (the\
     \ WebUntis access key)."
+- name: Stops
+  description: "Public-transport stops from the Linz AG stop finder. Stops only, no\
+    \ addresses."
 - name: WebUntis
   description: The logged-in student's WebUntis connection (F01).
 - name: MicroProfile Health

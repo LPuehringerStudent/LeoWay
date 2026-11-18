@@ -1,0 +1,19 @@
+<form class="editor" [formGroup]="form" (ngSubmit)="save()" novalidate aria-labelledby="editor-title">
+  <div class="editor-heading"><div><p class="eyebrow">Plan your commute</p><h2 id="editor-title">{{ route() ? 'Edit your route' : 'Where do you start?' }}</h2></div><span class="step">01 / 02</span></div>
+  <p class="intro">Two stops. A little walking. Your way to school.</p>
+  @if (errors().length) {
+    <div class="error-summary" role="alert" tabindex="-1" #errorBox><strong>Let’s check a few things</strong><ul>@for (error of errors(); track $index) {<li>{{ error }}</li>}</ul></div>
+  }
+  <div class="stop-field"><span class="stop-letter" aria-hidden="true">A</span><app-stop-picker fieldId="home-stop" label="Home stop" [selected]="home()" (selectedChange)="select('home', $event)" [invalid]="submitted() && !home()" /></div>
+  <div class="stop-connector" aria-hidden="true"></div>
+  <div class="stop-field"><span class="stop-letter school" aria-hidden="true">B</span><app-stop-picker fieldId="school-stop" label="School stop" [selected]="school()" (selectedChange)="select('school', $event)" [invalid]="submitted() && !school()" /></div>
+
+  <div class="timing-heading"><h3>Make room for the walk</h3><span>Minutes</span></div>
+  <div class="timings">
+    <div><label for="walk-stop">Walk to stop</label><div class="number"><input id="walk-stop" type="number" inputmode="numeric" min="0" max="60" step="1" required formControlName="walkToStopMinutes" [attr.aria-invalid]="submitted() && form.controls.walkToStopMinutes.invalid"/><span aria-hidden="true">min</span></div></div>
+    <div><label for="walk-school">Walk to school</label><div class="number"><input id="walk-school" type="number" inputmode="numeric" min="0" max="60" step="1" required formControlName="walkToSchoolMinutes" [attr.aria-invalid]="submitted() && form.controls.walkToSchoolMinutes.invalid"/><span aria-hidden="true">min</span></div></div>
+  </div>
+  <div class="buffer"><div><label for="buffer">Extra buffer</label><p id="buffer-help">A little breathing room. We suggest 10 min.</p></div><div class="number"><input id="buffer" type="number" inputmode="numeric" min="0" max="30" step="1" required formControlName="bufferMinutes" aria-describedby="buffer-help" [attr.aria-invalid]="submitted() && form.controls.bufferMinutes.invalid"/><span aria-hidden="true">min</span></div></div>
+  <p class="privacy-note"><span aria-hidden="true">◇</span> Just your stops. No home address or GPS location.</p>
+  <div class="form-actions"><button class="save" type="submit" [disabled]="busy()">{{ busy() ? 'Saving…' : route() ? 'Save changes' : 'Save this route' }} <span aria-hidden="true">→</span></button><button class="cancel" type="button" (click)="cancelled.emit()" [disabled]="busy()">Cancel</button></div>
+</form>

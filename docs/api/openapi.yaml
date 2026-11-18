@@ -36,6 +36,58 @@ components:
       format: date-time
       examples:
       - 2022-03-10T16:15:50Z
+    LeaveByConnection:
+      type: object
+      properties:
+        line:
+          type: string
+        plannedDeparture:
+          $ref: "#/components/schemas/OffsetDateTime"
+        departure:
+          $ref: "#/components/schemas/OffsetDateTime"
+        plannedArrival:
+          $ref: "#/components/schemas/OffsetDateTime"
+        arrival:
+          $ref: "#/components/schemas/OffsetDateTime"
+    LeaveByResult:
+      type: object
+      properties:
+        status:
+          $ref: "#/components/schemas/LeaveByStatus"
+        routeId:
+          type: integer
+          format: int64
+        lessonStart:
+          $ref: "#/components/schemas/OffsetDateTime"
+        leaveAt:
+          $ref: "#/components/schemas/OffsetDateTime"
+        atSchool:
+          $ref: "#/components/schemas/OffsetDateTime"
+        connection:
+          $ref: "#/components/schemas/LeaveByConnection"
+        source:
+          $ref: "#/components/schemas/Source"
+        minutesLate:
+          type: integer
+          format: int64
+    LeaveByStatus:
+      description: |-
+        IN_TIME: the latest connection that arrives in time, buffer included.
+        NO_BUFFER: none leaves room for the buffer; this one still arrives by the lesson start.
+        LATE: every connection arrives after the lesson starts; this one arrives earliest (minutesLate).
+        NO_CONNECTION: no connection that can still be reached.
+        NO_ROUTE, NO_LESSON (none in the next week), NOT_CONNECTED, NEEDS_RECONNECT (WebUntis key rejected):
+        nothing to calculate.
+      type: string
+      enum:
+      - IN_TIME
+      - NO_BUFFER
+      - LATE
+      - NO_CONNECTION
+      - NO_ROUTE
+      - NO_LESSON
+      - NOT_CONNECTED
+      - NEEDS_RECONNECT
     LocalDate:
       type: string
       format: date
@@ -56,6 +108,11 @@ components:
           type: string
         createdAt:
           $ref: "#/components/schemas/Instant"
+    OffsetDateTime:
+      type: string
+      format: date-time
+      examples:
+      - 2022-03-10T12:15:50-04:00
     Reachability:
       type: object
       properties:
@@ -121,6 +178,11 @@ components:
           type: string
         admin:
           type: boolean
+    Source:
+      type: string
+      enum:
+      - TIMETABLE
+      - PREDICTION
     State:
       type: string
       enum:
@@ -242,6 +304,40 @@ paths:
           description: Not logged in
         "403":
           description: "No student account, or an administrator"
+      security:
+      - SecurityScheme:
+        - student
+  /api/me/leave-by:
+    get:
+      summary: Leave-by time for the next first lesson
+      description: "Uses the student's first saved route unless routeId is given.\
+        \ The lesson comes from the last timetable sync (#59); connections from Linz\
+        \ AG, with real-time data close to the trip."
+      tags:
+      - Leave-by
+      parameters:
+      - description: Saved route; default the first one
+        name: routeId
+        in: query
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: The result; see status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeaveByResult"
+        "404":
+          description: routeId is not one of the student's routes
+        "503":
+          description: WebUntis or the connection source can't be reached; Retry-After
+            (seconds) if the source is only busy
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
       security:
       - SecurityScheme:
         - student
@@ -619,6 +715,8 @@ tags:
   description: The logged-in student's own account.
 - name: Health
   description: Health checks for monitoring.
+- name: Leave-by
+  description: When the student has to leave home (F02).
 - name: Routes
   description: The student's saved routes. Other students' routes always look missing
     (404).

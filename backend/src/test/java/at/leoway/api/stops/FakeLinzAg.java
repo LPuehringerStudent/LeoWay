@@ -12,7 +12,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * A local stand-in for the Linz AG stop finder, replaying recorded responses from src/test/resources/linz-ag.
- * "auwiesen" gives several stops and an address, "meixnerkr" one stop, "fail" HTTP 500, anything else none.
+ * Stop finder: "auwiesen" gives several stops and an address, "meixnerkr" one stop, "fail" HTTP 500, anything else
+ * none. Trip request: always the trips of trip-arrive-by.json (Hauptbahnhof to Limesstraße, 19.11.2026, by 07:50),
+ * or HTTP 500 if the origin is "fail".
  */
 public class FakeLinzAg implements AutoCloseable {
     public final List<String> queries = new CopyOnWriteArrayList<>();
@@ -21,10 +23,11 @@ public class FakeLinzAg implements AutoCloseable {
     public FakeLinzAg(int port) throws IOException {
         server = HttpServer.create(new InetSocketAddress("127.0.0.1", port), 0);
         server.createContext("/XML_STOPFINDER_REQUEST", this::handle);
+        server.createContext("/XML_TRIP_REQUEST2", this::trip);
         server.start();
     }
 
-    String baseUrl() {
+    public String baseUrl() {
         return "http://127.0.0.1:" + server.getAddress().getPort();
     }
 
@@ -37,6 +40,12 @@ public class FakeLinzAg implements AutoCloseable {
             case "fail" -> reply(ex, 500, "{}");
             default -> reply(ex, 200, resource("stopfinder-none.json"));
         }
+    }
+
+    private void trip(HttpExchange ex) throws IOException {
+        queries.add(ex.getRequestURI().getRawQuery());
+        if (param(ex.getRequestURI().getRawQuery(), "name_origin").equals("fail")) reply(ex, 500, "{}");
+        else reply(ex, 200, resource("trip-arrive-by.json"));
     }
 
     static String param(String rawQuery, String name) {

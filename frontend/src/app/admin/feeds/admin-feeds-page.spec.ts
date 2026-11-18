@@ -35,6 +35,20 @@ describe('AdminFeedsPage', () => {
     expect(page.querySelector('time[datetime="2026-11-18T08:00:00Z"]')).not.toBeNull();
   });
 
+  it('refreshes every 30 seconds, manually, and stops when destroyed', async () => {
+    const { fixture, page } = await render();
+    expect(list).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(29_999);
+    expect(list).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(list).toHaveBeenCalledTimes(2);
+    (page.querySelector('button.refresh') as HTMLButtonElement).click();
+    expect(list).toHaveBeenCalledTimes(3);
+    fixture.destroy();
+    await vi.advanceTimersByTimeAsync(30_000);
+    expect(list).toHaveBeenCalledTimes(3);
+  });
+
   it.each([401, 403])('shows Not allowed for HTTP %s and stops polling', async status => {
     list.mockReturnValue(throwError(() => new HttpErrorResponse({ status })));
     const { page, text } = await render();
@@ -45,4 +59,62 @@ describe('AdminFeedsPage', () => {
     expect(list).toHaveBeenCalledTimes(1);
   });
 
+  it('keeps the last report on a network failure, then recovers', async () => {
+    const { fixture, text } = await render();
+    list.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 0 })));
+    await vi.advanceTimersByTimeAsync(30_000);
+    fixture.detectChanges();
+    expect(text()).toContain('Showing previously loaded data');
+    expect(text()).toContain('Linz AG');
+    await vi.advanceTimersByTimeAsync(30_000);
+    fixture.detectChanges();
+    expect(text()).not.toContain('Showing previously loaded data');
+  });
+
+  it('clears private feed data if access is revoked', async () => {
+    const { fixture, text } = await render();
+    list.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 403 })));
+    await vi.advanceTimersByTimeAsync(30_000);
+    fixture.detectChanges();
+    expect(text()).toContain('Not allowed');
+    expect(text()).not.toContain('Linz AG');
+  });
+
+  it('shows STALE and DOWN with text and historical error details', async () => {
+    list.mockReturnValue(of([
+      { ...feed, state: 'STALE', lastErrorAt: feed.lastSuccessAt, lastError: '<script>bad()</script>' },
+      { ...feed, feedId: 'other', state: 'DOWN', lastSuccessAt: null },
+    ]));
+    const { page, text } = await render();
+    expect(text()).toContain('STALE');
+    expect(text()).toContain('DOWN');
+    expect(text()).toContain('Never received');
+    expect(page.querySelector('details summary')?.textContent).toContain('Error details');
+    expect(page.querySelector('script')).toBeNull();
+    expect(text()).toContain('<script>bad()</script>');
+  });
+
+  it('distinguishes an empty report from a failed initial request', async () => {
+    list.mockReturnValue(of([]));
+    const { fixture, text } = await render();
+    list.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 503 })));
+    await vi.advanceTimersByTimeAsync(30_000);
+    fixture.detectChanges();
+    expect(text()).toContain('Couldn’t refresh');
+  });
+
+  it('offers retry after an initial failure', async () => {
+    list.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 500 })));
+    const { page, text } = await render();
+    expect(text()).toContain('Couldn’t load feed status');
+    expect((page.querySelector('button.refresh') as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it('prevents overlapping requests', async () => {
+    list.mockReturnValue(new Subject<AdminFeed[]>());
+    const { page } = await render();
+    expect((page.querySelector('button.refresh') as HTMLButtonElement).disabled).toBe(true);
+    await vi.advanceTimersByTimeAsync(60_000);
+    expect(list).toHaveBeenCalledTimes(1);
+  });
 });

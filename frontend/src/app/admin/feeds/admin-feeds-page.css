@@ -9,6 +9,9 @@ h1 { font-family: var(--display); font-size: 2rem; margin-bottom: 0.5rem; }
 .sources-heading h2 { display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.15rem; }
 .sources-heading .muted { font-size: 0.72rem; }
 .source-count { display: inline-grid; place-items: center; min-width: 1.25rem; height: 1.25rem; border: 1px solid var(--line); border-radius: 0.3rem; font-size: 0.7rem; color: var(--muted); }
+.refresh { display: inline-flex; justify-content: center; align-items: center; gap: 0.4rem; min-height: 2.75rem; padding: 0.5rem 0.65rem; border: 1px solid var(--line); background: var(--surface); color: var(--text); border-radius: 0.5rem; font: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+.refresh:hover { border-color: var(--accent); background: var(--prediction-bg); }
+.refresh:disabled { color: var(--muted); cursor: progress; }
 .feed-table-wrap { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
 .feed-table { border-collapse: collapse; width: 100%; text-align: left; font-size: 0.75rem; }
 .feed-table thead { background: #e5eaf0; color: var(--muted); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; }

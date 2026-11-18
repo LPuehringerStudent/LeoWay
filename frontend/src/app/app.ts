@@ -22,12 +22,12 @@ import { Session } from './core/session';
         }
         <a routerLink="/route" routerLinkActive="active" ariaCurrentWhenActive="page">Route</a>
         <a routerLink="/privacy" routerLinkActive="active" ariaCurrentWhenActive="page">Privacy</a>
-        @if (session.me()) {
-          <button type="button" class="logout" (click)="logout()" [disabled]="signingOut()">
-            {{ signingOut() ? 'Logging out…' : 'Log out' }}
-          </button>
-        }
       </nav>
+      @if (session.me()) {
+        <button type="button" class="logout" (click)="logout()" [disabled]="signingOut()">
+          {{ signingOut() ? 'Logging out…' : 'Log out' }}
+        </button>
+      }
     </header>
     <main id="main" tabindex="-1"><router-outlet /></main>
     <footer class="foot">
@@ -55,9 +55,7 @@ import { Session } from './core/session';
       display: grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 0.35rem;
       background: var(--amber); color: var(--night); font-size: 1.05rem;
     }
-    nav { display: flex; flex-wrap: wrap; gap: 0.15rem; }
-    /* Phones: the menu always gets its own row, so the header keeps its height when "Log out" appears (CLS). */
-    @media (max-width: 30rem) { nav { flex-basis: 100%; } }
+    nav { display: flex; flex-wrap: wrap; gap: 0.15rem; margin-left: auto; }
     nav a, .logout {
       color: var(--on-night); text-decoration: none; padding: 0.45rem 0.55rem; border-radius: 0.35rem;
       border-bottom: 2px solid transparent;
@@ -68,6 +66,7 @@ import { Session } from './core/session';
     nav a.active { border-bottom-color: var(--amber); font-weight: 600; }
     main { width: 100%; max-width: 32rem; margin: 0 auto; padding: 0.9rem 1rem 1.5rem; flex: 1; }
     main:has(app-admin-feeds-page) { max-width: 54rem; padding-top: 1.5rem; }
+    main:has(app-route-page) { max-width: 74rem; padding-top: 1.5rem; }
     main:focus { outline: none; }
     .foot {
       width: 100%; max-width: 32rem; margin: 0 auto; padding: 0 1rem 1.25rem;
@@ -76,6 +75,11 @@ import { Session } from './core/session';
     .foot p { margin: 0; }
     .skip { position: absolute; left: -999px; }
     .skip:focus { left: 0.5rem; top: 0.5rem; z-index: 1; background: var(--surface); color: var(--text); padding: 0.5rem; }
+    @media (max-width: 480px) {
+      .bar { display: grid; grid-template-columns: 1fr auto; }
+      nav { grid-column: 1 / -1; grid-row: 2; justify-content: space-around; margin-left: 0; }
+      .logout { grid-column: 2; grid-row: 1; }
+    }
   `,
 })
 export class App implements OnInit {

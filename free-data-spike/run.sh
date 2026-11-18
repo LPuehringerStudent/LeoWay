@@ -25,6 +25,15 @@ timetable:
 street_routing: true
 geocoding: true
 YAML
-/usr/bin/time -v ./motis import 2> import-time.txt
-grep -E "Elapsed|Maximum resident" import-time.txt
+# Import time and peak memory (RSS sampled every second; /usr/bin/time is not installed everywhere).
+start=$(date +%s)
+./motis import > import.log 2>&1 &
+pid=$! peak=0
+while kill -0 "$pid" 2>/dev/null; do
+  rss=$(ps -o rss= -p "$pid" 2>/dev/null || echo 0)
+  (( ${rss:-0} > peak )) && peak=$rss
+  sleep 1
+done
+wait "$pid" || { tail -20 import.log; exit 1; }
+echo "import: $(( $(date +%s) - start )) s, peak $(( peak / 1024 )) MB, data $(du -sh data | cut -f1)"
 exec ./motis server

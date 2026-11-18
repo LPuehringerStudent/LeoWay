@@ -20,7 +20,7 @@ Validated locally on 2026-11-18, branch `feat/60-route-editor`.
 
 - **53 frontend tests pass**, covering the form, keyboard picker, debounce, stale results, Retry-After,
   create/update requests, validation, failed-save retry, delete confirmation and delete retry.
-- **153 backend tests pass**, including admin login and ownership, optional/malformed coordinates, stop filtering
+- **155 backend tests pass**, including admin login and ownership, optional/malformed coordinates, stop filtering
   and requesting WGS84 coordinates. Full `mvn verify` succeeds with packaging in `target/route-verify` to avoid
   Windows file locks from the already running app. OpenAPI was regenerated into `docs/api`.
 - Production frontend build passes. Existing admin CSS and the route stylesheet exceed the 4 kB warning

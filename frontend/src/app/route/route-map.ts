@@ -60,7 +60,8 @@ export class RouteMap {
         maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).on('tileerror', () => this.unavailable.set(true)).addTo(this.map);
       this.layer = L.layerGroup().addTo(this.map);
-      const observer = new ResizeObserver(() => { this.map?.invalidateSize(); this.draw(this.home(), this.school()); });
+      // Keep manual pan/zoom on resize; fit bounds only when the selected stops change.
+      const observer = new ResizeObserver(() => this.map?.invalidateSize({ pan: false }));
       observer.observe(this.canvas().nativeElement);
       this.destroyRef.onDestroy(() => observer.disconnect());
       this.ready.set(true);

@@ -33,9 +33,30 @@
 
         <div class="board__leave">
           <p class="board__label">Leave by</p>
-          <p class="board__pending">
-            {{ h.routes?.length ? 'Not calculated yet' : 'Needs a saved route' }}
-          </p>
+          @let l = h.leaveBy;
+          @let missing = leaveMissing(l, h.routes ? h.routes.length > 0 : undefined);
+          @if (!missing && l?.leaveAt && l?.connection; as c) {
+            <p class="board__time">
+              <time class="digits digits--leave" [attr.datetime]="l!.leaveAt">{{ clock(l!.leaveAt!) }}</time>
+              <app-time-source [source]="l!.source === 'PREDICTION' ? 'prediction' : 'timetable'" />
+            </p>
+            @if (leaveNote(l!); as note) {
+              <p class="board__note" [class.board__note--late]="l!.status === 'LATE'">{{ note }}</p>
+            }
+            <p class="board__ride">
+              Line {{ l!.connection!.line }} at <time [attr.datetime]="l!.connection!.departure">{{ clock(l!.connection!.departure) }}</time>@if (l!.connection!.departure !== l!.connection!.plannedDeparture) {&ngsp;<span class="board__planned">(planned {{ clock(l!.connection!.plannedDeparture) }})</span>}, at school <time [attr.datetime]="l!.atSchool">{{ clock(l!.atSchool!) }}</time>
+            </p>
+            @if (h.outdated) {
+              <p class="board__updated" role="status">Can't update right now, last update {{ timeOfDay(h.loadedAt) }}</p>
+            } @else if (l!.source !== 'PREDICTION') {
+              <p class="board__updated">No live data yet, updated {{ timeOfDay(h.loadedAt) }}</p>
+            }
+          } @else {
+            <p class="board__pending">{{ missing }}</p>
+            @if (l?.status === 'NO_ROUTE' && h.routes?.length === 0) {
+              <a routerLink="/route">Set up your route</a>
+            }
+          }
         </div>
       } @else {
         <h1 id="today-heading" class="board__day">Your day</h1>
@@ -79,5 +100,9 @@
     <p class="muted">Linz AG departures at Limesstraße and Meixnerkreuzung, checked every 30 seconds.</p>
   </section>
 } @else {
-  <p role="status" class="muted">Loading…</p>
+  <!-- About the size of the student board, so little moves when the data arrives (CLS, U01). The feed card
+       only comes with the data for the same reason. -->
+  <section class="board board--loading" aria-busy="true">
+    <p role="status" class="board__message">Loading…</p>
+  </section>
 }

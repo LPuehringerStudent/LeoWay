@@ -9,6 +9,7 @@
 .plain { margin: 0.2rem 0 0.4rem; padding-left: 1.1rem; }
 
 /* Student board */
+.board--loading { min-height: 18.5rem; }
 .board__day { font-size: 1.25rem; margin: 0 0 0.75rem; color: var(--on-night); }
 .board__date { font-weight: 400; color: var(--on-night-muted); font-size: 1rem; margin-left: 0.25rem; }
 .board__label { font-size: 0.875rem; color: var(--on-night-muted); }
@@ -20,6 +21,15 @@
   display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; flex-wrap: wrap;
 }
 .board__pending { font-weight: 600; color: var(--on-night); }
+.board__time { display: flex; align-items: center; gap: 0.6rem; }
+.digits--leave { font-size: 2.5rem; color: var(--amber); }
+.board__note, .board__ride, .board__updated { flex-basis: 100%; }
+.board__note { font-weight: 600; color: var(--on-night); }
+/* Light red: --late is too dark on the night board. 7.8:1 on --night. */
+.board__note--late { color: #ffa69c; }
+.board__planned { color: var(--on-night-muted); }
+.board__ride { color: var(--on-night); }
+.board__updated { font-size: 0.875rem; color: var(--on-night-muted); }
 .board__message { color: var(--on-night); }
 
 /* Live data */

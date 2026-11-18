@@ -2,10 +2,11 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { Subject } from 'rxjs';
 import { FeedHealth, FeedState } from '../core/feed-health';
+import { LeaveByResult } from '../core/leave-by-api';
 import { SavedRoute } from '../core/routes-api';
 import { WebUntisStatus } from '../core/webuntis-api';
-import { HomePage } from './home-page';
-import { dayLabel, HomeData, HomeDataService } from './home-data';
+import { HomePage, REFRESH_MS } from './home-page';
+import { dayLabel, HomeData, HomeDataService, keepLastLeaveBy } from './home-data';
 
 const lesson = (over: Partial<WebUntisStatus> = {}): WebUntisStatus => ({
   connected: true,
@@ -16,11 +17,39 @@ const lesson = (over: Partial<WebUntisStatus> = {}): WebUntisStatus => ({
   syncedAt: '2026-11-15T19:00:00Z',
   ...over,
 });
-const student = (webUntis: WebUntisStatus | null, routes: SavedRoute[] | null = []): HomeData => ({
+const ROUTE: SavedRoute = { id: 1, homeStopId: 'a', schoolStopId: 'b', walkToStopMinutes: 7, walkToSchoolMinutes: 3, bufferMinutes: 5 };
+const nothing = (status: LeaveByResult['status']): LeaveByResult => ({
+  status, routeId: null, lessonStart: null, leaveAt: null, atSchool: null, connection: null, source: null, minutesLate: null,
+});
+/** The A02 standard case from LeaveByResourceTest: lesson 08:00, tram 3 > bus 11 at 07:24, leave 07:17. */
+const leave = (over: Partial<LeaveByResult> = {}): LeaveByResult => ({
+  status: 'IN_TIME',
+  routeId: 1,
+  lessonStart: '2026-11-16T08:00:00+01:00',
+  leaveAt: '2026-11-16T07:17:00+01:00',
+  atSchool: '2026-11-16T07:39:00+01:00',
+  connection: {
+    line: '3 > 11',
+    plannedDeparture: '2026-11-16T07:24:00+01:00',
+    departure: '2026-11-16T07:24:00+01:00',
+    plannedArrival: '2026-11-16T07:36:00+01:00',
+    arrival: '2026-11-16T07:36:00+01:00',
+  },
+  source: 'TIMETABLE',
+  minutesLate: null,
+  ...over,
+});
+const student = (
+  webUntis: WebUntisStatus | null,
+  routes: SavedRoute[] | null = [],
+  leaveBy: LeaveByResult | null = nothing('NO_ROUTE'),
+): HomeData => ({
   kind: 'student',
   username: 'max.muster',
   webUntis,
   routes,
+  leaveBy,
+  loadedAt: new Date(2026, 10, 15, 20, 5),
 });
 
 async function render(data: HomeData) {
@@ -55,13 +84,52 @@ describe('HomePage', () => {
     expect(page.querySelector('app-time-source')?.textContent?.trim()).toBe('Timetable only');
   });
 
-  it('never shows a made-up leave-by time', async () => {
-    expect((await render(student(lesson()))).text()).toContain('Leave by Needs a saved route');
+  it('asks for a route when there is none', async () => {
+    const { text, page } = await render(student(lesson()));
+    expect(page.querySelector('.board__pending')?.textContent?.trim()).toBe('Needs a saved route');
+    expect(page.querySelector('.board__leave a')?.getAttribute('href')).toBe('/route');
+    expect(page.querySelectorAll('time').length).toBe(1);
+  });
+
+  it('shows the leave-by time, the connection and the source (A02, U03)', async () => {
+    const { text, page } = await render(student(lesson(), [ROUTE], leave()));
+    expect(page.querySelector('.digits--leave')?.textContent).toBe('07:17');
+    expect(page.querySelector('.board__ride')?.textContent?.trim()).toBe('Line 3 > 11 at 07:24, at school 07:39');
+    expect(text()).not.toContain('planned');
+    const labels = [...page.querySelectorAll('app-time-source')].map((e) => e.textContent?.trim());
+    expect(labels).toEqual(['Timetable only', 'Timetable only']);
+    expect(text()).toContain('No live data yet, updated 20:05');
+    expect(text()).toContain('7 min to the stop, 3 min from the stop to school, 5 min buffer');
+  });
+
+  it('marks live times as prediction and shows the planned time', async () => {
+    const live = leave({
+      source: 'PREDICTION',
+      leaveAt: '2026-11-16T07:20:00+01:00',
+      connection: { ...leave().connection!, departure: '2026-11-16T07:27:00+01:00' },
+    });
+    const { text, page } = await render(student(lesson(), [ROUTE], live));
+    expect(page.querySelector('.digits--leave')?.textContent).toBe('07:20');
+    expect(page.querySelectorAll('app-time-source')[1]?.textContent?.trim()).toBe('Prediction');
+    expect(page.querySelector('.board__ride')?.textContent?.trim()).toBe('Line 3 > 11 at 07:27 (planned 07:24), at school 07:39');
+    expect(text()).not.toContain('No live data');
+  });
+
+  it('says when there is no buffer left or the student will be late', async () => {
+    expect((await render(student(lesson(), [ROUTE], leave({ status: 'NO_BUFFER' })))).text())
+      .toContain('No buffer left');
     TestBed.resetTestingModule();
-    const route = { id: 1, homeStopId: 'a', schoolStopId: 'b', walkToStopMinutes: 4, walkToSchoolMinutes: 3, bufferMinutes: 5 };
-    const { text, page } = await render(student(lesson(), [route]));
-    expect(text()).toContain('Leave by Not calculated yet');
-    expect(text()).toContain('4 min to the stop, 3 min from the stop to school, 5 min buffer');
+    const { text, page } = await render(student(lesson(), [ROUTE], leave({ status: 'LATE', minutesLate: 4 })));
+    expect(text()).toContain('4 min late');
+    expect(page.querySelector('.board__note--late')).not.toBeNull();
+  });
+
+  it('never shows a made-up leave-by time', async () => {
+    expect((await render(student(lesson(), [ROUTE], null))).page.querySelector('.board__pending')?.textContent?.trim())
+      .toBe('Could not be calculated right now');
+    TestBed.resetTestingModule();
+    const { text, page } = await render(student(lesson(), [ROUTE], nothing('NO_CONNECTION')));
+    expect(page.querySelector('.board__pending')?.textContent?.trim()).toBe('No connection found');
     expect(page.querySelectorAll('time').length).toBe(1);
   });
 
@@ -93,6 +161,57 @@ describe('HomePage', () => {
     expect(status()).toBe('No update for over five minutes');
     feed.next('OFFLINE');
     expect(status()).toBe('LeoWay server not reachable');
+  });
+});
+
+describe('HomePage refresh', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it('reloads every minute while open and stops when closed', async () => {
+    const load = vi.fn(() => Promise.resolve<HomeData>({ kind: 'guest' }));
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([]),
+        { provide: HomeDataService, useValue: { load } },
+        { provide: FeedHealth, useValue: { linzAg: new Subject<FeedState>() } },
+      ],
+    });
+    const fixture = TestBed.createComponent(HomePage);
+    fixture.detectChanges();
+    expect(load).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(REFRESH_MS);
+    expect(load).toHaveBeenCalledTimes(2);
+    fixture.destroy();
+    await vi.advanceTimersByTimeAsync(3 * REFRESH_MS);
+    expect(load).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('keepLastLeaveBy', () => {
+  const before = new Date('2026-11-16T07:00:00+01:00');
+  const good = student(lesson(), [ROUTE], leave());
+  const failed = { ...student(lesson(), [ROUTE], null), loadedAt: new Date(2026, 10, 16, 7, 1) };
+
+  it('keeps the last result while its lesson is ahead, marked as outdated', () => {
+    const kept = keepLastLeaveBy(good, failed, before);
+    expect(kept.kind === 'student' && kept.leaveBy).toEqual(leave());
+    expect(kept.kind === 'student' && kept.outdated).toBe(true);
+    expect(kept.kind === 'student' && kept.loadedAt).toEqual(new Date(2026, 10, 15, 20, 5));
+  });
+
+  it('lets a new answer win and drops a result whose lesson has started', () => {
+    const noRoute = student(lesson(), [], nothing('NO_ROUTE'));
+    expect(keepLastLeaveBy(good, noRoute, before)).toBe(noRoute);
+    expect(keepLastLeaveBy(good, failed, new Date('2026-11-16T08:00:00+01:00'))).toBe(failed);
+    expect(keepLastLeaveBy(null, failed, before)).toBe(failed);
+  });
+
+  it('says on Home that the time could not be updated', async () => {
+    const { text, page } = await render(keepLastLeaveBy(good, failed, before));
+    expect(page.querySelector('.digits--leave')?.textContent).toBe('07:17');
+    expect(text()).toContain("Can't update right now, last update 20:05");
+    expect(text()).not.toContain('No live data yet');
   });
 });
 

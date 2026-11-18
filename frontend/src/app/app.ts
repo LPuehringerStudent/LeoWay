@@ -56,6 +56,8 @@ import { Session } from './core/session';
       background: var(--amber); color: var(--night); font-size: 1.05rem;
     }
     nav { display: flex; flex-wrap: wrap; gap: 0.15rem; }
+    /* Phones: the menu always gets its own row, so the header keeps its height when "Log out" appears (CLS). */
+    @media (max-width: 30rem) { nav { flex-basis: 100%; } }
     nav a, .logout {
       color: var(--on-night); text-decoration: none; padding: 0.45rem 0.55rem; border-radius: 0.35rem;
       border-bottom: 2px solid transparent;

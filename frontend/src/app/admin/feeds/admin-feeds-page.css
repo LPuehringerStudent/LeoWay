@@ -1,0 +1,48 @@
+:host { display: flex; flex-direction: column; gap: 1.25rem; }
+.page-heading { padding-top: 0.5rem; }
+.eyebrow { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; }
+.page-heading .eyebrow { color: var(--muted); margin-bottom: 0.65rem; }
+.eyebrow span { margin: 0 0.4rem; color: var(--muted); }
+h1 { font-family: var(--display); font-size: 2rem; margin-bottom: 0.5rem; }
+.lead { margin: 0; font-size: 0.9rem; }
+.sources-heading { display: flex; justify-content: space-between; align-items: center; gap: 0.65rem; margin-bottom: 0.8rem; }
+.sources-heading h2 { display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.15rem; }
+.sources-heading .muted { font-size: 0.72rem; }
+.source-count { display: inline-grid; place-items: center; min-width: 1.25rem; height: 1.25rem; border: 1px solid var(--line); border-radius: 0.3rem; font-size: 0.7rem; color: var(--muted); }
+.feed-table-wrap { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
+.feed-table { border-collapse: collapse; width: 100%; text-align: left; font-size: 0.75rem; }
+.feed-table thead { background: #e5eaf0; color: var(--muted); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.feed-table th, .feed-table td { padding: 0.9rem 0.65rem; vertical-align: top; }
+.feed-table tbody tr + tr { border-top: 1px solid var(--line); }
+.feed-name { display: block; font-size: 0.9rem; color: var(--text); overflow-wrap: anywhere; }
+.feed-id { display: block; margin-top: 0.3rem; font-size: 0.65rem; font-weight: 400; color: var(--muted); overflow-wrap: anywhere; }
+.badge { display: inline-flex; gap: 0.35rem; align-items: center; padding: 0.25rem 0.45rem; border-radius: 0.3rem; font-size: 0.65rem; font-weight: 750; letter-spacing: 0.04em; white-space: nowrap; }
+.badge--ok { color: #18532f; background: #e2f2e7; }
+.badge--stale { color: #754400; background: #fff0cb; }
+.badge--down { color: #922424; background: #fbe7e7; }
+.cell-note { display: block; margin-top: 0.35rem; color: var(--muted); font-size: 0.65rem; }
+time { font-variant-numeric: tabular-nums; }
+.error-details { margin-top: 0.35rem; color: var(--muted); }
+.error-details summary { cursor: pointer; min-height: 2rem; padding: 0.25rem 0; color: var(--accent); }
+.error-details p { overflow-wrap: anywhere; white-space: pre-wrap; padding: 0.5rem; background: var(--page); border-radius: 0.3rem; max-width: 22rem; }
+.notice { padding: 0.8rem; margin-bottom: 0.8rem; border: 1px solid #cfac5f; border-radius: 0.5rem; color: #674000; background: #fff4d9; font-size: 0.8rem; }
+.empty-state { padding: 1.3rem; color: var(--muted); font-size: 0.85rem; }
+.empty-state h3 { margin: 0; color: var(--text); font-size: 1rem; }
+.access-card { align-items: flex-start; gap: 0.7rem; padding: 1.5rem; }
+.access-icon { display: grid; place-items: center; height: 2.5rem; width: 2.5rem; border-radius: 0.65rem; background: var(--page); color: var(--accent); font-size: 1.5rem; }
+.access-card .eyebrow { color: var(--muted); }
+.access-card h2 { font-size: 1.5rem; font-family: var(--display); }
+.access-card > p:not(.eyebrow) { color: var(--muted); font-size: 0.9rem; }
+.access-card .btn { align-self: stretch; margin-top: 0.25rem; }
+.back-link { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 0; font-size: 0.85rem; font-weight: 600; }
+@media (max-width: 479px) {
+  .feed-table, .feed-table tbody, .feed-table tr, .feed-table td, .feed-table tbody th { display: block; }
+  .feed-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .feed-table tbody th { padding: 1rem 1rem 0.65rem; border-bottom: 1px solid var(--line); }
+  .feed-id { display: inline-block; margin-top: 0.15rem; }
+  .feed-table td { padding: 0.75rem 1rem; }
+  .feed-table td::before { content: attr(data-label); display: block; color: var(--muted); font-size: 0.65rem; font-weight: 600; margin-bottom: 0.35rem; }
+  .cell-note { display: inline; margin-left: 0.5rem; }
+  .feed-table td + td { border-top: 1px solid #edf0f4; }
+  .feed-table tbody tr + tr { border-top: 3px solid var(--line); }
+}

@@ -53,6 +53,7 @@ import { ApiHealth } from './core/api-health';
     nav a:hover { background: var(--night-line); }
     nav a.active { border-bottom-color: var(--amber); font-weight: 600; }
     main { width: 100%; max-width: 32rem; margin: 0 auto; padding: 0.9rem 1rem 1.5rem; flex: 1; }
+    main:has(app-admin-feeds-page) { max-width: 54rem; padding-top: 1.5rem; }
     main:focus { outline: none; }
     .foot {
       width: 100%; max-width: 32rem; margin: 0 auto; padding: 0 1rem 1.25rem;

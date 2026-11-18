@@ -109,6 +109,19 @@ class LeaveByCalculatorTest {
     }
 
     @Test
+    void withAChangeDepartureAndArrivalDelaysCountSeparately() {
+        // Tram 3 leaves 4 min late but still makes bus 19, which arrives on time: leave later, same arrival.
+        var change = new Connection("3 > 19", "x", MONDAY, at(MONDAY, "07:31"), at(MONDAY, "07:47"), 4, 0);
+        var r = assertInstanceOf(InTime.class, calc(MONDAY, "08:00", List.of(change)));
+        assertEquals("07:28", local(r.leaveAt()));
+        assertEquals("07:50", local(r.atSchool()));
+        assertEquals(LeaveBy.Source.PREDICTION, r.source());
+
+        var reportedEarly = new Connection("19", "y", MONDAY, at(MONDAY, "07:31"), at(MONDAY, "07:35"), 5, 0);
+        assertEquals("07:36", local(reportedEarly.arrival()), "never arrives before it leaves");
+    }
+
+    @Test
     void springForwardDay() {
         // Clocks go 02:00 -> 03:00 on 29 March 2026; Monday after, and a lesson on the day itself.
         LocalDate monday = LocalDate.of(2026, 3, 30);

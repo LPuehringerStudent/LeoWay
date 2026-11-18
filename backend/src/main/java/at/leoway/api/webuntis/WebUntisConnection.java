@@ -14,6 +14,8 @@ import java.util.Optional;
  */
 @ApplicationScoped
 public class WebUntisConnection {
+    private static final org.jboss.logging.Logger LOG = org.jboss.logging.Logger.getLogger(WebUntisConnection.class);
+
     @Inject
     WebUntisClientFactory clients;
 
@@ -47,13 +49,27 @@ public class WebUntisConnection {
         return withClient(studentId, c -> FirstLesson.on(date, c.timetable(date, date)));
     }
 
-    /** The next school day's first lesson from {@code from} on, looking up to a week ahead. */
-    public Optional<Lesson> nextFirstLesson(long studentId, LocalDate from) {
+    /**
+     * The next school day's first lesson from {@code from} on, looking up to a week ahead, and whether an exam
+     * overlaps it (#63). If only the exam call fails, the lesson still counts, without an exam.
+     */
+    public Optional<FirstLesson.Found> nextFirstLesson(long studentId, LocalDate from) {
         return withClient(studentId, c -> {
             List<Lesson> week = c.timetable(from, from.plusDays(7));
-            return from.datesUntil(from.plusDays(8))
+            Optional<Lesson> first = from.datesUntil(from.plusDays(8))
                     .map(d -> FirstLesson.on(d, week)).flatMap(Optional::stream).findFirst();
+            return first.map(l -> new FirstLesson.Found(l, FirstLesson.isExam(l, exams(c, l.date()))));
         });
+    }
+
+    private static List<Exam> exams(WebUntisClient c, LocalDate day) {
+        try {
+            return c.exams(day, day);
+        } catch (WebUntisException e) {
+            if (e.reason() == WebUntisException.Reason.KEY_REJECTED) throw e;
+            LOG.warnf("exam call failed: %s", e.reason());
+            return List.of();
+        }
     }
 
     /** Deletes the stored key. The student logs in again to reconnect. */

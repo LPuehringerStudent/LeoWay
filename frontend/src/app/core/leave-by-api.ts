@@ -32,6 +32,26 @@ export interface LeaveByResult {
   } | null;
   source: 'TIMETABLE' | 'PREDICTION' | null;
   minutesLate: number | null;
+  /** Open delay warning for this lesson (F03, #63); only for the first saved route. */
+  warning?: DelayWarning | null;
+}
+
+/** The connection the timetable chose runs late enough to make the student late (F03). */
+export interface DelayWarning {
+  line: string;
+  plannedDeparture: string;
+  delayMinutes: number;
+  atSchool: string;
+  minutesLate: number;
+  exam: boolean;
+  /** Another connection: in time, or only arriving earlier (`inTime` false). Null if none helps. */
+  alternative: {
+    line: string;
+    departure: string;
+    leaveAt: string;
+    atSchool: string;
+    inTime: boolean;
+  } | null;
 }
 
 @Injectable({ providedIn: 'root' })

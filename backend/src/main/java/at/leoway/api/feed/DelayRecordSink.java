@@ -44,6 +44,10 @@ public class DelayRecordSink implements ObservationSink {
     /** Trip ids stored per departure, first stored first. Filled from the database on a miss, like {@link #last}. */
     private final Map<Departure, List<String>> tripIds = new ConcurrentHashMap<>();
 
+    /** Null when a test creates the sink with {@code new}. */
+    @jakarta.inject.Inject
+    jakarta.enterprise.event.Event<DelaysRecorded> recorded;
+
     @Override
     public void store(String source, Instant collectedAt, List<DepartureObservation> observations) {
         Map<Key, Last> stored = new HashMap<>();
@@ -80,6 +84,7 @@ public class DelayRecordSink implements ObservationSink {
         tripIds.keySet().removeIf(d -> d.plannedAt().isBefore(collectedAt.minus(Duration.ofDays(2))));
         // Departures from earlier days are never seen again.
         last.keySet().removeIf(k -> k.serviceDate().isBefore(java.time.LocalDate.now(LinzAgAdapter.LINZ).minusDays(1)));
+        if (recorded != null) recorded.fireAsync(new DelaysRecorded(source, collectedAt));
     }
 
     /**

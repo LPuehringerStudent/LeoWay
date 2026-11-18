@@ -80,13 +80,14 @@ public class TimetableSync {
      */
     @ActivateRequestContext
     public Optional<FirstLessonCache> sync(long studentId, LocalDate from) {
-        Optional<Lesson> lesson;
+        Optional<FirstLesson.Found> found;
         try {
-            lesson = connection.nextFirstLesson(studentId, from);
+            found = connection.nextFirstLesson(studentId, from);
         } catch (WebUntisException e) {
             if (e.reason() == WebUntisException.Reason.KEY_REJECTED) markRejected(studentId);
             throw e;
         }
+        Optional<Lesson> lesson = found.map(FirstLesson.Found::lesson);
         Instant now = clock.instant();
         Instant[] before = new Instant[1];
         Optional<FirstLessonCache> stored = QuarkusTransaction.requiringNew().call(() -> {
@@ -108,6 +109,7 @@ public class TimetableSync {
             c.startAt = lesson.map(l -> at(l.date(), l.start())).orElse(null);
             c.endAt = lesson.map(l -> at(l.date(), l.end())).orElse(null);
             c.subject = lesson.map(Lesson::subject).orElse(null);
+            c.exam = found.map(FirstLesson.Found::exam).orElse(false);
             c.syncedAt = now;
             c.persist();
             return Optional.of(c);

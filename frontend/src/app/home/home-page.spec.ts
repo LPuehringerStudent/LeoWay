@@ -124,6 +124,48 @@ describe('HomePage', () => {
     expect(page.querySelector('.board__note--late')).not.toBeNull();
   });
 
+  it('shows a delay warning with the exam note and the alternative (F03, A03)', async () => {
+    const warned = leave({
+      warning: {
+        line: '19',
+        plannedDeparture: '2026-11-16T07:35:00+01:00',
+        delayMinutes: 6,
+        atSchool: '2026-11-16T08:03:00+01:00',
+        minutesLate: 3,
+        exam: true,
+        alternative: {
+          line: '3',
+          departure: '2026-11-16T07:29:00+01:00',
+          leaveAt: '2026-11-16T07:24:00+01:00',
+          atSchool: '2026-11-16T07:49:00+01:00',
+          inTime: true,
+        },
+      },
+    });
+    const { page } = await render(student(lesson(), [ROUTE], warned));
+    const warning = page.querySelector('.board__warning')?.textContent?.replace(/\s+/g, ' ').trim();
+    expect(warning).toContain('Line 19 at 07:35 is 6 min late: at school 08:03, 3 min late');
+    expect(warning).toContain('Exam in your first lesson');
+    expect(warning).toContain('Take line 3 at 07:29 instead, leave home at 07:24');
+  });
+
+  it('says when no connection helps and shows nothing without a warning', async () => {
+    const base = leave().warning;
+    expect(base).toBeUndefined();
+    expect((await render(student(lesson(), [ROUTE], leave()))).page.querySelector('.board__warning')).toBeNull();
+    TestBed.resetTestingModule();
+    const warned = leave({
+      warning: {
+        line: '19', plannedDeparture: '2026-11-16T07:35:00+01:00', delayMinutes: 6,
+        atSchool: '2026-11-16T08:03:00+01:00', minutesLate: 3, exam: false, alternative: null,
+      },
+    });
+    const { page } = await render(student(lesson(), [ROUTE], warned));
+    const warning = page.querySelector('.board__warning')?.textContent ?? '';
+    expect(warning).toContain('No other connection gets you there earlier');
+    expect(warning).not.toContain('Exam');
+  });
+
   it('never shows a made-up leave-by time', async () => {
     expect((await render(student(lesson(), [ROUTE], null))).page.querySelector('.board__pending')?.textContent?.trim())
       .toBe('Could not be calculated right now');

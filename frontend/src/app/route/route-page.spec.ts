@@ -45,6 +45,8 @@ describe('RoutePage', () => {
     });
     await vi.waitFor(() => {
       http.expectOne('/api/stops?q=111').flush([{ id: '111', name: 'Home stop' }]);
+    });
+    await vi.waitFor(() => {
       http.expectOne('/api/stops?q=222').flush([{ id: '222', name: 'School stop' }]);
     });
     const page = fixture.nativeElement as HTMLElement;

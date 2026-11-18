@@ -11,3 +11,4 @@ details { margin-top: 0.75rem; }
 summary { cursor: pointer; color: var(--accent); font-weight: 600; }
 ol, ul { padding-left: 1.2rem; margin: 0.4rem 0 0; }
 .card > .btn:first-of-type { margin-top: 0.5rem; }
+.card form { display: flex; flex-direction: column; gap: 0.4rem; }

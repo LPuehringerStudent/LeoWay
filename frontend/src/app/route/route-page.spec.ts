@@ -22,6 +22,7 @@ describe('RoutePage', () => {
     expect(page.textContent).not.toContain('Connected as');
     expect(page.textContent).not.toContain('Loading…');
     http.expectNone('/api/me/webuntis');
+    http.expectNone('/api/me/alerts');
     expect(TestBed.inject(Session).me()?.admin).toBe(true);
     http.verify();
   });

@@ -14,7 +14,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * A local stand-in for the Linz AG stop finder, replaying recorded responses from src/test/resources/linz-ag.
  * Stop finder: "auwiesen" gives several stops and an address, "meixnerkr" one stop, "fail" HTTP 500, anything else
  * none. Trip request: always the trips of trip-arrive-by.json (Hauptbahnhof to Limesstraße, 19.11.2026, by 07:50),
- * or HTTP 500 if the origin is "fail".
+ * HTTP 500 if the origin is "fail", an unusable answer if it is "broken".
  */
 public class FakeLinzAg implements AutoCloseable {
     public final List<String> queries = new CopyOnWriteArrayList<>();
@@ -44,8 +44,12 @@ public class FakeLinzAg implements AutoCloseable {
 
     private void trip(HttpExchange ex) throws IOException {
         queries.add(ex.getRequestURI().getRawQuery());
-        if (param(ex.getRequestURI().getRawQuery(), "name_origin").equals("fail")) reply(ex, 500, "{}");
-        else reply(ex, 200, resource("trip-arrive-by.json"));
+        switch (param(ex.getRequestURI().getRawQuery(), "name_origin")) {
+            case "fail" -> reply(ex, 500, "{}");
+            // A ride without points: parses as JSON, but not as a trip.
+            case "broken" -> reply(ex, 200, "{\"trips\": [{\"legs\": [{\"mode\": {\"diva\": {\"stateless\": \"esg:1\"}}}]}]}");
+            default -> reply(ex, 200, resource("trip-arrive-by.json"));
+        }
     }
 
     static String param(String rawQuery, String name) {

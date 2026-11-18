@@ -185,6 +185,38 @@ class LeaveByResourceTest {
     void sourceDownIs503() {
         update(() -> SavedRoute.<SavedRoute>findById(routeId).homeStopId = "fail");
         given().get("/api/me/leave-by").then().statusCode(503);
+        update(() -> SavedRoute.<SavedRoute>findById(routeId).homeStopId = "broken");
+        given().get("/api/me/leave-by").then().statusCode(503);
+    }
+
+    @Test
+    void whileTheGapRunsAnExpiredAnswerIsServedAndOnlyNewTripsWait() {
+        // #99 review: Home refreshes every minute, so expired answers must not turn into 503s.
+        trips.useMinGap(java.time.Duration.ofSeconds(15));
+        given().get("/api/me/leave-by").then().statusCode(200);
+
+        // Six hours later the 08:00 answer has expired. Another lesson start asks Linz AG and starts the gap.
+        Instant later = EVENING_BEFORE.plus(java.time.Duration.ofHours(6)).plusSeconds(60);
+        at(later);
+        update(() -> lesson(annaId, "08:05"));
+        given().get("/api/me/leave-by").then().statusCode(200);
+        assertEquals(2, fake.queries.size());
+
+        at(later.plusSeconds(1));
+        update(() -> lesson(annaId, "08:00"));
+        given().get("/api/me/leave-by").then().statusCode(200)
+                .body("leaveAt", equalTo("2026-11-19T07:17:00+01:00"));
+        assertEquals(2, fake.queries.size(), "expired answer served, no request");
+
+        at(later.plusSeconds(2));
+        update(() -> lesson(annaId, "08:10"));
+        given().get("/api/me/leave-by").then().statusCode(503).header("Retry-After", "13");
+        assertEquals(2, fake.queries.size());
+    }
+
+    private void at(Instant t) {
+        trips.useClock(Clock.fixed(t, ZoneOffset.UTC));
+        resource.useClock(Clock.fixed(t, ZoneOffset.UTC));
     }
 
     private static void update(Runnable r) {

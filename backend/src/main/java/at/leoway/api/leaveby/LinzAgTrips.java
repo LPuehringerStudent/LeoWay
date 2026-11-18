@@ -22,6 +22,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
@@ -38,7 +42,8 @@ import org.jboss.logging.Logger;
  * <p>Budget: the recorder already uses one request every 15 s on this server. Answers are cached per (home stop,
  * school stop, arrival time), not per student, so students with the same route and first lesson share one request
  * (#56). Close to the trip the cache is short, so real-time data stays fresh; further ahead it is long. Requests that
- * aren't cached are spaced at least {@code min-gap} apart across all students.
+ * aren't cached are spaced at least {@code min-gap} apart across all students, like the recorder (15 s). Students
+ * asking for the same trips at once share one request; while the gap runs, a recently expired answer is served.
  */
 @ApplicationScoped
 public class LinzAgTrips implements ConnectionSource {
@@ -47,6 +52,10 @@ public class LinzAgTrips implements ConnectionSource {
     static final int MAX_CACHED = 2_000;
     /** Closer than this to the arrival, answers carry real-time data and are cached only for {@code live-ttl}. */
     static final Duration LIVE_WINDOW = Duration.ofHours(3);
+    /** How long after expiry an answer may still be served while a new request has to wait for the gap. */
+    static final Duration STALE_GRACE = Duration.ofMinutes(5);
+    /** How long to wait for another student's request for the same trips (the HTTP timeout is 15 s). */
+    static final Duration WAIT_FOR_OTHERS = Duration.ofSeconds(20);
     private static final DateTimeFormatter EFA_DATE = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
     /** Same server as the departure monitor (LinzAgAdapter) and the stop finder. */
@@ -56,10 +65,10 @@ public class LinzAgTrips implements ConnectionSource {
     @ConfigProperty(name = "leoway.trips.cache-ttl", defaultValue = "PT6H")
     Duration cacheTtl;
 
-    @ConfigProperty(name = "leoway.trips.live-ttl", defaultValue = "PT1M")
+    @ConfigProperty(name = "leoway.trips.live-ttl", defaultValue = "PT2M")
     Duration liveTtl;
 
-    @ConfigProperty(name = "leoway.trips.min-gap", defaultValue = "2s")
+    @ConfigProperty(name = "leoway.trips.min-gap", defaultValue = "15s")
     Duration minGap;
 
     @Inject
@@ -71,6 +80,8 @@ public class LinzAgTrips implements ConnectionSource {
 
     /** Insertion order, so the oldest entry is dropped first when the cache is full. */
     private final Map<Key, Entry> cache = new LinkedHashMap<>();
+    /** Requests on their way, so students asking for the same trips at once share one request. */
+    private final Map<Key, CompletableFuture<List<Connection>>> inFlight = new java.util.HashMap<>();
     private Instant nextRequest = Instant.EPOCH;
     private Clock clock = Clock.systemUTC();
 
@@ -80,41 +91,88 @@ public class LinzAgTrips implements ConnectionSource {
     }
 
     /** For tests. */
+    void useMinGap(Duration gap) {
+        minGap = gap;
+    }
+
+    /** For tests. */
     synchronized void clearCache() {
         cache.clear();
+        inFlight.clear();
         nextRequest = Instant.EPOCH;
     }
 
     @Override
     public List<Connection> arrivingBy(String fromStopId, String toStopId, Instant arriveBy) {
         Key key = new Key(fromStopId, toStopId, arriveBy.truncatedTo(ChronoUnit.MINUTES));
+        CompletableFuture<List<Connection>> mine;
+        CompletableFuture<List<Connection>> theirs;
         Instant now;
         synchronized (this) {
             now = clock.instant();
             Entry hit = cache.get(key);
             if (hit != null && hit.expires.isAfter(now)) return hit.connections;
-            if (now.isBefore(nextRequest)) {
-                throw new Unavailable("Linz AG trip request busy", Duration.between(now, nextRequest));
+            theirs = inFlight.get(key);
+            if (theirs == null) {
+                if (now.isBefore(nextRequest)) {
+                    // Busy: a recently expired answer beats a 503 (#99 review). Live delays in it are at most
+                    // live-ttl + STALE_GRACE old, the same age LiveDelays still accepts from the recorder.
+                    if (hit != null && hit.expires.plus(STALE_GRACE).isAfter(now)) return hit.connections;
+                    throw new Unavailable("Linz AG trip request busy", Duration.between(now, nextRequest));
+                }
+                nextRequest = now.plus(minGap);
+                mine = new CompletableFuture<>();
+                inFlight.put(key, mine);
+            } else {
+                mine = null;
             }
-            nextRequest = now.plus(minGap);
         }
-        List<Connection> connections;
+        // Someone is already asking for the same trips (a class refreshing together): share their answer.
+        if (theirs != null) return await(theirs);
         try {
-            connections = parse(json.readTree(request(key)));
-        } catch (IOException e) {
-            LOG.warnf("Linz AG trip request failed: %s", e.getMessage());
+            List<Connection> connections = fetch(key);
+            Duration ttl = Duration.between(now, key.arriveBy).compareTo(LIVE_WINDOW) < 0 ? liveTtl : cacheTtl;
+            synchronized (this) {
+                cache.remove(key);
+                if (cache.size() >= MAX_CACHED) cache.remove(cache.keySet().iterator().next());
+                cache.put(key, new Entry(connections, now.plus(ttl)));
+            }
+            mine.complete(connections);
+            return connections;
+        } catch (Unavailable e) {
+            mine.completeExceptionally(e);
+            throw e;
+        } finally {
+            synchronized (this) {
+                inFlight.remove(key);
+            }
+        }
+    }
+
+    /** Request and parse. Anything unexpected in the answer counts as the source being unavailable, not a 500. */
+    private List<Connection> fetch(Key key) {
+        try {
+            return parse(json.readTree(request(key)));
+        } catch (IOException | RuntimeException e) {
+            LOG.warnf("Linz AG trip request failed: %s", e.getClass().getSimpleName() + ": " + e.getMessage());
             throw new Unavailable("Linz AG trip request failed", null);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new Unavailable("interrupted", null);
         }
-        Duration ttl = Duration.between(now, key.arriveBy).compareTo(LIVE_WINDOW) < 0 ? liveTtl : cacheTtl;
-        synchronized (this) {
-            cache.remove(key);
-            if (cache.size() >= MAX_CACHED) cache.remove(cache.keySet().iterator().next());
-            cache.put(key, new Entry(connections, now.plus(ttl)));
+    }
+
+    private static List<Connection> await(CompletableFuture<List<Connection>> answer) {
+        try {
+            return answer.get(WAIT_FOR_OTHERS.toMillis(), TimeUnit.MILLISECONDS);
+        } catch (ExecutionException e) {
+            throw e.getCause() instanceof Unavailable u ? u : new Unavailable("Linz AG trip request failed", null);
+        } catch (TimeoutException e) {
+            throw new Unavailable("Linz AG trip request slow", null);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new Unavailable("interrupted", null);
         }
-        return connections;
     }
 
     private String request(Key key) throws IOException, InterruptedException {

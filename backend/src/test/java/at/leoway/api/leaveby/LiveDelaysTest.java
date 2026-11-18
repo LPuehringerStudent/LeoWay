@@ -73,6 +73,27 @@ class LiveDelaysTest {
     }
 
     @Test
+    void afterMidnightTheSchoolStopRowHasTheNextDate() {
+        // #99 review: 23:50 -> 00:20. The recorder dates the school stop row with the arrival's day.
+        Instant dep = DAY.atTime(23, 50).atZone(LeaveBy.VIENNA).toInstant();
+        Instant arr = DAY.plusDays(1).atTime(0, 20).atZone(LeaveBy.VIENNA).toInstant();
+        QuarkusTransaction.requiringNew().run(() -> {
+            DelayRecord r = new DelayRecord();
+            r.source = "linz-ag";
+            r.line = "N82";
+            r.tripId = "night";
+            r.stopId = SCHOOL;
+            r.serviceDate = DAY.plusDays(1);
+            r.plannedAt = arr;
+            r.reportedDelay = 5;
+            r.collectedAt = NOW.minusSeconds(30);
+            r.persist();
+        });
+        Connection night = new Connection("N82", "night", DAY, dep, arr, null);
+        assertEquals(5, delays.apply(List.of(night), HOME, SCHOOL).getFirst().delayMinutes());
+    }
+
+    @Test
     void oldOrMissingDelayMeansTimetableOnly() {
         record("t3", HOME, 4, NOW.minusSeconds(600));
         List<Connection> r = delays.apply(List.of(conn("t3"), conn("unknown")), HOME, SCHOOL);

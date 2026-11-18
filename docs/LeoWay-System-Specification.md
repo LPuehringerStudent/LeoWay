@@ -695,7 +695,7 @@ LeoWay runs over two school years and may later move to other schools or another
 | L02 | Data minimisation: no GPS, no home address and no WebUntis password. Absence reasons and notes are never stored. Deleted accounts stay deleted after a restore. |
 | L03 | Retention: routes and contacts until account deletion; timetable caches are replaced on sync; appeals and linked lateness entries until school-year end or account deletion. |
 | L04 | The school (school IT) agrees to the use of student access keys and the sync frequency before real student data is used. |
-| L05 | Data licences are respected: ÖBB timetables are CC BY 4.0 and credited in the app. VAO stays off until education access and limits are agreed; the stored Start contract allows only 100 queries per day per service. |
+| L05 | Data licences are respected: ÖBB timetables are CC BY 4.0 and credited in the app. VAO runs on the free Start contract, with no higher quota for education (2026-11-18): up to 100 VAO queries per calendar day in total, shared by routing, departure board and stop search; the counter resets at midnight (contract §1.3; the price sheet says 100 per type, the stricter contract applies). LeoWay counts its VAO queries and stops before the limit. VAO grants no rights in query results (§1.3), so they are not stored for statistics or prediction until VAO agrees. While VAO is used, the app and the project pages say that the VAO Start access is a basis of the service (§5.3). Tracked in #94. |
 | L06 | LeoWay provides evidence only. Excusing lateness stays the form teacher's decision under school rules. |
 
 ## 4. Quantity structure
@@ -746,7 +746,7 @@ flowchart LR
 | WebUntis | JSON-RPC with the student's access key (webuntis package), read only. Allowed calls: login/logout, timetable, timegrid, absences and exams (getExamsForRange). |
 | Linz AG Linien | Live departures and delays (GTFS-RT, EFA departure endpoint), polled by the recorder. |
 | MVO, ÖBB | GTFS timetables, imported nightly. |
-| VAO | Off until education access and limits are agreed. Without live data, show "timetable only". |
+| VAO | Start key, up to 100 queries per day in total (L05). Only for connections Linz AG and the GTFS timetables cannot answer; results are kept for the current day only. Key only in the server's `.env`. When the day's quota is used up, show "timetable only". |
 | GeoSphere Austria | Weather data as input for prediction. |
 | Discord, push, email | One notification interface; each channel is one implementation. Appeals open as a mailto draft in the student's own mail app. |
 | Form teacher | Verification link in the browser; optional portal with school-approved login. |
@@ -801,4 +801,4 @@ Tests follow the standard and non-standard scenarios in section 2. The teacher a
 
 Deliver code, database changes, tests, deployment steps, a short user guide and test results. Work in two-week sprints. Update the backlog and this document when requirements change.
 
-Confirm the final name, product owner, hosting, WebUntis permission and limits, VAO access, the teacher email source and the optional teacher login. Until email lookup is agreed, the student enters and checks the address. Review proposed settings with the teacher before release.
+Confirm the final name, product owner, hosting, WebUntis permission and limits, the teacher email source and the optional teacher login. Until email lookup is agreed, the student enters and checks the address. Review proposed settings with the teacher before release.

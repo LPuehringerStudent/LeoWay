@@ -1,6 +1,6 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { ApiHealth } from './core/api-health';
 import { Session } from './core/session';
 
@@ -22,6 +22,11 @@ import { Session } from './core/session';
         }
         <a routerLink="/route" routerLinkActive="active" ariaCurrentWhenActive="page">Route</a>
         <a routerLink="/privacy" routerLinkActive="active" ariaCurrentWhenActive="page">Privacy</a>
+        @if (session.me()) {
+          <button type="button" class="logout" (click)="logout()" [disabled]="signingOut()">
+            {{ signingOut() ? 'Logging out…' : 'Log out' }}
+          </button>
+        }
       </nav>
     </header>
     <main id="main" tabindex="-1"><router-outlet /></main>
@@ -51,11 +56,13 @@ import { Session } from './core/session';
       background: var(--amber); color: var(--night); font-size: 1.05rem;
     }
     nav { display: flex; flex-wrap: wrap; gap: 0.15rem; }
-    nav a {
+    nav a, .logout {
       color: var(--on-night); text-decoration: none; padding: 0.45rem 0.55rem; border-radius: 0.35rem;
       border-bottom: 2px solid transparent;
     }
-    nav a:hover { background: var(--night-line); }
+    nav a:hover, .logout:hover { background: var(--night-line); }
+    .logout { font: inherit; background: transparent; border: 1px solid var(--night-line); cursor: pointer; }
+    .logout:disabled { cursor: progress; color: var(--on-night-muted); }
     nav a.active { border-bottom-color: var(--amber); font-weight: 600; }
     main { width: 100%; max-width: 32rem; margin: 0 auto; padding: 0.9rem 1rem 1.5rem; flex: 1; }
     main:has(app-admin-feeds-page) { max-width: 54rem; padding-top: 1.5rem; }
@@ -72,9 +79,21 @@ import { Session } from './core/session';
 export class App implements OnInit {
   protected readonly session = inject(Session);
   protected readonly api = toSignal(inject(ApiHealth).status);
+  protected readonly signingOut = signal(false);
+  private readonly router = inject(Router);
 
   ngOnInit() {
     void this.session.refresh();
   }
 
+  protected async logout() {
+    if (this.signingOut()) return;
+    this.signingOut.set(true);
+    try {
+      await this.session.logout();
+      await this.router.navigateByUrl('/connect', { replaceUrl: true, state: { returningUser: true } });
+    } finally {
+      this.signingOut.set(false);
+    }
+  }
 }

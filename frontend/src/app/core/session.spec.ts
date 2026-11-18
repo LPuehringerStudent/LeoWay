@@ -40,6 +40,16 @@ describe('Session', () => {
     http.expectNone('/api/me');
   });
 
+  it('does not restore an old session when a request finishes after logout', async () => {
+    const refresh = session.refresh();
+    const oldRequest = http.expectOne('/api/session');
+    const logout = session.logout();
+    http.expectOne('/api/session/logout').flush(null);
+    await logout;
+    oldRequest.flush({ username: 'root.admin', admin: true });
+    expect(await refresh).toBeNull();
+    expect(session.me()).toBeNull();
+  });
 
   it('reports unavailable when WebUntis is down', async () => {
     const result = session.login('max.muster', 'KEY123');

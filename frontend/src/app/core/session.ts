@@ -19,13 +19,17 @@ export class Session {
   private readonly api = inject(ApiClient);
   /** undefined while unknown, null when logged out. */
   readonly me = signal<Me | null | undefined>(undefined);
+  private revision = 0;
 
   async refresh(): Promise<Me | null> {
+    const revision = this.revision;
     try {
       const me = await firstValueFrom(this.api.get<Me>('/api/session'));
+      if (revision !== this.revision) return this.me() ?? null;
       this.me.set(me);
       return me;
     } catch {
+      if (revision !== this.revision) return this.me() ?? null;
       this.me.set(null);
       return null;
     }
@@ -49,7 +53,10 @@ export class Session {
   }
 
   async logout(): Promise<void> {
+    // A session request already in flight must not restore the user after logout.
+    this.revision++;
     await firstValueFrom(this.api.post('/api/session/logout', {})).catch(() => undefined);
+    this.revision++;
     this.me.set(null);
   }
 }

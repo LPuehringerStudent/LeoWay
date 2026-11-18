@@ -10,6 +10,7 @@ Can LeoWay plan trips and find stops with free timetable data and a self-hosted 
   docker run --rm -u "$(id -u):$(id -g)" -v "$PWD/data":/d -w /d iboates/osmium:latest \
     extract -b 12.7,47.4,15.1,48.8 austria.osm.pbf -o upper-austria.osm.pbf
   ```
+- **ÖBB train runs** (planned and actual times, weekly, CC BY): `curl -o data/oebb/zugfahrten.zip https://static.web.oebb.at/open-data/infra/delVO_mmtis/mmtis_zugfahrten.zip` and unzip in `data/oebb/` (terms: data.oebb.at/de/nutzungsbedingungen). `python3 delays.py <train numbers>` prints the typical delay.
 - Everything goes into `data/` (gitignored, licence terms in #93).
 
 ## Run

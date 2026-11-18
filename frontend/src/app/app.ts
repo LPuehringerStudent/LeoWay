@@ -1,7 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { ApiHealth } from './core/api-health';
+import { Session } from './core/session';
 
 @Component({
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
@@ -15,6 +16,10 @@ import { ApiHealth } from './core/api-health';
       <nav aria-label="Main">
         <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
            ariaCurrentWhenActive="page">Home</a>
+        @if (session.me()?.admin) {
+          <a routerLink="/admin/feeds" routerLinkActive="active"
+             ariaCurrentWhenActive="page">Admin</a>
+        }
         <a routerLink="/route" routerLinkActive="active" ariaCurrentWhenActive="page">Route</a>
         <a routerLink="/privacy" routerLinkActive="active" ariaCurrentWhenActive="page">Privacy</a>
       </nav>
@@ -34,7 +39,7 @@ import { ApiHealth } from './core/api-health';
   styles: `
     :host { display: flex; flex-direction: column; min-height: 100dvh; }
     .bar {
-      display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.5rem;
       padding: 0.55rem 1rem; background: var(--night); color: var(--on-night);
     }
     .brand {
@@ -45,7 +50,7 @@ import { ApiHealth } from './core/api-health';
       display: grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 0.35rem;
       background: var(--amber); color: var(--night); font-size: 1.05rem;
     }
-    nav { display: flex; gap: 0.15rem; }
+    nav { display: flex; flex-wrap: wrap; gap: 0.15rem; }
     nav a {
       color: var(--on-night); text-decoration: none; padding: 0.45rem 0.55rem; border-radius: 0.35rem;
       border-bottom: 2px solid transparent;
@@ -64,6 +69,12 @@ import { ApiHealth } from './core/api-health';
     .skip:focus { left: 0.5rem; top: 0.5rem; z-index: 1; background: var(--surface); color: var(--text); padding: 0.5rem; }
   `,
 })
-export class App {
+export class App implements OnInit {
+  protected readonly session = inject(Session);
   protected readonly api = toSignal(inject(ApiHealth).status);
+
+  ngOnInit() {
+    void this.session.refresh();
+  }
+
 }

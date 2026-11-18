@@ -1,0 +1,23 @@
+<label [for]="fieldId()">{{ label() }}</label>
+<div class="search-wrap" [class.selected]="selected()" [class.invalid]="invalid()">
+  <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+  <input [id]="fieldId()" type="text" role="combobox" autocomplete="off" spellcheck="false" maxlength="60"
+    placeholder="Search a bus or tram stop" [value]="query()" (input)="search($any($event.target).value)"
+    (focus)="open.set(true)" (blur)="open.set(false)" (keydown)="key($event)"
+    aria-autocomplete="list" [attr.aria-expanded]="open() && results().length > 0"
+    [attr.aria-controls]="open() && results().length ? fieldId() + '-results' : null"
+    [attr.aria-activedescendant]="open() && active() >= 0 && results().length ? fieldId() + '-option-' + active() : null"
+    [attr.aria-invalid]="invalid()" [attr.aria-describedby]="fieldId() + '-help'" />
+  @if (selected()) {<span class="check" aria-label="Stop selected">✓</span>}
+</div>
+@if (open() && results().length) {
+  <ul [id]="fieldId() + '-results'" role="listbox" [attr.aria-label]="label() + ' suggestions'">
+    @for (stop of results(); track stop.id; let i = $index) {
+      <li [id]="fieldId() + '-option-' + i" role="option" [attr.aria-selected]="active() === i"
+        (mousedown)="$event.preventDefault()" (click)="choose(stop)" [class.active]="active() === i">
+        <span>{{ stop.name }}</span><span class="stop-tag">Stop</span>
+      </li>
+    }
+  </ul>
+}
+<p [id]="fieldId() + '-help'" class="help" role="status">{{ busy() ? 'Searching stops…' : message() || (selected() ? 'Selected stop · ' + selected()!.id : 'Type at least 2 characters, then select a suggestion.') }}</p>

@@ -1,6 +1,8 @@
 package at.leoway.api.security;
 
 import at.leoway.api.domain.Student;
+import at.leoway.api.webuntis.WebUntisClient;
+import at.leoway.api.webuntis.WebUntisClientFactory;
 import at.leoway.api.webuntis.WebUntisConnection;
 import at.leoway.api.webuntis.WebUntisException;
 import io.quarkus.narayana.jta.QuarkusTransaction;
@@ -25,7 +27,7 @@ import org.jboss.logging.Logger;
  *
  * <p>Students: the key is checked with a real WebUntis login; on the first login the account is created and the
  * key stored encrypted, which also connects WebUntis (F01). Later logins refresh the stored key.
- * Administrators keep their own student features and also receive the admin role.
+ * Administrators ({@code leoway.admins}) are checked the same way but get only the admin role and no stored data.
  */
 @ApplicationScoped
 public class WebUntisIdentityProvider implements IdentityProvider<UsernamePasswordAuthenticationRequest> {
@@ -33,6 +35,9 @@ public class WebUntisIdentityProvider implements IdentityProvider<UsernamePasswo
 
     @Inject
     WebUntisConnection connection;
+
+    @Inject
+    WebUntisClientFactory clients;
 
     // Empty or unset LEOWAY_ADMINS means no admins.
     @ConfigProperty(name = "leoway.admins")
@@ -53,6 +58,12 @@ public class WebUntisIdentityProvider implements IdentityProvider<UsernamePasswo
 
     SecurityIdentity login(String username, String key) {
         try {
+            if (admins.orElse(Set.of()).contains(username)) {
+                try (WebUntisClient client = clients.create()) {
+                    client.login(username, key);
+                }
+                return identity(username, Roles.ADMIN);
+            }
             QuarkusTransaction.requiringNew().run(() -> {
                 Student student = Student.<Student>find("username", username).firstResult();
                 if (student == null) {
@@ -63,7 +74,7 @@ public class WebUntisIdentityProvider implements IdentityProvider<UsernamePasswo
                 // Rolls the new account back if WebUntis rejects the key.
                 connection.connect(student.id, username, key);
             });
-            return identity(username, admins.orElse(Set.of()).contains(username));
+            return identity(username, Roles.STUDENT);
         } catch (WebUntisException e) {
             // Reason only: never the username or key (S01).
             LOG.infof("login failed: %s", e.reason());
@@ -71,9 +82,7 @@ public class WebUntisIdentityProvider implements IdentityProvider<UsernamePasswo
         }
     }
 
-    private static SecurityIdentity identity(String username, boolean admin) {
-        var identity = QuarkusSecurityIdentity.builder().setPrincipal(new QuarkusPrincipal(username)).addRole(Roles.STUDENT);
-        if (admin) identity.addRole(Roles.ADMIN);
-        return identity.build();
+    private static SecurityIdentity identity(String username, String role) {
+        return QuarkusSecurityIdentity.builder().setPrincipal(new QuarkusPrincipal(username)).addRole(role).build();
     }
 }

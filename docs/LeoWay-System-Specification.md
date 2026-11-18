@@ -681,7 +681,7 @@ LeoWay runs over two school years and may later move to other schools or another
 | ID | Requirement |
 | --- | --- |
 | S01 | **Confidentiality:** HTTPS only. WebUntis keys are encrypted; the encryption key is kept outside the database and repository. Keys and private school data are never logged. |
-| S02 | **Confidentiality:** the API checks record ownership on every private request. Administrators can use student features for their own account as well as health and feed endpoints; record ownership checks still apply. Database support access uses a separate, restricted account and is logged. |
+| S02 | **Confidentiality:** the API checks record ownership on every private request. The administrator role has health and feed endpoints only. Database support access uses a separate, restricted account and is logged. |
 | S03 | **Confidentiality:** verification links use random, unguessable tokens. Proposed: they expire after 30 days and can be revoked. They show only the delay record, source and collection time. |
 | S04 | **Data integrity:** delay records cannot be changed after collection. Students can only confirm a match, not edit times. Invalid links cannot read or change records. |
 | S05 | **Data integrity:** the WebUntis adapter calls only login/logout, timetable, timegrid, absence and exam endpoints. Messages, homework, grades and other data are blocked. |
@@ -794,7 +794,7 @@ Tests follow the standard and non-standard scenarios in section 2. The teacher a
 | A10 · F10 | Standard: three accounts trigger a warning. Non-standard: repeated reports from one account count once. |
 | A11 · F11 | Test on later dates excluded from training. Compare mean delay error with both baselines. Non-standard: keep the stronger baseline if the model loses. |
 | A12 · F12 | Standard: a known late connection appears in the statistics. Non-standard: figures with fewer than five users are hidden. |
-| A13 · S01–S04, L02 | Student A cannot read B's records. An administrator can use their own private endpoints but cannot read another student's records. Deletion removes private data and survives a backup restore. |
+| A13 · S01–S04, L02 | Student A cannot read B's records. An administrator cannot use private endpoints. Deletion removes private data and survives a backup restore. |
 | A14 · E01, E04, U01, U05, U06, M03 | Meet the load targets, phone-width and keyboard checks in the supported browsers, a test of the Android app on a real phone, and CI checks; record the results. |
 
 ### 6.1 Delivery and open decisions

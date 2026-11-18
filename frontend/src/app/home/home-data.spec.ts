@@ -5,25 +5,17 @@ import { Session } from '../core/session';
 import { HomeDataService } from './home-data';
 
 describe('HomeDataService', () => {
-  it('loads an admin’s own timetable and routes like a student', async () => {
+  it('shows the guest view for an admin without requesting student data', async () => {
     TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
     const http = TestBed.inject(HttpTestingController);
     const result = TestBed.inject(HomeDataService).load();
     http.expectOne('/api/session').flush({ username: 'test.admin', admin: true });
 
-    await vi.waitFor(() => {
-      http.expectOne('/api/me/webuntis').flush({ connected: true });
-      http.expectOne('/api/me/routes').flush([]);
-      http.expectOne('/api/me/leave-by').flush(null, { status: 404, statusText: 'Not Found' });
-    });
-    expect(await result).toEqual({
-      kind: 'student',
-      username: 'test.admin',
-      webUntis: { connected: true },
-      routes: [],
-      leaveBy: null,
-      loadedAt: expect.any(Date),
-    });
+    expect(await result).toEqual({ kind: 'guest' });
+    http.expectNone('/api/me/webuntis');
+    http.expectNone('/api/me/routes');
+    http.expectNone('/api/me/leave-by');
+    // Keep the admin session so the Admin navigation remains available.
     expect(TestBed.inject(Session).me()?.admin).toBe(true);
     http.verify();
   });

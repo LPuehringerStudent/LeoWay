@@ -31,7 +31,7 @@ public class MeResource {
     @Operation(summary = "Show the logged-in student")
     @APIResponse(responseCode = "200", description = "The student")
     @APIResponse(responseCode = "401", description = "Not logged in")
-    @APIResponse(responseCode = "403", description = "No student account")
+    @APIResponse(responseCode = "403", description = "No student account, or an administrator")
     public Me me() {
         Student s = current.get();
         return new Me(s.username, s.createdAt);
@@ -46,7 +46,7 @@ public class MeResource {
     @Operation(summary = "Delete the account and all private data", description = "Removes the WebUntis key, saved routes and lateness entries (L02, L03).")
     @APIResponse(responseCode = "204", description = "Deleted")
     @APIResponse(responseCode = "401", description = "Not logged in")
-    @APIResponse(responseCode = "403", description = "No student account")
+    @APIResponse(responseCode = "403", description = "No student account, or an administrator")
     @Transactional
     public void delete() {
         long id = current.id();

@@ -29,7 +29,7 @@ class LoginTest {
     @AfterEach
     void stop() {
         fake.close();
-        QuarkusTransaction.requiringNew().run(() -> Student.delete("username in ?1", java.util.List.of(FakeWebUntis.USER, FakeWebUntis.ADMIN)));
+        QuarkusTransaction.requiringNew().run(() -> Student.delete("username", FakeWebUntis.USER));
     }
 
     static Cookie login(String user, String key, int expectedStatus) {
@@ -65,15 +65,13 @@ class LoginTest {
     }
 
     @Test
-    void adminGetsFeedsAndOwnStudentAccount() {
+    void adminGetsFeedsButNoAccount() {
         Cookie session = login(FakeWebUntis.ADMIN, FakeWebUntis.KEY, 200);
         given().cookie(session).get("/api/admin/feeds").then().statusCode(200);
         given().cookie(session).get("/api/session").then().statusCode(200)
                 .body("username", equalTo(FakeWebUntis.ADMIN)).body("admin", equalTo(true));
-        given().cookie(session).get("/api/me").then().statusCode(200);
-        given().cookie(session).get("/api/me/routes").then().statusCode(200);
-        given().cookie(session).get("/api/me/webuntis").then().statusCode(200).body("connected", equalTo(true));
-        assertEquals(1L, QuarkusTransaction.requiringNew().call(() -> Student.count("username", FakeWebUntis.ADMIN)));
+        given().cookie(session).get("/api/me").then().statusCode(403);
+        assertEquals(0L, QuarkusTransaction.requiringNew().call(() -> Student.count("username", FakeWebUntis.ADMIN)));
     }
 
     @Test

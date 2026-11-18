@@ -43,7 +43,7 @@ export class RoutePage implements OnInit {
 
   async ngOnInit() {
     const me = await this.session.refresh();
-    if (me) {
+    if (me && !me.admin) {
       await Promise.all([
         firstValueFrom(this.webUntis.status()).then(status => this.status.set(status)).catch(() => this.status.set(null)),
         this.loadRoutes(),

@@ -5,10 +5,13 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import at.leoway.api.security.Roles;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.TestSecurity;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +19,7 @@ import org.junit.jupiter.api.Test;
 
 /** GET /api/stops (#57) against a fake Linz AG stop finder on the port in %test.leoway.feeds.linz-ag.base-url. */
 @QuarkusTest
+@TestSecurity(user = "anna", roles = Roles.STUDENT)
 class StopSearchTest {
     FakeLinzAg fake;
 
@@ -34,7 +38,7 @@ class StopSearchTest {
     }
 
     @Test
-    void findsStopsWithoutLoginBestFirstAndNoAddresses() {
+    void findsStopsBestFirstAndNoAddresses() {
         given().queryParam("q", "Auwiesen").get("/api/stops").then().statusCode(200)
                 .body("id", contains("60501810", "60502210", "60508077"))
                 .body("name[0]", equalTo("Linz/Donau, Auwiesen"));
@@ -62,7 +66,8 @@ class StopSearchTest {
 
     @Test
     void rejectsTooShortOrTooLongQueries() {
-        given().get("/api/stops").then().statusCode(400);
+        given().get("/api/stops").then().statusCode(400)
+                .body("errors", hasItem("q must have 2 to 60 characters"));
         given().queryParam("q", " a ").get("/api/stops").then().statusCode(400);
         given().queryParam("q", "x".repeat(61)).get("/api/stops").then().statusCode(400);
         assertEquals(0, fake.queries.size());
@@ -71,5 +76,19 @@ class StopSearchTest {
     @Test
     void reportsAnUnreachableStopFinder() {
         given().queryParam("q", "fail").get("/api/stops").then().statusCode(503);
+    }
+
+    /** Every uncached search uses the shared request slot, so only students may search (#90). */
+    @Test
+    @TestSecurity
+    void anonymousCannotSearch() {
+        given().queryParam("q", "auwiesen").get("/api/stops").then().statusCode(401);
+        assertEquals(0, fake.queries.size());
+    }
+
+    @Test
+    @TestSecurity(user = "root", roles = Roles.ADMIN)
+    void adminCannotSearch() {
+        given().queryParam("q", "auwiesen").get("/api/stops").then().statusCode(403);
     }
 }

@@ -482,10 +482,21 @@ paths:
                   $ref: "#/components/schemas/Stop"
         "400":
           description: "q is missing, shorter than 2 or longer than 60 characters"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Errors"
         "429":
           description: Too many new searches right now; see Retry-After (seconds)
         "503":
           description: The Linz AG stop finder can't be reached
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - SecurityScheme:
+        - student
   /q/health:
     description: MicroProfile Health Endpoint
     summary: MicroProfile Health provides a way for your application to distribute

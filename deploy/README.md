@@ -25,7 +25,7 @@ apt-get install -y docker.io docker-compose age rsync git curl osmium-tool   # c
 mkdir -p /opt/leoway && cd /opt/leoway
 git clone https://github.com/LPuehringerStudent/LeoWay.git repo && cp -r repo/deploy . && cd deploy
 cp .env.example .env && chmod 600 .env   # fill in passwords and keys (see comments in the file)
-docker compose up -d --wait
+docker compose up -d --wait db backend web   # motis has no data yet, see "MOTIS trip planner"
 cp systemd/leoway-backup.* /etc/systemd/system/
 systemctl daemon-reload && systemctl enable --now leoway-backup.timer
 ```
@@ -119,8 +119,14 @@ backup. Each run:
 3. imports into a new folder `data-<time>` in its own container (about 1 minute; at most 3 cores and 4 GB, peak
    about 2.1 GB)
 4. points `current` at it, restarts `motis` (a few seconds without answers), and checks the health and a test trip
-   Linz Hauptbahnhof → Limesstraße
-5. if the check fails, points `current` back at the old data and restarts again
+   Linz Hauptbahnhof → Limesstraße, which must contain a bus, tram or train leg (a walking-only answer means the
+   timetables are unusable)
+5. if the check fails, points `current` back at the old data and restarts again. On the very first run there is no
+   old data: it removes `current` and stops `motis`, and the next run starts clean
+
+If next year's data is published but its terms aren't accepted (HTTP 451), the update still runs with this year's data
+and sends a warning every night until you accept them; otherwise trips would quietly stop about 30 days after the
+timetable change. A 451 for the current year fails the update.
 
 A failed download or import changes nothing. Results go to `AUTO_DEPLOY_NOTIFY_URL` if set, otherwise to the journal
 (`journalctl -u leoway-motis`). The data before the current one stays for a manual rollback
@@ -130,7 +136,8 @@ A failed download or import changes nothing. Results go to `AUTO_DEPLOY_NOTIFY_U
 App deploys (`auto-deploy.sh`) only start `db`, `backend` and `web`, so a MOTIS problem never rolls back an app
 deploy.
 
-Setup, once:
+Setup, once (the script creates `MOTIS_DIR` and gives it to the MOTIS user, uid `MOTIS_UID`; don't start `motis`
+before the first import, it only restarts without data):
 1. Create a free account on [data.mobilitaetsverbuende.at](https://data.mobilitaetsverbuende.at) and accept the
    terms of data sets 66, 69 and 77 (otherwise downloads answer HTTP 451). Accept them again for each new
    timetable year.

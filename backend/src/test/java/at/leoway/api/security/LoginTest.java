@@ -12,6 +12,7 @@ import io.quarkus.narayana.jta.QuarkusTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.Cookie;
 import io.restassured.http.ContentType;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,7 +30,7 @@ class LoginTest {
     @AfterEach
     void stop() {
         fake.close();
-        QuarkusTransaction.requiringNew().run(() -> Student.delete("username", FakeWebUntis.USER));
+        QuarkusTransaction.requiringNew().run(() -> Student.delete("username in ?1", List.of(FakeWebUntis.USER, FakeWebUntis.ADMIN)));
     }
 
     static Cookie login(String user, String key, int expectedStatus) {
@@ -65,13 +66,15 @@ class LoginTest {
     }
 
     @Test
-    void adminGetsFeedsButNoAccount() {
+    void adminGetsFeedsAndOwnStudentAccount() {
         Cookie session = login(FakeWebUntis.ADMIN, FakeWebUntis.KEY, 200);
         given().cookie(session).get("/api/admin/feeds").then().statusCode(200);
         given().cookie(session).get("/api/session").then().statusCode(200)
                 .body("username", equalTo(FakeWebUntis.ADMIN)).body("admin", equalTo(true));
-        given().cookie(session).get("/api/me").then().statusCode(403);
-        assertEquals(0L, QuarkusTransaction.requiringNew().call(() -> Student.count("username", FakeWebUntis.ADMIN)));
+        given().cookie(session).get("/api/me").then().statusCode(200);
+        given().cookie(session).get("/api/me/routes").then().statusCode(200);
+        given().cookie(session).get("/api/me/webuntis").then().statusCode(200).body("connected", equalTo(true));
+        assertEquals(1L, QuarkusTransaction.requiringNew().call(() -> Student.count("username", FakeWebUntis.ADMIN)));
     }
 
     @Test

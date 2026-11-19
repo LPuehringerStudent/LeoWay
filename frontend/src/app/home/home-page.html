@@ -60,7 +60,10 @@
         </div>
       } @else {
         <h1 id="today-heading" class="board__day">Your day</h1>
-        @if (!s) {
+        @if (h.reconnectRequired) {
+          <p class="board__message">Please log out and reconnect WebUntis to use your routes and timetable.</p>
+          <a class="btn btn--amber" routerLink="/connect">Reconnect WebUntis</a>
+        } @else if (!s) {
           <p class="board__message">Your timetable could not be loaded. Reload the page in a moment.</p>
         } @else if (!s.connected) {
           <p class="board__message">WebUntis is not connected, so LeoWay doesn't know your first lesson.</p>
@@ -78,7 +81,9 @@
 
     <section class="card" aria-labelledby="route-heading">
       <h2 id="route-heading">Your way to school</h2>
-      @if (h.routes === null) {
+      @if (h.reconnectRequired) {
+        <p class="muted">Reconnect WebUntis to load your routes.</p>
+      } @else if (h.routes === null) {
         <p class="error">Your routes could not be loaded.</p>
       } @else if (h.routes.length === 0) {
         <p class="muted">No route saved yet. Saving a route is coming soon; then LeoWay works out your leave-by time.</p>

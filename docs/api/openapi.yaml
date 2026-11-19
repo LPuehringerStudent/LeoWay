@@ -193,7 +193,7 @@ components:
           format: int32
           maximum: 30
           minimum: 0
-          default: 5
+          default: 10
     Session:
       type: object
       properties:
@@ -234,6 +234,12 @@ components:
           type: string
         name:
           type: string
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
     HealthResponse:
       type: object
       properties:
@@ -310,7 +316,7 @@ paths:
         "401":
           description: Not logged in
         "403":
-          description: "No student account, or an administrator"
+          description: No student account
       security:
       - SecurityScheme:
         - student
@@ -326,7 +332,7 @@ paths:
         "401":
           description: Not logged in
         "403":
-          description: "No student account, or an administrator"
+          description: No student account
       security:
       - SecurityScheme:
         - student

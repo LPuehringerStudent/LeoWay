@@ -14,68 +14,175 @@ import { Session } from './core/session';
         <span class="brand__mark" aria-hidden="true">L</span>LeoWay
       </a>
       <nav aria-label="Main">
-        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
-           ariaCurrentWhenActive="page">Home</a>
+        <a
+          routerLink="/"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          ariaCurrentWhenActive="page"
+          >Home</a
+        >
         @if (session.me()?.admin) {
-          <a routerLink="/admin/feeds" routerLinkActive="active"
-             ariaCurrentWhenActive="page">Admin</a>
+          <a routerLink="/admin/feeds" routerLinkActive="active" ariaCurrentWhenActive="page"
+            >Admin</a
+          >
         }
         <a routerLink="/route" routerLinkActive="active" ariaCurrentWhenActive="page">Route</a>
         <a routerLink="/privacy" routerLinkActive="active" ariaCurrentWhenActive="page">Privacy</a>
-        @if (session.me()) {
-          <button type="button" class="logout" (click)="logout()" [disabled]="signingOut()">
-            {{ signingOut() ? 'Logging out…' : 'Log out' }}
-          </button>
-        }
       </nav>
+      @if (session.me()) {
+        <button type="button" class="logout" (click)="logout()" [disabled]="signingOut()">
+          {{ signingOut() ? 'Logging out…' : 'Log out' }}
+        </button>
+      }
     </header>
     <main id="main" tabindex="-1"><router-outlet /></main>
     <footer class="foot">
       <p role="status">
         @switch (api()) {
-          @case ('Ready') { LeoWay server is running }
-          @case ('Unavailable') { <strong>LeoWay server not reachable.</strong> Data may be out of date. }
-          @default { Checking the LeoWay server… }
+          @case ('Ready') {
+            LeoWay server is running
+          }
+          @case ('Unavailable') {
+            <strong>LeoWay server not reachable.</strong> Data may be out of date.
+          }
+          @default {
+            Checking the LeoWay server…
+          }
         }
       </p>
       <p>A school project at HTL Leonding</p>
     </footer>
   `,
   styles: `
-    :host { display: flex; flex-direction: column; min-height: 100dvh; }
+    :host {
+      display: flex;
+      flex-direction: column;
+      min-height: 100dvh;
+    }
     .bar {
-      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.5rem;
-      padding: 0.55rem 1rem; background: var(--night); color: var(--on-night);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 1rem;
+      background: var(--night);
+      color: var(--on-night);
     }
     .brand {
-      display: flex; align-items: center; gap: 0.45rem;
-      color: inherit; font-family: var(--display); font-weight: 700; font-size: 1.2rem; text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      color: inherit;
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 1.2rem;
+      text-decoration: none;
     }
     .brand__mark {
-      display: grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 0.35rem;
-      background: var(--amber); color: var(--night); font-size: 1.05rem;
+      display: grid;
+      place-items: center;
+      width: 1.6rem;
+      height: 1.6rem;
+      border-radius: 0.35rem;
+      background: var(--amber);
+      color: var(--night);
+      font-size: 1.05rem;
     }
-    nav { display: flex; flex-wrap: wrap; gap: 0.15rem; }
-    /* Phones: the menu always gets its own row, so the header keeps its height when "Log out" appears (CLS). */
-    @media (max-width: 30rem) { nav { flex-basis: 100%; } }
-    nav a, .logout {
-      color: var(--on-night); text-decoration: none; padding: 0.45rem 0.55rem; border-radius: 0.35rem;
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.15rem;
+      margin-left: auto;
+    }
+    nav a,
+    .logout {
+      color: var(--on-night);
+      text-decoration: none;
+      padding: 0.45rem 0.55rem;
+      border-radius: 0.35rem;
       border-bottom: 2px solid transparent;
     }
-    nav a:hover, .logout:hover { background: var(--night-line); }
-    .logout { font: inherit; background: transparent; border: 1px solid var(--night-line); cursor: pointer; }
-    .logout:disabled { cursor: progress; color: var(--on-night-muted); }
-    nav a.active { border-bottom-color: var(--amber); font-weight: 600; }
-    main { width: 100%; max-width: 32rem; margin: 0 auto; padding: 0.9rem 1rem 1.5rem; flex: 1; }
-    main:has(app-admin-feeds-page) { max-width: 54rem; padding-top: 1.5rem; }
-    main:focus { outline: none; }
-    .foot {
-      width: 100%; max-width: 32rem; margin: 0 auto; padding: 0 1rem 1.25rem;
-      color: var(--muted); font-size: 0.8rem; display: flex; flex-direction: column; gap: 0.2rem;
+    nav a:hover,
+    .logout:hover {
+      background: var(--night-line);
     }
-    .foot p { margin: 0; }
-    .skip { position: absolute; left: -999px; }
-    .skip:focus { left: 0.5rem; top: 0.5rem; z-index: 1; background: var(--surface); color: var(--text); padding: 0.5rem; }
+    .logout {
+      font: inherit;
+      background: transparent;
+      border: 1px solid var(--night-line);
+      cursor: pointer;
+    }
+    .logout:disabled {
+      cursor: progress;
+      color: var(--on-night-muted);
+    }
+    nav a.active {
+      border-bottom-color: var(--amber);
+      font-weight: 600;
+    }
+    main {
+      width: 100%;
+      max-width: 32rem;
+      margin: 0 auto;
+      padding: 0.9rem 1rem 1.5rem;
+      flex: 1;
+    }
+    main:has(app-admin-feeds-page) {
+      max-width: 54rem;
+      padding-top: 1.5rem;
+    }
+    main:has(app-route-page) {
+      max-width: 74rem;
+      padding-top: 1.5rem;
+    }
+    main:focus {
+      outline: none;
+    }
+    .foot {
+      width: 100%;
+      max-width: 32rem;
+      margin: 0 auto;
+      padding: 0 1rem 1.25rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .foot p {
+      margin: 0;
+    }
+    .skip {
+      position: absolute;
+      left: -999px;
+    }
+    .skip:focus {
+      left: 0.5rem;
+      top: 0.5rem;
+      z-index: 1;
+      background: var(--surface);
+      color: var(--text);
+      padding: 0.5rem;
+    }
+    @media (max-width: 480px) {
+      /* Reserve phone menu rows so session updates do not shift the page. */
+      .bar {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-rows: minmax(2.5rem, auto) auto;
+      }
+      nav {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        justify-content: space-around;
+        margin-left: 0;
+      }
+      .logout {
+        grid-column: 2;
+        grid-row: 1;
+      }
+    }
   `,
 })
 export class App implements OnInit {
@@ -93,7 +200,10 @@ export class App implements OnInit {
     this.signingOut.set(true);
     try {
       await this.session.logout();
-      await this.router.navigateByUrl('/connect', { replaceUrl: true, state: { returningUser: true } });
+      await this.router.navigateByUrl('/connect', {
+        replaceUrl: true,
+        state: { returningUser: true },
+      });
     } finally {
       this.signingOut.set(false);
     }

@@ -60,7 +60,7 @@ class RouteResourceTest {
     void createsARouteWithTheSuggestedBuffer() {
         int id = given().contentType(ContentType.JSON).body(route("60501810", "60500120", 4, 6, null))
                 .post("/api/me/routes").then().statusCode(201)
-                .body("homeStopId", equalTo("60501810")).body("bufferMinutes", equalTo(5))
+                .body("homeStopId", equalTo("60501810")).body("bufferMinutes", equalTo(10))
                 .extract().path("id");
         given().get("/api/me/routes/" + id).then().statusCode(200).body("walkToSchoolMinutes", equalTo(6));
         assertEquals(annaId, QuarkusTransaction.requiringNew().call(() -> SavedRoute.<SavedRoute>findById((long) id).studentId));

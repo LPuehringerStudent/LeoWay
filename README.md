@@ -82,8 +82,20 @@ Alternatively, set `LEOWAY_ADMINS=username.one,username.two` in the root `.env` 
 `npm start` passes this local setting to the backend. An existing shell variable takes precedence.
 
 Log out and back in through Connect WebUntis with your normal access key to receive the new role.
-Admin accounts have access to feeds and health only; they do not have student routes or timetable data.
+Admin accounts can use their own routes and timetable data as well as the admin panel.
+Admins who used the old admin-only login must log out and reconnect once to create their own student account.
 The local setting does not change the production allowlist in `deploy/.env`.
+
+### Route editor
+
+In **Route and alerts**, choose your home and school stops from the search suggestions, enter both walking
+times, and save. The form suggests a 10-minute buffer. Saved routes can be edited or deleted.
+Students and admins use this form for their own data; other students' private data remains protected.
+
+The map displays public stop positions and a dashed stop overview, not the actual bus journey or live travel
+times. Stop names and positions are resolved again after a reload; only ids and timing settings are saved.
+Map tiles load from OpenStreetMap with attribution and normal browser caching. Production hosting must follow
+the [OpenStreetMap tile policy](https://operations.osmfoundation.org/policies/tiles/).
 
 ### OpenAPI
 

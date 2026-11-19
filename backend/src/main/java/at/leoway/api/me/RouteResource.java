@@ -42,7 +42,7 @@ public class RouteResource {
 
     /**
      * What the route editor sends (F02). Stops are ids from {@code GET /api/stops}, never an address (L02).
-     * Walking times and buffer are whole minutes; a missing buffer means the suggested 5 minutes.
+     * Walking times and buffer are whole minutes; a missing buffer means the suggested 10 minutes.
      */
     public record RouteInput(
             @Schema(required = true, description = "Stop id from GET /api/stops", examples = "60501720")
@@ -51,11 +51,11 @@ public class RouteResource {
             String schoolStopId,
             @Schema(required = true, minimum = "0", maximum = "60") Integer walkToStopMinutes,
             @Schema(required = true, minimum = "0", maximum = "60") Integer walkToSchoolMinutes,
-            @Schema(minimum = "0", maximum = "30", defaultValue = "5") Integer bufferMinutes) {}
+            @Schema(minimum = "0", maximum = "30", defaultValue = "10") Integer bufferMinutes) {}
 
     static final int MAX_WALK_MINUTES = 60;
     static final int MAX_BUFFER_MINUTES = 30;
-    static final int DEFAULT_BUFFER_MINUTES = 5;
+    static final int DEFAULT_BUFFER_MINUTES = 10;
     /** Stop ids are short tokens (Linz AG: digits, GTFS: e.g. at:44:41164). Rules out free text like an address. */
     private static final Pattern STOP_ID = Pattern.compile("[0-9A-Za-z:._-]{1,40}");
 

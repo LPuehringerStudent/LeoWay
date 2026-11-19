@@ -52,7 +52,7 @@ class CoreSchemaTest {
 
     @Test
     @TestTransaction
-    void routeBufferDefaultsToFiveMinutesInTheDatabase() {
+    void routeBufferDefaultsToTenMinutesInTheDatabase() {
         Student student = student("cara");
         em.createNativeQuery("""
                 INSERT INTO saved_route
@@ -61,7 +61,7 @@ class CoreSchemaTest {
                 """).setParameter("student", student.id).executeUpdate();
 
         SavedRoute found = SavedRoute.find("studentId", student.id).firstResult();
-        assertEquals(5, found.bufferMinutes);
+        assertEquals(10, found.bufferMinutes);
     }
 
     @Test

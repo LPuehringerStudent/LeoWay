@@ -14,6 +14,11 @@ public class LinzAgTripsAccess {
         trips.clearCache();
         trips.useClock(clock);
         trips.useMinGap(java.time.Duration.ZERO);
+        trips.useBackgroundGap(java.time.Duration.ZERO);
+    }
+
+    public void useBackgroundGap(java.time.Duration gap) {
+        trips.useBackgroundGap(gap);
     }
 
     public void useClock(Clock clock) {
@@ -22,6 +27,10 @@ public class LinzAgTripsAccess {
 
     public void useMinGap(java.time.Duration gap) {
         trips.useMinGap(gap);
+    }
+
+    public ConnectionSource source() {
+        return trips;
     }
 
     /** The trip id of the {@code index}th trip in trip-arrive-by.json. */

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import at.leoway.api.alerts.Alerts;
@@ -16,6 +17,7 @@ import at.leoway.api.domain.SavedRoute;
 import at.leoway.api.domain.Student;
 import at.leoway.api.domain.WebUntisCredential;
 import at.leoway.api.feed.LinzAgAdapter;
+import at.leoway.api.leaveby.ConnectionSource;
 import at.leoway.api.leaveby.LeaveBy;
 import at.leoway.api.leaveby.LinzAgTripsAccess;
 import at.leoway.api.stops.FakeLinzAg;
@@ -23,11 +25,14 @@ import io.quarkus.narayana.jta.QuarkusTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,6 +49,8 @@ class DelayWarningsTest {
     static final Instant MORNING = THURSDAY.atTime(6, 30).atZone(LeaveBy.VIENNA).toInstant();
     static final String HOME = "60501720";
     static final String SCHOOL = "60501780";
+    static final String HOME_2 = "60501721";
+    static final String HOME_3 = "60501722";
     static final String WEBHOOK = "https://discord.com/api/webhooks/1234567890123456780/" + "wQ3_-".repeat(13) + "xyz";
 
     FakeLinzAg linzAg;
@@ -66,6 +73,7 @@ class DelayWarningsTest {
         discord = new FakeDiscord(18767);
         trips.reset(Clock.fixed(MORNING, ZoneOffset.UTC));
         warnings.useClock(Clock.fixed(MORNING, ZoneOffset.UTC));
+        warnings.reset();
         tripId = LinzAgTripsAccess.parseFixtureTripId(2);
         studentId = QuarkusTransaction.requiringNew().call(() -> {
             Student s = new Student();
@@ -98,8 +106,8 @@ class DelayWarningsTest {
         discord.close();
         warnings.useClock(Clock.systemUTC());
         QuarkusTransaction.requiringNew().run(() -> {
-            Student.delete("username", "wanda");
-            DelayRecord.delete("stopId in ?1", List.of(HOME, SCHOOL));
+            Student.delete("username in ?1", List.of("wanda", "wanda-2", "wanda-3"));
+            DelayRecord.delete("stopId in ?1", List.of(HOME, HOME_2, HOME_3, SCHOOL));
         });
     }
 
@@ -205,6 +213,55 @@ class DelayWarningsTest {
         assertNull(warning());
     }
 
+    @Test
+    void withTheRealRequestGapEveryRouteGetsItsTurn() {
+        // #106 review: with one trip request per 15 s, only the first routes in id order were ever checked.
+        trips.useMinGap(Duration.ofSeconds(15));
+        trips.useBackgroundGap(Duration.ofSeconds(30));
+        long second = student("wanda-2", HOME_2);
+        long third = student("wanda-3", HOME_3);
+        delay(6);
+        delay(6, HOME_2);
+        delay(6, HOME_3);
+
+        // First poll: one request, the other two routes are busy and queued.
+        at(MORNING);
+        warnings.poll();
+        assertEquals(1, linzAg.queries.size());
+
+        // Recorder polls every 15 s. Queued students are retried in between full runs (background requests at most
+        // every 30 s), so all three are checked within a minute: 0:00 first, 0:30 second, 0:60 third. Without the
+        // retries the third would wait until 2:00, and in plain id order never.
+        for (int i = 1; i <= 4; i++) {
+            at(MORNING.plusSeconds(15L * i));
+            warnings.poll();
+        }
+        Set<String> origins = linzAg.queries.stream()
+                .map(q -> q.replaceAll(".*name_origin=([^&]*).*", "$1")).collect(Collectors.toSet());
+        assertEquals(Set.of(HOME, HOME_2, HOME_3), origins);
+        assertNotNull(warning(studentId));
+        assertNotNull(warning(second));
+        assertNotNull(warning(third));
+    }
+
+    @Test
+    void backgroundChecksLeaveRequestsForStudentsOwnCalls() {
+        trips.useMinGap(Duration.ofSeconds(15));
+        trips.useBackgroundGap(Duration.ofSeconds(30));
+        ConnectionSource source = trips.source();
+        Instant arrive = THURSDAY.atTime(7, 41).atZone(LeaveBy.VIENNA).toInstant();
+        at(MORNING);
+        source.arrivingByInBackground(HOME, SCHOOL, arrive);
+
+        // 15 s later the next slot is free, but not for the background job: it goes to a student's Home.
+        at(MORNING.plusSeconds(15));
+        ConnectionSource.Unavailable busy = assertThrows(ConnectionSource.Unavailable.class,
+                () -> source.arrivingByInBackground(HOME_2, SCHOOL, arrive));
+        assertEquals(Duration.ofSeconds(15), busy.retryAfter);
+        source.arrivingBy(HOME_3, SCHOOL, arrive);
+        assertEquals(2, linzAg.queries.size());
+    }
+
     private void lesson(String start, boolean exam) {
         QuarkusTransaction.requiringNew().run(() -> {
             FirstLessonCache c = FirstLessonCache.findById(studentId);
@@ -222,14 +279,55 @@ class DelayWarningsTest {
         });
     }
 
+    private void at(Instant t) {
+        trips.useClock(Clock.fixed(t, ZoneOffset.UTC));
+        warnings.useClock(Clock.fixed(t, ZoneOffset.UTC));
+    }
+
+    /** Another student with the same lesson and walks, from another home stop. */
+    private long student(String username, String home) {
+        return QuarkusTransaction.requiringNew().call(() -> {
+            Student s = new Student();
+            s.username = username;
+            s.persist();
+            WebUntisCredential c = new WebUntisCredential();
+            c.studentId = s.id;
+            c.webUntisUsername = username;
+            c.encryptedAccessKey = new byte[] {1};
+            c.keyVersion = 1;
+            c.persist();
+            SavedRoute r = new SavedRoute();
+            r.studentId = s.id;
+            r.homeStopId = home;
+            r.schoolStopId = SCHOOL;
+            r.walkToStopMinutes = 7;
+            r.walkToSchoolMinutes = 3;
+            r.bufferMinutes = 5;
+            r.persist();
+            FirstLessonCache l = new FirstLessonCache();
+            l.studentId = s.id;
+            l.lessonDate = THURSDAY;
+            l.startAt = THURSDAY.atTime(7, 44).atZone(LeaveBy.VIENNA).toInstant();
+            l.endAt = l.startAt.plusSeconds(50 * 60);
+            l.subject = "SYP";
+            l.syncedAt = MORNING;
+            l.persist();
+            return s.id;
+        });
+    }
+
     /** The recorder sees the 07:24 at the home stop with this delay, just now. */
     private void delay(int minutes) {
+        delay(minutes, HOME);
+    }
+
+    private void delay(int minutes, String stopId) {
         QuarkusTransaction.requiringNew().run(() -> {
             DelayRecord r = new DelayRecord();
             r.source = LinzAgAdapter.ID;
             r.line = "3";
             r.tripId = tripId;
-            r.stopId = HOME;
+            r.stopId = stopId;
             r.serviceDate = THURSDAY;
             r.plannedAt = THURSDAY.atTime(7, 24).atZone(LeaveBy.VIENNA).toInstant();
             r.reportedDelay = minutes;
@@ -239,6 +337,10 @@ class DelayWarningsTest {
     }
 
     private DelayWarning warning() {
-        return QuarkusTransaction.requiringNew().call(() -> DelayWarning.findById(studentId));
+        return warning(studentId);
+    }
+
+    private DelayWarning warning(long id) {
+        return QuarkusTransaction.requiringNew().call(() -> DelayWarning.findById(id));
     }
 }

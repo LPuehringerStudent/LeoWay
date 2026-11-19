@@ -22,8 +22,11 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
@@ -35,8 +38,10 @@ import org.jboss.logging.Logger;
  * connection changed, or it is at least {@link #CHANGE_STEP} minutes more or less late than last sent.
  *
  * <p>Connections come from the same {@link ConnectionSource} and cache as the leave-by endpoint, so a check costs no
- * extra Linz AG request while a student's Home is open. If the source is busy, the student is checked next time.
- * Logs carry the student id and a reason only (S01).
+ * extra Linz AG request while a student's Home is open. Background requests have their own, smaller budget
+ * ({@code leoway.trips.background-gap}). A student skipped because the source was busy is queued: the queue is retried
+ * on every recorder poll (15 s) and goes first in the next full run, so every route gets its turn instead of only the
+ * first few in id order (#106 review). Logs carry the student id and a reason only (S01).
  */
 @ApplicationScoped
 public class DelayWarnings {
@@ -64,6 +69,8 @@ public class DelayWarnings {
 
     private final AtomicBoolean running = new AtomicBoolean();
     private volatile Instant lastCheck = Instant.EPOCH;
+    /** Students skipped because the source was busy, oldest first. Guarded by itself. */
+    private final Set<Long> skipped = new LinkedHashSet<>();
     private Clock clock = Clock.systemUTC();
 
     /** For tests. A method, because tests reach the bean through a client proxy. */
@@ -71,36 +78,81 @@ public class DelayWarnings {
         clock = c;
     }
 
-    void onRecorded(@ObservesAsync DelaysRecorded event) {
-        if (!enabled || !LinzAgAdapter.ID.equals(event.source())) return;
-        Instant now = clock.instant();
-        if (now.isBefore(lastCheck.plus(CHECK_GAP))) return;
-        lastCheck = now;
-        checkAll();
+    /** For tests. */
+    void reset() {
+        lastCheck = Instant.EPOCH;
+        synchronized (skipped) {
+            skipped.clear();
+        }
     }
 
-    /** Checks every student with a first lesson in the window. Never runs twice at once. */
+    void onRecorded(@ObservesAsync DelaysRecorded event) {
+        if (!enabled || !LinzAgAdapter.ID.equals(event.source())) return;
+        poll();
+    }
+
+    /** One recorder poll: everyone at most once per {@link #CHECK_GAP}, the queued students in between. */
+    void poll() {
+        Instant now = clock.instant();
+        if (!now.isBefore(lastCheck.plus(CHECK_GAP))) {
+            lastCheck = now;
+            checkAll();
+        } else if (hasSkipped()) {
+            checkSkipped();
+        }
+    }
+
+    private boolean hasSkipped() {
+        synchronized (skipped) {
+            return !skipped.isEmpty();
+        }
+    }
+
+    /** Checks every student with a first lesson in the window, queued ones first. Never runs twice at once. */
     @ActivateRequestContext
     public Result checkAll() {
+        return run(true);
+    }
+
+    /** Checks only the students skipped last time because the source was busy. */
+    @ActivateRequestContext
+    public Result checkSkipped() {
+        return run(false);
+    }
+
+    private Result run(boolean everyone) {
         if (!running.compareAndSet(false, true)) return new Result(0, 0, 0);
         try {
             Instant now = clock.instant();
-            List<Long> ids = QuarkusTransaction.requiringNew().call(() -> FirstLessonCache
+            List<Long> inWindow = QuarkusTransaction.requiringNew().call(() -> FirstLessonCache
                     .<FirstLessonCache>list("startAt > ?1 and startAt <= ?2 order by studentId", now, now.plus(WINDOW))
                     .stream().map(c -> c.studentId).toList());
+            List<Long> ids = new ArrayList<>();
+            synchronized (skipped) {
+                skipped.retainAll(Set.copyOf(inWindow)); // lesson over or moved out of the window
+                ids.addAll(skipped);
+            }
+            if (everyone) inWindow.stream().filter(id -> !ids.contains(id)).forEach(ids::add);
             int warned = 0;
-            int skipped = 0;
+            int skippedNow = 0;
             for (long id : ids) {
+                boolean busy = false;
                 try {
                     if (check(id, now)) warned++;
                 } catch (ConnectionSource.Unavailable e) {
-                    skipped++;
+                    skippedNow++;
+                    // Only "busy" is worth retrying soon; a failing source waits for the next full run.
+                    busy = e.retryAfter != null;
                 } catch (RuntimeException e) {
-                    skipped++;
+                    skippedNow++;
                     LOG.warnf("delay check for student %d failed: %s", id, e.getClass().getSimpleName());
                 }
+                synchronized (skipped) {
+                    skipped.remove(id);
+                    if (busy) skipped.add(id); // to the back of the queue
+                }
             }
-            return new Result(ids.size(), warned, skipped);
+            return new Result(ids.size(), warned, skippedNow);
         } finally {
             running.set(false);
         }
@@ -126,7 +178,7 @@ public class DelayWarnings {
         LeaveByCalculator.Walks walks = LeaveByCalculator.Walks.of(route);
 
         // Same arguments as the leave-by endpoint, so both share one cached Linz AG answer.
-        List<Connection> found = connections.arrivingBy(route.homeStopId, route.schoolStopId,
+        List<Connection> found = connections.arrivingByInBackground(route.homeStopId, route.schoolStopId,
                 lesson.startAt.minus(Duration.ofMinutes(walks.toSchool())));
         List<Connection> live = liveDelays.complete(found, route.homeStopId, route.schoolStopId);
         Optional<DelayCheck.Late> late = DelayCheck.check(lesson.startAt, walks, live, now);

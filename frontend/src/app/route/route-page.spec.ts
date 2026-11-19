@@ -77,7 +77,7 @@ describe('RoutePage', () => {
     http.verify();
   });
 
-  it('shows an admin�s own WebUntis connection like a student', async () => {
+  it('shows an admin’s own WebUntis connection like a student', async () => {
     TestBed.configureTestingModule({
       providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
     });
@@ -101,7 +101,7 @@ describe('RoutePage', () => {
       expect(page.textContent).toContain('Connected as test.admin');
     });
     expect(page.querySelector('a[href="/connect"]')).toBeNull();
-    expect(page.textContent).not.toContain('Loading�');
+    expect(page.textContent).not.toContain('Loading…');
     expect(TestBed.inject(Session).me()?.admin).toBe(true);
     http.verify();
   });

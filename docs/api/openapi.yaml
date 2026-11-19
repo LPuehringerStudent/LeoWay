@@ -350,7 +350,7 @@ paths:
         "401":
           description: Not logged in
         "403":
-          description: "No student account, or an administrator"
+          description: No student account
       security:
       - SecurityScheme:
         - student
@@ -366,7 +366,7 @@ paths:
         "401":
           description: Not logged in
         "403":
-          description: "No student account, or an administrator"
+          description: No student account
       security:
       - SecurityScheme:
         - student

@@ -34,7 +34,7 @@ export class HomeDataService {
 
   async load(): Promise<HomeData> {
     const me = await this.session.refresh();
-    if (!me || me.admin) return { kind: 'guest' };
+    if (!me) return { kind: 'guest' };
     let reconnectRequired = false;
     const unavailable = (error: unknown) => {
       if (error instanceof HttpErrorResponse && error.status === 403) reconnectRequired = true;

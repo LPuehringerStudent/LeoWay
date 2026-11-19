@@ -11,9 +11,6 @@
   <h2 id="webuntis-heading">WebUntis</h2>
   @if (loading()) {
     <p role="status">Loading…</p>
-  } @else if (session.me()?.admin) {
-    <p>Route settings are available to student accounts. You are signed in as an administrator.</p>
-    <a class="btn" routerLink="/admin/feeds">Open admin panel</a>
   } @else if (!session.me()) {
     <p>WebUntis <strong>not connected</strong></p>
     <a class="btn" routerLink="/connect">Connect WebUntis</a>
@@ -58,7 +55,7 @@
   }
 </section>
 
-@if (!loading() && session.me() && !session.me()?.admin) {
+@if (!loading() && session.me()) {
   <div class="section-heading">
     <div>
       <p class="eyebrow">Route settings</p>

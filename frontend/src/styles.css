@@ -47,6 +47,7 @@ p { margin: 0; }
 .lead { margin: 0 0 0.75rem; color: var(--muted); }
 .muted { color: var(--muted); font-size: 0.875rem; }
 .error { color: var(--late); font-weight: 600; margin: 0.4rem 0 0; }
+.ok { color: var(--ok); font-weight: 600; margin: 0.4rem 0 0; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 .card {

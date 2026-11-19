@@ -16,6 +16,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * Encrypts WebUntis access keys with AES-256-GCM (S01). The key comes from {@code LEOWAY_KEY_ENCRYPTION_KEY}
  * (Base64, 32 bytes) and is never stored in the database or the repo. Stored value: 12-byte nonce + ciphertext.
  * The student id is bound as associated data, so a ciphertext copied to another student's row won't decrypt.
+ * Other secrets (alert channel targets, #62) also bind a purpose, so they can't be swapped with the access key.
  */
 @ApplicationScoped
 public class KeyCipher {
@@ -40,30 +41,43 @@ public class KeyCipher {
     }
 
     public byte[] encrypt(String accessKey, long studentId) {
+        return encrypt(accessKey, studentId, "");
+    }
+
+    public String decrypt(byte[] stored, long studentId) {
+        return decrypt(stored, studentId, "");
+    }
+
+    /**
+     * @param purpose bound as associated data next to the student id, e.g. "alert:DISCORD". Empty for the
+     *                WebUntis access key, which keeps the format of keys stored before #62.
+     */
+    public byte[] encrypt(String secret, long studentId, String purpose) {
         byte[] nonce = new byte[NONCE];
         random.nextBytes(nonce);
         try {
-            Cipher c = cipher(Cipher.ENCRYPT_MODE, nonce, studentId);
-            byte[] ct = c.doFinal(accessKey.getBytes(StandardCharsets.UTF_8));
+            Cipher c = cipher(Cipher.ENCRYPT_MODE, nonce, studentId, purpose);
+            byte[] ct = c.doFinal(secret.getBytes(StandardCharsets.UTF_8));
             return ByteBuffer.allocate(NONCE + ct.length).put(nonce).put(ct).array();
         } catch (GeneralSecurityException e) {
             throw new IllegalStateException("encryption failed");
         }
     }
 
-    public String decrypt(byte[] stored, long studentId) {
+    public String decrypt(byte[] stored, long studentId, String purpose) {
         try {
-            Cipher c = cipher(Cipher.DECRYPT_MODE, java.util.Arrays.copyOf(stored, NONCE), studentId);
+            Cipher c = cipher(Cipher.DECRYPT_MODE, java.util.Arrays.copyOf(stored, NONCE), studentId, purpose);
             return new String(c.doFinal(stored, NONCE, stored.length - NONCE), StandardCharsets.UTF_8);
         } catch (GeneralSecurityException e) {
-            throw new IllegalStateException("stored access key cannot be decrypted (wrong key or tampered)");
+            throw new IllegalStateException("stored secret cannot be decrypted (wrong key or tampered)");
         }
     }
 
-    private Cipher cipher(int mode, byte[] nonce, long studentId) throws GeneralSecurityException {
+    private Cipher cipher(int mode, byte[] nonce, long studentId, String purpose) throws GeneralSecurityException {
         Cipher c = Cipher.getInstance("AES/GCM/NoPadding");
         c.init(mode, key, new GCMParameterSpec(128, nonce));
-        c.updateAAD(ByteBuffer.allocate(8).putLong(studentId).array());
+        byte[] p = purpose.getBytes(StandardCharsets.UTF_8);
+        c.updateAAD(ByteBuffer.allocate(8 + p.length).putLong(studentId).put(p).array());
         return c;
     }
 }

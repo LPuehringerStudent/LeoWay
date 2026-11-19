@@ -3,11 +3,12 @@ import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { Session } from '../core/session';
 import { WebUntisApi, WebUntisStatus } from '../core/webuntis-api';
+import { AlertsCard } from './alerts-card';
 
-/** Route and alerts. Sprint 1 has the WebUntis section (F01); routes and alerts come later. */
+/** Route and alerts: the WebUntis section (F01) and alert channels (#62, F04). */
 @Component({
   selector: 'app-route-page',
-  imports: [RouterLink],
+  imports: [RouterLink, AlertsCard],
   templateUrl: './route-page.html',
   styleUrl: '../connect/connect-page.css',
 })

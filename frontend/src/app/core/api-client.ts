@@ -28,6 +28,10 @@ export class ApiClient {
     return this.http.post<T>(this.url(path), body);
   }
 
+  put<T>(path: string, body: unknown): Observable<T> {
+    return this.http.put<T>(this.url(path), body);
+  }
+
   delete(path: string): Observable<void> {
     return this.http.delete<void>(this.url(path));
   }

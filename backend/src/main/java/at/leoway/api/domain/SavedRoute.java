@@ -31,5 +31,5 @@ public class SavedRoute extends PanacheEntityBase {
     public int walkToSchoolMinutes;
 
     @Column(name = "buffer_minutes", nullable = false)
-    public int bufferMinutes = 5;
+    public int bufferMinutes = 10;
 }

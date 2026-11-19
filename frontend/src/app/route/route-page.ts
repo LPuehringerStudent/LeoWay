@@ -12,7 +12,7 @@ import { AlertsCard } from './alerts-card';
 import { HttpErrorResponse } from '@angular/common/http';
 import { RECONNECT_REQUIRED } from '../core/session-errors';
 
-/** Students' own saved routes and WebUntis connection. */
+/** Own saved routes and WebUntis connection for students, including admins with student access. */
 @Component({
   selector: 'app-route-page',
   imports: [RouterLink, RouteEditor, RouteMap, AlertsCard],
@@ -53,7 +53,7 @@ export class RoutePage implements OnInit {
 
   async ngOnInit() {
     const me = await this.session.refresh();
-    if (me && !me.admin) {
+    if (me) {
       await Promise.all([
         firstValueFrom(this.webUntis.status())
           .then((status) => this.status.set(status))

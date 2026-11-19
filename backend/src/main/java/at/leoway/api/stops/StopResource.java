@@ -24,7 +24,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 
 /**
- * Stop search for the route editor (F02). Students only: every uncached search uses the one request slot shared by
+ * Stop search for accounts with student access (F02). Every uncached search uses the one request slot shared by
  * everyone (see {@link StopFinder}), so an anonymous script could otherwise keep it busy for all students (#90).
  */
 @Path("/stops")

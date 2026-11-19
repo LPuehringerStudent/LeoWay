@@ -112,6 +112,31 @@ class TimetableSyncTest {
     }
 
     @Test
+    void anExamOverlappingTheFirstLessonIsStored() {
+        sync.syncAll(THURSDAY);
+        assertFalse(cached(a).exam, "the fixture's exam is on another day");
+
+        // POS 08:55-09:45; an exam from 09:00 overlaps it (#63).
+        fake.exams = "{\"data\":{\"exams\":[{\"id\":10,\"examType\":\"Test\",\"examDate\":20261105,"
+                + "\"startTime\":900,\"endTime\":950,\"subject\":\"POS\"}]}}";
+        sync.syncAll(THURSDAY);
+        assertTrue(cached(a).exam);
+
+        // After the lesson: not an exam of the first lesson.
+        fake.exams = fake.exams.replace("\"startTime\":900,\"endTime\":950", "\"startTime\":1000,\"endTime\":1050");
+        sync.syncAll(THURSDAY);
+        assertFalse(cached(a).exam);
+    }
+
+    @Test
+    void aFailingExamCallStillStoresTheLesson() {
+        fake.exams = "FAIL";
+        assertEquals(new TimetableSync.Result(2, 0), sync.syncAll(THURSDAY));
+        assertEquals("POS", cached(a).subject);
+        assertFalse(cached(a).exam);
+    }
+
+    @Test
     void lessonCancelledOvernightMovesTheFirstLesson() {
         sync.syncAll(THURSDAY);
         recorder.events().clear();

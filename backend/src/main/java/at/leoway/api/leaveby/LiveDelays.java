@@ -25,6 +25,16 @@ public class LiveDelays {
         clock = c;
     }
 
+    /**
+     * Connections without real-time data from the source get the delay the recorder saw last (F09), if it is
+     * recent. Only then do they count as predictions. Used by the leave-by endpoint and the delay warnings (#63).
+     */
+    public List<Connection> complete(List<Connection> found, String homeStopId, String schoolStopId) {
+        List<Connection> out = new java.util.ArrayList<>(found.stream().filter(Connection::predicted).toList());
+        out.addAll(apply(found.stream().filter(c -> !c.predicted()).toList(), homeStopId, schoolStopId));
+        return out;
+    }
+
     public List<Connection> apply(List<Connection> connections, String homeStopId, String schoolStopId) {
         if (connections.isEmpty()) return connections;
         Instant since = clock.instant().minus(FRESH);

@@ -44,6 +44,8 @@ import org.jboss.logging.Logger;
  * (#56). Close to the trip the cache is short, so real-time data stays fresh; further ahead it is long. Requests that
  * aren't cached are spaced at least {@code min-gap} apart across all students, like the recorder (15 s). Students
  * asking for the same trips at once share one request; while the gap runs, a recently expired answer is served.
+ * Background requests (delay warnings, #63) are also spaced at least {@code background-gap} apart, so they take at
+ * most every other slot and the rest stays free for students' own leave-by calls (#101).
  */
 @ApplicationScoped
 public class LinzAgTrips implements ConnectionSource {
@@ -71,6 +73,9 @@ public class LinzAgTrips implements ConnectionSource {
     @ConfigProperty(name = "leoway.trips.min-gap", defaultValue = "15s")
     Duration minGap;
 
+    @ConfigProperty(name = "leoway.trips.background-gap", defaultValue = "30s")
+    Duration backgroundGap;
+
     @Inject
     ObjectMapper json;
 
@@ -83,6 +88,7 @@ public class LinzAgTrips implements ConnectionSource {
     /** Requests on their way, so students asking for the same trips at once share one request. */
     private final Map<Key, CompletableFuture<List<Connection>>> inFlight = new java.util.HashMap<>();
     private Instant nextRequest = Instant.EPOCH;
+    private Instant nextBackground = Instant.EPOCH;
     private Clock clock = Clock.systemUTC();
 
     /** For tests. A method, because tests reach the bean through a client proxy. */
@@ -96,14 +102,29 @@ public class LinzAgTrips implements ConnectionSource {
     }
 
     /** For tests. */
+    void useBackgroundGap(Duration gap) {
+        backgroundGap = gap;
+    }
+
+    /** For tests. */
     synchronized void clearCache() {
         cache.clear();
         inFlight.clear();
         nextRequest = Instant.EPOCH;
+        nextBackground = Instant.EPOCH;
     }
 
     @Override
     public List<Connection> arrivingBy(String fromStopId, String toStopId, Instant arriveBy) {
+        return get(fromStopId, toStopId, arriveBy, false);
+    }
+
+    @Override
+    public List<Connection> arrivingByInBackground(String fromStopId, String toStopId, Instant arriveBy) {
+        return get(fromStopId, toStopId, arriveBy, true);
+    }
+
+    private List<Connection> get(String fromStopId, String toStopId, Instant arriveBy, boolean background) {
         Key key = new Key(fromStopId, toStopId, arriveBy.truncatedTo(ChronoUnit.MINUTES));
         CompletableFuture<List<Connection>> mine;
         CompletableFuture<List<Connection>> theirs;
@@ -114,13 +135,15 @@ public class LinzAgTrips implements ConnectionSource {
             if (hit != null && hit.expires.isAfter(now)) return hit.connections;
             theirs = inFlight.get(key);
             if (theirs == null) {
-                if (now.isBefore(nextRequest)) {
+                Instant allowed = background && nextBackground.isAfter(nextRequest) ? nextBackground : nextRequest;
+                if (now.isBefore(allowed)) {
                     // Busy: a recently expired answer beats a 503 (#99 review). Live delays in it are at most
                     // live-ttl + STALE_GRACE old, the same age LiveDelays still accepts from the recorder.
                     if (hit != null && hit.expires.plus(STALE_GRACE).isAfter(now)) return hit.connections;
-                    throw new Unavailable("Linz AG trip request busy", Duration.between(now, nextRequest));
+                    throw new Unavailable("Linz AG trip request busy", Duration.between(now, allowed));
                 }
                 nextRequest = now.plus(minGap);
+                if (background) nextBackground = now.plus(backgroundGap);
                 mine = new CompletableFuture<>();
                 inFlight.put(key, mine);
             } else {

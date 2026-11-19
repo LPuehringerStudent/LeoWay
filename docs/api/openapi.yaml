@@ -13,6 +13,38 @@ components:
           $ref: "#/components/schemas/Instant"
         brokenAt:
           $ref: "#/components/schemas/Instant"
+    DelayWarning:
+      type: object
+      properties:
+        line:
+          type: string
+        plannedDeparture:
+          $ref: "#/components/schemas/OffsetDateTime"
+        delayMinutes:
+          type: integer
+          format: int32
+        atSchool:
+          $ref: "#/components/schemas/OffsetDateTime"
+        minutesLate:
+          type: integer
+          format: int32
+        exam:
+          type: boolean
+        alternative:
+          $ref: "#/components/schemas/DelayWarningAlternative"
+    DelayWarningAlternative:
+      type: object
+      properties:
+        line:
+          type: string
+        departure:
+          $ref: "#/components/schemas/OffsetDateTime"
+        leaveAt:
+          $ref: "#/components/schemas/OffsetDateTime"
+        atSchool:
+          $ref: "#/components/schemas/OffsetDateTime"
+        inTime:
+          type: boolean
     DiscordInput:
       type: object
       required:
@@ -93,6 +125,8 @@ components:
         minutesLate:
           type: integer
           format: int64
+        warning:
+          $ref: "#/components/schemas/DelayWarning"
     LeaveByStatus:
       description: |-
         IN_TIME: the latest connection that arrives in time, buffer included.

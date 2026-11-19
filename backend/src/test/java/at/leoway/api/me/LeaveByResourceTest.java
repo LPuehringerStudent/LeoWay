@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import at.leoway.api.domain.DelayRecord;
+import at.leoway.api.domain.DelayWarning;
 import at.leoway.api.domain.FirstLessonCache;
 import at.leoway.api.domain.SavedRoute;
 import at.leoway.api.domain.Student;
@@ -125,6 +126,45 @@ class LeaveByResourceTest {
                 .body("connection.departure", equalTo("2026-11-19T07:28:00+01:00"))
                 .body("leaveAt", equalTo("2026-11-19T07:21:00+01:00"))
                 .body("source", equalTo("PREDICTION"));
+    }
+
+    @Test
+    void anOpenDelayWarningIsShownForTheFirstRoute() {
+        // Stored by the background check (#63): the 07:39 is late, take the 07:24.
+        Instant lessonStart = THURSDAY.atTime(8, 0).atZone(LeaveBy.VIENNA).toInstant();
+        QuarkusTransaction.requiringNew().run(() -> {
+            DelayWarning w = new DelayWarning();
+            w.studentId = annaId;
+            w.lessonStart = lessonStart;
+            w.line = "3 > 19";
+            w.tripId = "t";
+            w.plannedDeparture = THURSDAY.atTime(7, 39).atZone(LeaveBy.VIENNA).toInstant();
+            w.delayMinutes = 9;
+            w.atSchool = THURSDAY.atTime(8, 3).atZone(LeaveBy.VIENNA).toInstant();
+            w.minutesLate = 3;
+            w.exam = true;
+            w.alternativeLine = "3 > 11";
+            w.alternativeDeparture = THURSDAY.atTime(7, 24).atZone(LeaveBy.VIENNA).toInstant();
+            w.alternativeLeaveAt = THURSDAY.atTime(7, 17).atZone(LeaveBy.VIENNA).toInstant();
+            w.alternativeAtSchool = THURSDAY.atTime(7, 39).atZone(LeaveBy.VIENNA).toInstant();
+            w.sentAt = EVENING_BEFORE;
+            w.persist();
+        });
+        given().get("/api/me/leave-by").then().statusCode(200)
+                .body("warning.line", equalTo("3 > 19"))
+                .body("warning.plannedDeparture", equalTo("2026-11-19T07:39:00+01:00"))
+                .body("warning.delayMinutes", equalTo(9))
+                .body("warning.atSchool", equalTo("2026-11-19T08:03:00+01:00"))
+                .body("warning.minutesLate", equalTo(3))
+                .body("warning.exam", equalTo(true))
+                .body("warning.alternative.line", equalTo("3 > 11"))
+                .body("warning.alternative.leaveAt", equalTo("2026-11-19T07:17:00+01:00"))
+                .body("warning.alternative.inTime", equalTo(true));
+        given().queryParam("routeId", routeId).get("/api/me/leave-by").then().statusCode(200)
+                .body("warning", nullValue());
+
+        update(() -> DelayWarning.update("resolvedAt = ?1 where studentId = ?2", EVENING_BEFORE, annaId));
+        given().get("/api/me/leave-by").then().statusCode(200).body("warning", nullValue());
     }
 
     @Test

@@ -18,6 +18,14 @@ public interface ConnectionSource {
      */
     List<Connection> arrivingBy(String fromStopId, String toStopId, Instant arriveBy);
 
+    /**
+     * Like {@link #arrivingBy}, for background jobs (delay warnings, #63). A source with a request budget may answer
+     * these with {@link Unavailable} more often, so students asking interactively keep most of it.
+     */
+    default List<Connection> arrivingByInBackground(String fromStopId, String toStopId, Instant arriveBy) {
+        return arrivingBy(fromStopId, toStopId, arriveBy);
+    }
+
     /** The source can't be reached, or is busy and should be asked again after {@code retryAfter} (null: unknown). */
     class Unavailable extends RuntimeException {
         public final Duration retryAfter;

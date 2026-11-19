@@ -27,6 +27,10 @@ public class FirstLessonCache extends PanacheEntityBase {
 
     public String subject;
 
+    /** An exam overlaps the lesson (#63, from the WebUntis exam call). False if unknown. */
+    @Column(nullable = false)
+    public boolean exam;
+
     @Column(name = "synced_at", nullable = false)
     public Instant syncedAt;
 }

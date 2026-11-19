@@ -9,6 +9,15 @@ import java.util.Optional;
 public final class FirstLesson {
     private FirstLesson() {}
 
+    /** The first lesson of a day and whether an exam overlaps it (#63). */
+    public record Found(Lesson lesson, boolean exam) {}
+
+    /** True if an exam on the lesson's day overlaps it, even partly (exams can start mid-lesson). */
+    public static boolean isExam(Lesson lesson, List<Exam> exams) {
+        return exams.stream().anyMatch(e -> e.date() != null && e.start() != null && e.end() != null
+                && e.date().equals(lesson.date()) && e.start().isBefore(lesson.end()) && e.end().isAfter(lesson.start()));
+    }
+
     public static Optional<Lesson> on(LocalDate date, List<Lesson> lessons) {
         return lessons.stream()
                 .filter(l -> l.date().equals(date) && l.takesPlace())

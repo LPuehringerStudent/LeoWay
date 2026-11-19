@@ -6,6 +6,7 @@ import { provideRouter } from '@angular/router';
 import { Session } from '../core/session';
 import { RoutePage } from './route-page';
 import { RouteMap } from './route-map';
+import { AlertsCard } from './alerts-card';
 import { Stop } from '../core/stops-api';
 
 @Component({ selector: 'app-route-map', template: '' })
@@ -14,14 +15,49 @@ class MapStub {
   readonly school = input<Stop | null>(null);
 }
 
+@Component({ selector: 'app-alerts-card', template: '<h2>Discord alerts</h2>' })
+class AlertsStub {}
+
 describe('RoutePage', () => {
-  it('shows a reconnect message after a 403 from private endpoints', async () => {
+  it('loads the route editor and real Discord alerts card together for a student', async () => {
     TestBed.configureTestingModule({
       providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
     });
     TestBed.overrideComponent(RoutePage, {
       remove: { imports: [RouteMap] },
       add: { imports: [MapStub] },
+    });
+    const http = TestBed.inject(HttpTestingController);
+    const fixture = TestBed.createComponent(RoutePage);
+    fixture.detectChanges();
+    http.expectOne('/api/session').flush({ username: 'student', admin: false });
+    await vi.waitFor(() => {
+      http
+        .expectOne('/api/me/webuntis')
+        .flush({ connected: true, available: true, username: 'student' });
+      http.expectOne('/api/me/routes').flush([]);
+    });
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      http.expectOne('/api/me/alerts').flush([]);
+    });
+    const page = fixture.nativeElement as HTMLElement;
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      expect(page.querySelector('#home-stop')).not.toBeNull();
+      expect(page.querySelector('#webhook')).not.toBeNull();
+    });
+    expect(page.textContent).toContain('Get alerts in a Discord channel');
+    http.verify();
+  });
+
+  it('shows a reconnect message after a 403 from private endpoints', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
+    });
+    TestBed.overrideComponent(RoutePage, {
+      remove: { imports: [RouteMap, AlertsCard] },
+      add: { imports: [MapStub, AlertsStub] },
     });
     const http = TestBed.inject(HttpTestingController);
     const fixture = TestBed.createComponent(RoutePage);
@@ -46,8 +82,8 @@ describe('RoutePage', () => {
       providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
     });
     TestBed.overrideComponent(RoutePage, {
-      remove: { imports: [RouteMap] },
-      add: { imports: [MapStub] },
+      remove: { imports: [RouteMap, AlertsCard] },
+      add: { imports: [MapStub, AlertsStub] },
     });
     const http = TestBed.inject(HttpTestingController);
     const fixture = TestBed.createComponent(RoutePage);
@@ -61,6 +97,7 @@ describe('RoutePage', () => {
     expect(page.querySelector('a[href="/admin/feeds"]')).not.toBeNull();
     http.expectNone('/api/me/webuntis');
     http.expectNone('/api/me/routes');
+    http.expectNone('/api/me/alerts');
     expect(page.textContent).not.toContain('Loading…');
     expect(TestBed.inject(Session).me()?.admin).toBe(true);
     http.verify();
@@ -71,8 +108,8 @@ describe('RoutePage', () => {
       providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
     });
     TestBed.overrideComponent(RoutePage, {
-      remove: { imports: [RouteMap] },
-      add: { imports: [MapStub] },
+      remove: { imports: [RouteMap, AlertsCard] },
+      add: { imports: [MapStub, AlertsStub] },
     });
     const http = TestBed.inject(HttpTestingController);
     const fixture = TestBed.createComponent(RoutePage);
@@ -82,18 +119,16 @@ describe('RoutePage', () => {
       http
         .expectOne('/api/me/webuntis')
         .flush({ connected: true, username: 'student', available: true });
-      http
-        .expectOne('/api/me/routes')
-        .flush([
-          {
-            id: 1,
-            homeStopId: '111',
-            schoolStopId: '222',
-            walkToStopMinutes: 4,
-            walkToSchoolMinutes: 6,
-            bufferMinutes: 10,
-          },
-        ]);
+      http.expectOne('/api/me/routes').flush([
+        {
+          id: 1,
+          homeStopId: '111',
+          schoolStopId: '222',
+          walkToStopMinutes: 4,
+          walkToSchoolMinutes: 6,
+          bufferMinutes: 10,
+        },
+      ]);
     });
     await vi.waitFor(() => {
       http.expectOne('/api/stops?q=111').flush([{ id: '111', name: 'Home stop' }]);

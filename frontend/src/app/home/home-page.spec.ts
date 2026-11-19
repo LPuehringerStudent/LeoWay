@@ -17,9 +17,23 @@ const lesson = (over: Partial<WebUntisStatus> = {}): WebUntisStatus => ({
   syncedAt: '2026-11-15T19:00:00Z',
   ...over,
 });
-const ROUTE: SavedRoute = { id: 1, homeStopId: 'a', schoolStopId: 'b', walkToStopMinutes: 7, walkToSchoolMinutes: 3, bufferMinutes: 5 };
+const ROUTE: SavedRoute = {
+  id: 1,
+  homeStopId: 'a',
+  schoolStopId: 'b',
+  walkToStopMinutes: 7,
+  walkToSchoolMinutes: 3,
+  bufferMinutes: 5,
+};
 const nothing = (status: LeaveByResult['status']): LeaveByResult => ({
-  status, routeId: null, lessonStart: null, leaveAt: null, atSchool: null, connection: null, source: null, minutesLate: null,
+  status,
+  routeId: null,
+  lessonStart: null,
+  leaveAt: null,
+  atSchool: null,
+  connection: null,
+  source: null,
+  minutesLate: null,
 });
 /** The A02 standard case from LeaveByResourceTest: lesson 08:00, tram 3 > bus 11 at 07:24, leave 07:17. */
 const leave = (over: Partial<LeaveByResult> = {}): LeaveByResult => ({
@@ -71,7 +85,15 @@ async function render(data: HomeData) {
 
 describe('HomePage', () => {
   it('shows a reconnect message instead of generic load errors after a 403', async () => {
-    const { page, text } = await render({ kind: 'student', username: 'student', webUntis: null, routes: null, reconnectRequired: true });
+    const { page, text } = await render({
+      kind: 'student',
+      username: 'student',
+      webUntis: null,
+      routes: null,
+      leaveBy: null,
+      loadedAt: new Date(),
+      reconnectRequired: true,
+    });
     expect(text()).toContain('Please log out and reconnect WebUntis');
     expect(text()).not.toContain('could not be loaded');
     expect(page.querySelector('a[href="/connect"]')).not.toBeNull();
@@ -101,7 +123,9 @@ describe('HomePage', () => {
   it('shows the leave-by time, the connection and the source (A02, U03)', async () => {
     const { text, page } = await render(student(lesson(), [ROUTE], leave()));
     expect(page.querySelector('.digits--leave')?.textContent).toBe('07:17');
-    expect(page.querySelector('.board__ride')?.textContent?.trim()).toBe('Line 3 > 11 at 07:24, at school 07:39');
+    expect(page.querySelector('.board__ride')?.textContent?.trim()).toBe(
+      'Line 3 > 11 at 07:24, at school 07:39',
+    );
     expect(text()).not.toContain('planned');
     const labels = [...page.querySelectorAll('app-time-source')].map((e) => e.textContent?.trim());
     expect(labels).toEqual(['Timetable only', 'Timetable only']);
@@ -118,22 +142,30 @@ describe('HomePage', () => {
     const { text, page } = await render(student(lesson(), [ROUTE], live));
     expect(page.querySelector('.digits--leave')?.textContent).toBe('07:20');
     expect(page.querySelectorAll('app-time-source')[1]?.textContent?.trim()).toBe('Prediction');
-    expect(page.querySelector('.board__ride')?.textContent?.trim()).toBe('Line 3 > 11 at 07:27 (planned 07:24), at school 07:39');
+    expect(page.querySelector('.board__ride')?.textContent?.trim()).toBe(
+      'Line 3 > 11 at 07:27 (planned 07:24), at school 07:39',
+    );
     expect(text()).not.toContain('No live data');
   });
 
   it('says when there is no buffer left or the student will be late', async () => {
-    expect((await render(student(lesson(), [ROUTE], leave({ status: 'NO_BUFFER' })))).text())
-      .toContain('No buffer left');
+    expect(
+      (await render(student(lesson(), [ROUTE], leave({ status: 'NO_BUFFER' })))).text(),
+    ).toContain('No buffer left');
     TestBed.resetTestingModule();
-    const { text, page } = await render(student(lesson(), [ROUTE], leave({ status: 'LATE', minutesLate: 4 })));
+    const { text, page } = await render(
+      student(lesson(), [ROUTE], leave({ status: 'LATE', minutesLate: 4 })),
+    );
     expect(text()).toContain('4 min late');
     expect(page.querySelector('.board__note--late')).not.toBeNull();
   });
 
   it('never shows a made-up leave-by time', async () => {
-    expect((await render(student(lesson(), [ROUTE], null))).page.querySelector('.board__pending')?.textContent?.trim())
-      .toBe('Could not be calculated right now');
+    expect(
+      (await render(student(lesson(), [ROUTE], null))).page
+        .querySelector('.board__pending')
+        ?.textContent?.trim(),
+    ).toBe('Could not be calculated right now');
     TestBed.resetTestingModule();
     const { text, page } = await render(student(lesson(), [ROUTE], nothing('NO_CONNECTION')));
     expect(page.querySelector('.board__pending')?.textContent?.trim()).toBe('No connection found');
@@ -141,16 +173,23 @@ describe('HomePage', () => {
   });
 
   it('explains a missing first lesson', async () => {
-    expect((await render(student(lesson({ connected: false, username: null, firstLesson: null })))).text())
-      .toContain('WebUntis is not connected');
+    expect(
+      (
+        await render(student(lesson({ connected: false, username: null, firstLesson: null })))
+      ).text(),
+    ).toContain('WebUntis is not connected');
     TestBed.resetTestingModule();
-    expect((await render(student(lesson({ available: false, firstLesson: null })))).text())
-      .toContain("WebUntis can't be reached right now");
+    expect(
+      (await render(student(lesson({ available: false, firstLesson: null })))).text(),
+    ).toContain("WebUntis can't be reached right now");
     TestBed.resetTestingModule();
-    expect((await render(student(lesson({ needsReconnect: true, firstLesson: null })))).text())
-      .toContain('WebUntis no longer accepts your access key');
+    expect(
+      (await render(student(lesson({ needsReconnect: true, firstLesson: null })))).text(),
+    ).toContain('WebUntis no longer accepts your access key');
     TestBed.resetTestingModule();
-    expect((await render(student(lesson({ firstLesson: null })))).text()).toContain('No lessons found');
+    expect((await render(student(lesson({ firstLesson: null })))).text()).toContain(
+      'No lessons found',
+    );
     TestBed.resetTestingModule();
     expect((await render(student(null))).text()).toContain('could not be loaded');
   });

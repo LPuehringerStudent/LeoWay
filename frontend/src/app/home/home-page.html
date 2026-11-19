@@ -46,6 +46,24 @@
             <p class="board__ride">
               Line {{ l!.connection!.line }} at <time [attr.datetime]="l!.connection!.departure">{{ clock(l!.connection!.departure) }}</time>@if (l!.connection!.departure !== l!.connection!.plannedDeparture) {&ngsp;<span class="board__planned">(planned {{ clock(l!.connection!.plannedDeparture) }})</span>}, at school <time [attr.datetime]="l!.atSchool">{{ clock(l!.atSchool!) }}</time>
             </p>
+            @if (l!.warning; as w) {
+              <div class="board__warning" role="status">
+                <p class="board__warning-title">Line {{ w.line }} at {{ clock(w.plannedDeparture) }} is {{ w.delayMinutes }} min late:
+                  at school {{ clock(w.atSchool) }}, {{ w.minutesLate }} min late</p>
+                @if (w.exam) {
+                  <p class="board__warning-exam">Exam in your first lesson</p>
+                }
+                @if (w.alternative; as a) {
+                  @if (a.inTime) {
+                    <p>Take line {{ a.line }} at {{ clock(a.departure) }} instead, leave home at {{ clock(a.leaveAt) }}</p>
+                  } @else {
+                    <p>Earliest: line {{ a.line }} at {{ clock(a.departure) }}, at school {{ clock(a.atSchool) }}</p>
+                  }
+                } @else {
+                  <p>No other connection gets you there earlier</p>
+                }
+              </div>
+            }
             @if (h.outdated) {
               <p class="board__updated" role="status">Can't update right now, last update {{ timeOfDay(h.loadedAt) }}</p>
             } @else if (l!.source !== 'PREDICTION') {

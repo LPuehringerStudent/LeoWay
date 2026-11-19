@@ -27,6 +27,10 @@
 .board__note { font-weight: 600; color: var(--on-night); }
 /* Light red: --late is too dark on the night board. 7.8:1 on --night. */
 .board__note--late { color: #ffa69c; }
+/* Delay warning (F03): same light red as a late note, framed so it stands out on the board. */
+.board__warning { flex-basis: 100%; border-left: 4px solid #ffa69c; padding-left: 0.75rem; color: var(--on-night); }
+.board__warning p { margin: 0.25rem 0; }
+.board__warning-title, .board__warning-exam { font-weight: 600; color: #ffa69c; }
 .board__planned { color: var(--on-night-muted); }
 .board__ride { color: var(--on-night); }
 .board__updated { font-size: 0.875rem; color: var(--on-night-muted); }

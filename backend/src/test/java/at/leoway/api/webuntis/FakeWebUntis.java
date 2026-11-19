@@ -25,6 +25,8 @@ public class FakeWebUntis implements AutoCloseable {
     /** Replaces timetable.json / absences.json when set, e.g. to cancel a lesson overnight. */
     public volatile String timetable;
     public volatile String absences;
+    /** Replaces exams.json when set; "FAIL" answers HTTP 500. */
+    public volatile String exams;
     private final HttpServer server;
 
     public FakeWebUntis(int port) throws IOException {
@@ -64,7 +66,10 @@ public class FakeWebUntis implements AutoCloseable {
             }
             case "/WebUntis/api/app/config" -> reply(ex, session ? 200 : 401, resource("app-config.json"));
             case "/WebUntis/api/classreg/absences/students" -> reply(ex, session ? 200 : 401, absences != null ? absences : resource("absences.json"));
-            case "/WebUntis/api/exams" -> reply(ex, session ? 200 : 401, resource("exams.json"));
+            case "/WebUntis/api/exams" -> {
+                if ("FAIL".equals(exams)) reply(ex, 500, "{}");
+                else reply(ex, session ? 200 : 401, exams != null ? exams : resource("exams.json"));
+            }
             default -> reply(ex, 404, "{}");
         }
     }

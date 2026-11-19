@@ -1,5 +1,6 @@
 package at.leoway.api.me;
 
+import at.leoway.api.domain.DelayWarning;
 import at.leoway.api.domain.FirstLessonCache;
 import at.leoway.api.domain.SavedRoute;
 import at.leoway.api.domain.WebUntisCredential;
@@ -26,7 +27,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -67,11 +67,34 @@ public class LeaveByResource {
      */
     @Schema(name = "LeaveByResult")
     public record Result(Status status, Long routeId, OffsetDateTime lessonStart, OffsetDateTime leaveAt,
-            OffsetDateTime atSchool, Ride connection, LeaveBy.Source source, Long minutesLate) {
+            OffsetDateTime atSchool, Ride connection, LeaveBy.Source source, Long minutesLate, Warning warning) {
         static Result nothing(Status status, Long routeId, OffsetDateTime lessonStart) {
-            return new Result(status, routeId, lessonStart, null, null, null, null, null);
+            return new Result(status, routeId, lessonStart, null, null, null, null, null, null);
+        }
+
+        Result withWarning(Warning w) {
+            return new Result(status, routeId, lessonStart, leaveAt, atSchool, connection, source, minutesLate, w);
         }
     }
+
+    /**
+     * The open delay warning for this lesson (F03, #63), checked in the background after recorder polls. Only for
+     * the first saved route, the one the warnings watch.
+     *
+     * @param line the connection the timetable chose, now late
+     * @param delayMinutes its live delay
+     * @param atSchool when the student would reach school with it
+     * @param exam an exam is in the first lesson
+     * @param alternative another connection, null if none helps
+     */
+    @Schema(name = "DelayWarning")
+    public record Warning(String line, OffsetDateTime plannedDeparture, int delayMinutes, OffsetDateTime atSchool,
+            int minutesLate, boolean exam, Alternative alternative) {}
+
+    /** @param inTime true if it reaches school by the lesson start, false if it only arrives earlier */
+    @Schema(name = "DelayWarningAlternative")
+    public record Alternative(String line, OffsetDateTime departure, OffsetDateTime leaveAt, OffsetDateTime atSchool,
+            boolean inTime) {}
 
     @Inject
     CurrentStudent current;
@@ -131,8 +154,9 @@ public class LeaveByResource {
             throw unavailable(e.retryAfter);
         }
         LeaveBy r = LeaveByCalculator.calculate(lesson.startAt, walks,
-                withRecordedDelays(found, route), clock.instant());
-        return switch (r) {
+                liveDelays.complete(found, route.homeStopId, route.schoolStopId), clock.instant());
+        Warning warning = routeId == null ? warning(id, lesson.startAt) : null;
+        Result result = switch (r) {
             case LeaveBy.InTime t -> result(Status.IN_TIME, rid, lessonStart, t.leaveAt(), t.atSchool(),
                     t.connection(), t.source(), null);
             case LeaveBy.NoBuffer t -> result(Status.NO_BUFFER, rid, lessonStart, t.leaveAt(), t.atSchool(),
@@ -141,6 +165,17 @@ public class LeaveByResource {
                     t.connection(), t.source(), t.minutesLate());
             case LeaveBy.NoConnection n -> Result.nothing(Status.NO_CONNECTION, rid, lessonStart);
         };
+        return result.withWarning(warning);
+    }
+
+    private static Warning warning(long studentId, Instant lessonStart) {
+        DelayWarning w = DelayWarning.findById(studentId);
+        if (w == null || w.resolvedAt != null || !w.lessonStart.equals(lessonStart)) return null;
+        Alternative alternative = w.alternativeLine == null ? null : new Alternative(w.alternativeLine,
+                vienna(w.alternativeDeparture), vienna(w.alternativeLeaveAt), vienna(w.alternativeAtSchool),
+                !w.alternativeAtSchool.isAfter(lessonStart));
+        return new Warning(w.line, vienna(w.plannedDeparture), w.delayMinutes, vienna(w.atSchool), w.minutesLate,
+                w.exam, alternative);
     }
 
     private SavedRoute route(long studentId, Long routeId) {
@@ -168,22 +203,12 @@ public class LeaveByResource {
         return c;
     }
 
-    /**
-     * Connections without real-time data from the source get the delay the recorder saw last (F09), if it is
-     * recent. Only then do they count as predictions.
-     */
-    private List<Connection> withRecordedDelays(List<Connection> found, SavedRoute route) {
-        List<Connection> out = new ArrayList<>(found.stream().filter(Connection::predicted).toList());
-        out.addAll(liveDelays.apply(found.stream().filter(c -> !c.predicted()).toList(),
-                route.homeStopId, route.schoolStopId));
-        return out;
-    }
-
     private static Result result(Status status, Long routeId, OffsetDateTime lessonStart, Instant leaveAt,
             Instant atSchool, Connection c, LeaveBy.Source source, Long minutesLate) {
         Ride ride = new Ride(c.line(), vienna(c.plannedDeparture()), vienna(c.departure()),
                 vienna(c.plannedArrival()), vienna(c.arrival()));
-        return new Result(status, routeId, lessonStart, vienna(leaveAt), vienna(atSchool), ride, source, minutesLate);
+        return new Result(status, routeId, lessonStart, vienna(leaveAt), vienna(atSchool), ride, source, minutesLate,
+                null);
     }
 
     private static OffsetDateTime vienna(Instant t) {

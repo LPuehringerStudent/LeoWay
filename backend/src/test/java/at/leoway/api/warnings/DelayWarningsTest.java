@@ -217,7 +217,7 @@ class DelayWarningsTest {
     void withTheRealRequestGapEveryRouteGetsItsTurn() {
         // #106 review: with one trip request per 15 s, only the first routes in id order were ever checked.
         trips.useMinGap(Duration.ofSeconds(15));
-        trips.useBackgroundGap(Duration.ofSeconds(30));
+        trips.useBackgroundGap(Duration.ofSeconds(25));
         long second = student("wanda-2", HOME_2);
         long third = student("wanda-3", HOME_3);
         delay(6);
@@ -229,11 +229,11 @@ class DelayWarningsTest {
         warnings.poll();
         assertEquals(1, linzAg.queries.size());
 
-        // Recorder polls every 15 s. Queued students are retried in between full runs (background requests at most
-        // every 30 s), so all three are checked within a minute: 0:00 first, 0:30 second, 0:60 third. Without the
-        // retries the third would wait until 2:00, and in plain id order never.
-        for (int i = 1; i <= 4; i++) {
-            at(MORNING.plusSeconds(15L * i));
+        // The recorder polls every 30 s. Queued students are retried in between full runs, so all three are checked
+        // within a minute: 0:00 first, 0:30 second, 1:00 third. Without the retries the third would wait until 2:00,
+        // and in plain id order never.
+        for (int i = 1; i <= 2; i++) {
+            at(MORNING.plusSeconds(30L * i));
             warnings.poll();
         }
         Set<String> origins = linzAg.queries.stream()
@@ -247,7 +247,7 @@ class DelayWarningsTest {
     @Test
     void backgroundChecksLeaveRequestsForStudentsOwnCalls() {
         trips.useMinGap(Duration.ofSeconds(15));
-        trips.useBackgroundGap(Duration.ofSeconds(30));
+        trips.useBackgroundGap(Duration.ofSeconds(25));
         ConnectionSource source = trips.source();
         Instant arrive = THURSDAY.atTime(7, 41).atZone(LeaveBy.VIENNA).toInstant();
         at(MORNING);
@@ -257,7 +257,7 @@ class DelayWarningsTest {
         at(MORNING.plusSeconds(15));
         ConnectionSource.Unavailable busy = assertThrows(ConnectionSource.Unavailable.class,
                 () -> source.arrivingByInBackground(HOME_2, SCHOOL, arrive));
-        assertEquals(Duration.ofSeconds(15), busy.retryAfter);
+        assertEquals(Duration.ofSeconds(10), busy.retryAfter);
         source.arrivingBy(HOME_3, SCHOOL, arrive);
         assertEquals(2, linzAg.queries.size());
     }

@@ -39,13 +39,14 @@ import org.jboss.logging.Logger;
  * is 1; otherwise it just repeats the timetable. Live times come per ride, so a trip with a change gets its
  * departure delay from the first ride and its arrival delay from the last one.
  *
- * <p>Budget: the recorder already uses one request every 15 s on this server. Answers are cached per (home stop,
+ * <p>Budget: the recorder already uses one request every 15 s on average on this server. Answers are cached per (home stop,
  * school stop, arrival time), not per student, so students with the same route and first lesson share one request
  * (#56). Close to the trip the cache is short, so real-time data stays fresh; further ahead it is long. Requests that
  * aren't cached are spaced at least {@code min-gap} apart across all students, like the recorder (15 s). Students
  * asking for the same trips at once share one request; while the gap runs, a recently expired answer is served.
- * Background requests (delay warnings, #63) are also spaced at least {@code background-gap} apart, so they take at
- * most every other slot and the rest stays free for students' own leave-by calls (#101).
+ * Background requests (delay warnings, #63) are also spaced at least {@code background-gap} apart: a bit less than the
+ * recorder's 30 s interval, so a check on every poll can make one request despite timing jitter, but at most every
+ * other {@code min-gap} slot. The rest stays free for students' own leave-by calls (#101).
  */
 @ApplicationScoped
 public class LinzAgTrips implements ConnectionSource {
@@ -73,7 +74,7 @@ public class LinzAgTrips implements ConnectionSource {
     @ConfigProperty(name = "leoway.trips.min-gap", defaultValue = "15s")
     Duration minGap;
 
-    @ConfigProperty(name = "leoway.trips.background-gap", defaultValue = "30s")
+    @ConfigProperty(name = "leoway.trips.background-gap", defaultValue = "25s")
     Duration backgroundGap;
 
     @Inject

@@ -40,7 +40,7 @@ import org.jboss.logging.Logger;
  * <p>Connections come from the same {@link ConnectionSource} and cache as the leave-by endpoint, so a check costs no
  * extra Linz AG request while a student's Home is open. Background requests have their own, smaller budget
  * ({@code leoway.trips.background-gap}). A student skipped because the source was busy is queued: the queue is retried
- * on every recorder poll (15 s) and goes first in the next full run, so every route gets its turn instead of only the
+ * on every recorder poll (every 30 s, {@code leoway.feeds.linz-ag.interval}) and goes first in the next full run, so every route gets its turn instead of only the
  * first few in id order (#106 review). Logs carry the student id and a reason only (S01).
  */
 @ApplicationScoped
@@ -48,7 +48,7 @@ public class DelayWarnings {
     private static final Logger LOG = Logger.getLogger(DelayWarnings.class);
     /** Live data only exists close to the trip, like {@code LinzAgTrips.LIVE_WINDOW}. */
     static final Duration WINDOW = Duration.ofHours(3);
-    /** At most one check per this gap; the recorder polls every 15 s and live trip answers are cached 2 min. */
+    /** At most one full check per this gap; the recorder polls every 30 s and live trip answers are cached 2 min. */
     static final Duration CHECK_GAP = Duration.ofMinutes(1);
     static final int CHANGE_STEP = 3;
     private static final DateTimeFormatter HHMM = DateTimeFormatter.ofPattern("HH:mm");

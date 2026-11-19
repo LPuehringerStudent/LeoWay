@@ -1,0 +1,12 @@
+[Unit]
+Description=LeoWay MOTIS data update (GTFS download, import, switch)
+After=docker.service network-online.target
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/leoway/deploy/motis-update.sh
+# Download and import take a few minutes; Geofabrik can be slow.
+TimeoutStartSec=1h
+Nice=10

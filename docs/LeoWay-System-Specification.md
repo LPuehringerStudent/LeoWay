@@ -751,6 +751,8 @@ flowchart LR
 | Discord, push, email | One notification interface; each channel is one implementation. Appeals open as a mailto draft in the student's own mail app. |
 | Form teacher | Verification link in the browser; optional portal with school-approved login. |
 
+**Linz AG live data (accepted risk, #88):** Linz AG publishes its timetable interface under CC BY, but since 2015 that interface carries no live data, and no written terms cover storing the live departures of the JSON departure endpoint long term. The team did not ask Linz AG and accepts this risk: LeoWay is a non-commercial school project, the recorder polls only two stops near the school every 30 seconds, the raw `delay_record` rows are never published, and Home names Linz AG as the source of the live delays. If Linz AG objects, the recorder is switched off and `delay_record` is deleted; delay predictions then fall back to "timetable only".
+
 **WebUntis sync (proposed, Europe/Vienna):** lessons and exams at 20:00 for the next day, at 05:00 and every 15 minutes from 05:00 to 10:00; absences at 12:00 and 16:00. Students can refresh manually. Data is cached and requests back off after errors; limits are confirmed with school IT.
 
 **Alarm updates:** after a lesson change, the backend pushes the new alarm time with a version to the phone. The app cancels the old alarm and sets the new one, and ignores older versions. It syncs again when opened. If updates cannot arrive, it shows the last sync time; alarm changes are not guaranteed while offline or force-stopped.

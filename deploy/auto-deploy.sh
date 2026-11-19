@@ -5,6 +5,8 @@
 #   3. backup.sh, so a bad migration can be undone with restore.sh; no backup, no deploy
 #   4. tag the images as leoway-*:latest (the names docker-compose.yml uses) and start them
 #   5. if the containers don't get healthy, put the previous images back
+# Only db, backend and web are started: MOTIS has its own update (motis-update.sh), and a MOTIS problem must not
+# roll back an app deploy (#104).
 # Rolling back the code does not undo database migrations; Flyway ignores migrations newer than the code.
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -56,7 +58,7 @@ for app in backend web; do
   docker tag "$registry/leoway-$app:main" "leoway-$app:$new"
 done
 
-if LEOWAY_VERSION=latest docker compose up -d --wait --wait-timeout 180; then
+if LEOWAY_VERSION=latest docker compose up -d --wait --wait-timeout 180 backend web; then
   echo "$new" > "$state"
   notify "deployed $new"
   # Keep the last KEEP commit tags for LEOWAY_VERSION=<commit> rollbacks; tagged images are not "dangling".
@@ -71,7 +73,7 @@ fi
 
 if docker image inspect leoway-backend:previous >/dev/null 2>&1; then
   for app in backend web; do docker tag "leoway-$app:previous" "leoway-$app:latest"; done
-  if LEOWAY_VERSION=latest docker compose up -d --wait --wait-timeout 180; then
+  if LEOWAY_VERSION=latest docker compose up -d --wait --wait-timeout 180 backend web; then
     # Remember the failed version, so the timer does not try it again every 5 minutes.
     echo "$new" > "$state"
     notify "deploy of $new FAILED, rolled back to ${old:-the previous images}. Fix on main, the next merge deploys again."

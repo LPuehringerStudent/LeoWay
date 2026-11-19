@@ -12,11 +12,25 @@ export interface SavedRoute {
   bufferMinutes: number;
 }
 
+export type RouteInput = Omit<SavedRoute, 'id'>;
+
 @Injectable({ providedIn: 'root' })
 export class RoutesApi {
   private readonly api = inject(ApiClient);
 
   list(): Observable<SavedRoute[]> {
     return this.api.get<SavedRoute[]>('/api/me/routes');
+  }
+
+  create(route: RouteInput): Observable<SavedRoute> {
+    return this.api.post<SavedRoute>('/api/me/routes', route);
+  }
+
+  update(id: number, route: RouteInput): Observable<SavedRoute> {
+    return this.api.put<SavedRoute>(`/api/me/routes/${id}`, route);
+  }
+
+  delete(id: number): Observable<void> {
+    return this.api.delete(`/api/me/routes/${id}`);
   }
 }

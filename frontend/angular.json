@@ -21,6 +21,23 @@
             "tsConfig": "tsconfig.app.json",
             "styles": [
               "src/styles.css"
+            ],
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "src/assets",
+                "output": "assets"
+              },
+              {
+                "glob": "leaflet.css",
+                "input": "node_modules/leaflet/dist",
+                "output": "assets/leaflet"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/leaflet/dist/images",
+                "output": "assets/leaflet/images"
+              }
             ]
           },
           "configurations": {

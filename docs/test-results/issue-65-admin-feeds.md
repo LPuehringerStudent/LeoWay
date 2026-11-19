@@ -2,6 +2,9 @@
 
 Local validation on 2026-11-18, branch `feat/65-admin-feed-status`.
 
+This records the initial #65 checks. The route editor keeps the existing admin-only boundaries;
+any student-feature access for admins is a separate security proposal requiring team/PO approval.
+
 ## Implementation
 
 - Admin navigation between Home and Route, visible only for an authenticated administrator.

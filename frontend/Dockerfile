@@ -7,6 +7,7 @@ RUN npm ci --no-audit --no-fund
 COPY . .
 RUN npx ng build
 
+# nginx 1.29.3 or newer: nginx.conf uses add_header_inherit (#107); older images fail at startup.
 FROM nginx:1.29-alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /src/dist/leoway/browser /usr/share/nginx/html

@@ -57,7 +57,7 @@ issue with tasks and acceptance criteria on GitHub. Sizes: S = up to a day, M = 
 |------|-----|--------------------|------|-------|
 | Delay warning with alternative | Ayan | A delay that makes the student late creates one warning and an alternative connection; no warning without live data (A03) | M | [#63](https://github.com/LPuehringerStudent/LeoWay/issues/63) |
 | Discord alerts | open | Test message arrives in a real Discord channel; webhook URL stored encrypted and never logged | S | [#62](https://github.com/LPuehringerStudent/LeoWay/issues/62) |
-| Android app with exact alarm (stretch) | Behrang | Alarm rings on a real phone and moves when the leave-by time changes (A04) | M | [#64](https://github.com/LPuehringerStudent/LeoWay/issues/64) |
+| ~~Android app with exact alarm (stretch)~~ (moved to Sprint 3) | Behrang | Alarm rings on a real phone and moves when the leave-by time changes (A04) | M | [#64](https://github.com/LPuehringerStudent/LeoWay/issues/64) |
 
 ---
 
@@ -66,7 +66,7 @@ issue with tasks and acceptance criteria on GitHub. Sizes: S = up to a day, M = 
 | Task | Who | Definition of Done | Size | Issue |
 |------|-----|--------------------|------|-------|
 | Admin feed status page | David | An admin sees `linz-ag` OK on production; students see "not allowed" | S | [#65](https://github.com/LPuehringerStudent/LeoWay/issues/65) |
-| Discord notifications for GitHub | open | New issues and pull requests posted to the team Discord | S | [#26](https://github.com/LPuehringerStudent/LeoWay/issues/26) |
+| ~~Discord notifications for GitHub~~ (moved to Sprint 3) | open | New issues and pull requests posted to the team Discord | S | [#26](https://github.com/LPuehringerStudent/LeoWay/issues/26) |
 | VAO access | Laurenz | Key received, or "Linz AG only" written into the specification | S | [#13](https://github.com/LPuehringerStudent/LeoWay/issues/13) |
 
 ---
@@ -100,8 +100,8 @@ time per route).
 | Laurenz | #58, #59, #61, #13 (#27/#3, #24, #50, #51 done in Sprint 1) |
 | Ayan | #56, #57, #63 (#50 done in Sprint 1) |
 | David | #60, #65 |
-| Behrang | #64 (#15 done in Sprint 1) |
-| open | #55, #62, #26, #69 |
+| Behrang | #64 moved to Sprint 3 (#15 done in Sprint 1) |
+| open | #55, #62, #69 (#26 moved to Sprint 3) |
 
 ---
 

@@ -7,6 +7,7 @@
 
 Items with an issue number are tracked on GitHub ([Sprint1](https://github.com/users/LPuehringerStudent/projects/14),
 [Sprint2](https://github.com/users/LPuehringerStudent/projects/15),
+[Sprint3](https://github.com/users/LPuehringerStudent/projects/16),
 [ProductBacklog](https://github.com/users/LPuehringerStudent/projects/12)). Items without an issue number come from the
 system specification and are not broken down yet. F01–F12 and A01–A14 refer to the use cases and acceptance tests in
 [the specification](../LeoWay-System-Specification.md).
@@ -47,9 +48,9 @@ system specification and are not broken down yet. F01–F12 and A01–A14 refer 
 | PB-32 | [#61](https://github.com/LPuehringerStudent/LeoWay/issues/61) | User Story | As a student, I want Home to show my real first lesson, leave-by time and bus delay (U01, U03) | High | To Do | Sprint 2 | With a saved route, Home shows real data on production; every time is labelled. |
 | PB-33 | [#62](https://github.com/LPuehringerStudent/LeoWay/issues/62) | User Story | As a student, I want to get alerts in Discord (F04) | Medium | To Do | Sprint 2 | A test message arrives in a real Discord channel; the webhook URL is never logged. |
 | PB-34 | [#63](https://github.com/LPuehringerStudent/LeoWay/issues/63) | User Story | As a student, I want a warning and an alternative when my bus will make me late (F03) | High | To Do | Sprint 2 | A03 standard and non-standard cases pass. |
-| PB-35 | [#64](https://github.com/LPuehringerStudent/LeoWay/issues/64) | User Story | As a student, I want my phone to ring at my leave-by time (F04, A04) | Medium | To Do | Sprint 2 (stretch) | The alarm rings on a real phone and moves when the leave-by time changes. |
+| PB-35 | [#64](https://github.com/LPuehringerStudent/LeoWay/issues/64) | User Story | As a student, I want my phone to ring at my leave-by time (F04, A04) | Medium | To Do | Sprint 3 (stretch) | The alarm rings on a real phone and moves when the leave-by time changes. |
 | PB-36 | [#65](https://github.com/LPuehringerStudent/LeoWay/issues/65) | User Story | As an administrator, I want to see the feed status in the app | Low | To Do | Sprint 2 | An admin sees `linz-ag` OK on production. |
-| PB-37 | [#26](https://github.com/LPuehringerStudent/LeoWay/issues/26) | Technical Improvement | Discord notifications for GitHub activity | Low | To Do | Sprint 2 | New issues and pull requests are posted to the team's Discord. |
+| PB-37 | [#26](https://github.com/LPuehringerStudent/LeoWay/issues/26) | Technical Improvement | Discord notifications for GitHub activity | Low | To Do | Sprint 3 | New issues and pull requests are posted to the team's Discord. |
 | PB-38 | [#13](https://github.com/LPuehringerStudent/LeoWay/issues/13) | Spike | Follow up on VAO Start access | Low | Done | Sprint 2 | Key received, or the decision to use only Linz AG is written into the specification. Key received 2026-11-18 (Start: 100 queries per day in total, §1.3). Counter, §5.3 notice and the storage question moved to #94. |
 | PB-39 | [#10](https://github.com/LPuehringerStudent/LeoWay/issues/10) | Spike | Ask form teachers what a delay appeal must show | Medium | To Do | Backlog | Format of the appeal email agreed with at least one form teacher. |
 | PB-40 | – | User Story | As a student, I want the way home after my last lesson (F05) | Medium | To Do | Backlog | A05 standard and non-standard cases pass. |

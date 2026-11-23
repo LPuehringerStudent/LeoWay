@@ -93,13 +93,17 @@ Accept them on data.mobilitaetsverbuende.at, or trips stop working after this ti
   osm=$input/upper-austria.osm.pbf
   if [ ! -s "$osm" ] || [ -n "$(find "$osm" -mtime +"$osm_max_days")" ]; then
     command -v osmium >/dev/null || fail "osmium is missing (apt-get install osmium-tool)"
-    curl -fsSL -m 1800 -o "$input/austria.osm.pbf.part" https://download.geofabrik.de/europe/austria-latest.osm.pbf \
-      || fail "OSM download from Geofabrik"
+    # Temporary names must end in .osm.pbf: osmium picks the file format from the name and rejects "….part".
+    # The download takes ~20 min on CT 104 (816 MB, 2026-11-23), so the timeout leaves room for a slow day.
+    full=$input/austria.part.osm.pbf part=$input/upper-austria.part.osm.pbf
+    rm -f "$input/austria.osm.pbf.part" "$osm.part.pbf"   # left over by older versions of this script
+    curl -fsSL -m 3600 -o "$full" https://download.geofabrik.de/europe/austria-latest.osm.pbf \
+      || { rm -f "$full"; fail "OSM download from Geofabrik"; }
     # Upper Austria and a margin (same box as in the #93 spike).
-    osmium extract --overwrite -b 12.7,47.4,15.1,48.8 "$input/austria.osm.pbf.part" -o "$osm.part.pbf" \
-      || fail "OSM extract"
-    mv "$osm.part.pbf" "$osm"
-    rm -f "$input/austria.osm.pbf.part"
+    osmium extract --overwrite -b 12.7,47.4,15.1,48.8 "$full" -o "$part" \
+      || { rm -f "$full" "$part"; fail "OSM extract"; }
+    mv "$part" "$osm"
+    rm -f "$full"
   fi
 fi
 

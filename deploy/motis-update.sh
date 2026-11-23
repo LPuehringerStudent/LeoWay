@@ -34,7 +34,7 @@ fail() {
   if [ -e "$dir/current" ]; then
     notify "MOTIS update FAILED: $1. The old data keeps running."
   else
-    notify "MOTIS update FAILED: $1. MOTIS has no data and stays down."
+    notify "MOTIS update FAILED: $1. MOTIS has no data and stays down until the next run (03:15) or a manual ./motis-update.sh."
   fi
   exit 1
 }

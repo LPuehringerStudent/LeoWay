@@ -21,6 +21,8 @@ M = several days. "Who" is the proposal for the planning meeting; assignees are 
 |------|-----|--------------------|------|-------|
 | Leave-by and stop search on MOTIS | Laurenz | Leave-by and stop search use MOTIS, Linz AG as fallback; A02 passes; no 503 for a new route on production | M | [#117](https://github.com/LPuehringerStudent/LeoWay/issues/117) |
 | Credit open data sources | David | MVO, Linz AG and OpenStreetMap credited in the app without login at 360 px; L05 matches | S | [#118](https://github.com/LPuehringerStudent/LeoWay/issues/118) |
+| Address search, stops first (review feedback) | open | Street search lists stops first, then addresses; picking an address saves a stop only, no address in database or logs (L02) on production | M | [#126](https://github.com/LPuehringerStudent/LeoWay/issues/126) |
+| Estimated walking times (review feedback) | open | Route editor suggests walk to school and, with an address, walk to the stop; student can change them; checked on production | M | [#127](https://github.com/LPuehringerStudent/LeoWay/issues/127) |
 
 ## Epic 2: Alerts (Block B: F04, F05)
 
@@ -46,7 +48,8 @@ M = several days. "Who" is the proposal for the planning meeting; assignees are 
 
 Checks left from Sprint 2, done when the case comes up (no new issues):
 
-- Delay warning (#63) seen on production: a route with buffer 0 on a school morning, or the first real late bus
+- Delay warning (#63) seen on production: a route with buffer 0 on a school morning, the first real late bus, or a
+  mock delay (allowed since the Sprint 2 review)
 - Restore test on CT 104 (#55, A13), as run locally on 2026-11-23
 
 ---
@@ -55,7 +58,8 @@ Checks left from Sprint 2, done when the case comes up (no new issues):
 
 ```text
 #117 MOTIS ──┬─> #118 credits (ship together)
-             └─> #119 way home (works on Linz AG too, switches with #117)
+             ├─> #119 way home (works on Linz AG too, switches with #117)
+             └─> #126 address search ──> #127 walking times
 #121 my lateness ──> F07 appeals in Sprint 4 (needs #10 answers)
 #120 email alerts      #64 Android alarm      #26, #94 (independent)
 ```
@@ -68,11 +72,11 @@ Checks left from Sprint 2, done when the case comes up (no new issues):
 
 | Epic | Tasks | Focus Area |
 |------|-------|------------|
-| Trips on our own data | 2 | #93 follow-ups, L05 |
+| Trips on our own data | 4 | #93 follow-ups, L05, review feedback |
 | Alerts | 3 | F04, F05, A04, A05 |
 | Towards delay appeals | 2 | F07 preparation, F12 data |
 | Operations | 2 | VAO, team notifications |
-| **TOTAL** | **9 tasks** | |
+| **TOTAL** | **11 tasks** | |
 
 | Who | Tasks |
 |-----|-------|
@@ -80,7 +84,7 @@ Checks left from Sprint 2, done when the case comes up (no new issues):
 | Ayan | #119, #121 (matching) |
 | David | #118, #121 (page) |
 | Behrang | #64, #10 |
-| open | #26 |
+| open | #26, #126, #127 |
 
 Not in this sprint (product backlog): F06 alert rules (PB-41), ÖBB train delays (#93 follow-up 4, base for F11),
 A14 release checks (PB-48, planned for the sprint before release).

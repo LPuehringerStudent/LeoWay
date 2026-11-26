@@ -5,3 +5,6 @@ probe-output.json
 node_modules/
 backend/target/
 docs/api/openapi.json
+
+# LibreOffice lock files (left behind while a sheet is open)
+.~lock.*#

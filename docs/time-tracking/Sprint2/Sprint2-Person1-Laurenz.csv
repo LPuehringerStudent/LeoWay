@@ -1,0 +1,44 @@
+﻿Date;Start Time;End Time;Task;GitHub Issue #;Minutes
+12.11.2026;08:00;10:00;Sprint review meeting (Sprint 1);;120
+12.11.2026;10:00;10:40;A09 one-week follow-up, stale alert, Sprint 1 post-review results;24, 50;40
+12.11.2026;10:40;10:50;Home without mock data, departure-board look;72;10
+12.11.2026;12:45;14:35;Home without mock data, departure-board look;72;110
+12.11.2026;14:35;14:50;Sprint 1 backlog: final result line;;15
+13.11.2026;16:20;16:35;Sprint 1 review feedback: time tracking, no review bypass, priorities;;15
+13.11.2026;16:35;17:05;One trip id per departure when AVMSTripID is missing;69;30
+13.11.2026;17:05;19:27;Background timetable sync for the first lesson;59;142
+13.11.2026;19:27;21:01;Leave-by calculator and live delays, part 1;58;94
+13.11.2026;21:01;21:21;Deleted accounts stay deleted after a backup restore;55;20
+13.11.2026;21:21;21:36;Parallel first syncs no longer fail on first_lesson;81;15
+13.11.2026;21:36;22:24;Deploy main to the server automatically, pull-based;83;48
+13.11.2026;22:24;22:40;Leave-by review notes from #79;79;16
+13.11.2026;22:40;22:55;Auto-deploy review notes from #84;84;15
+13.11.2026;22:55;23:12;Fallback sightings skipped when two vehicles share a departure;77;17
+14.11.2026;16:20;16:42;Leave-by endpoint with Linz AG connections;58;22
+14.11.2026;16:42;17:03;Discord alerts: first alert channel;62;21
+15.11.2026;16:20;17:05;Leave-by endpoint with Linz AG connections;58;45
+15.11.2026;17:05;17:46;Discord alerts: first alert channel;62;41
+16.11.2026;16:20;17:27;Leave-by endpoint with Linz AG connections;58;67
+16.11.2026;17:27;18:29;Discord alerts: first alert channel;62;62
+17.11.2026;16:20;17:49;Leave-by endpoint with Linz AG connections;58;89
+17.11.2026;17:49;18:13;Home: show the real leave-by time;61;24
+17.11.2026;18:13;19:36;Discord alerts: first alert channel;62;83
+18.11.2026;16:20;16:35;VAO Start key received, limits in the specification;13;15
+18.11.2026;16:35;17:17;Spike: free data instead of VAO - MOTIS with MVO GTFS;93;42
+18.11.2026;17:17;19:09;Leave-by endpoint with Linz AG connections;58;112
+18.11.2026;19:09;20:09;Code review: PR #89, #90, #96, #97;56, 57, 65;60
+18.11.2026;20:09;20:57;Home: show the real leave-by time;61;48
+18.11.2026;20:57;21:35;Leave-by review follow-up from #99;99;38
+18.11.2026;21:35;23:19;Discord alerts: first alert channel;62;104
+19.11.2026;08:00;08:45;Code review: PR #98, #103, #106;60, 63;45
+19.11.2026;08:45;09:45;Deploy MOTIS with nightly GTFS import;104;60
+19.11.2026;09:45;10:00;MOTIS update: review follow-up #105;105;15
+19.11.2026;10:00;10:15;nginx: send security headers on every response;107;15
+19.11.2026;10:15;10:30;Spec: Linz AG live data as an accepted risk;88;15
+23.11.2026;16:20;16:35;Review notes from #109, #110, #111 and spec PDF rebuild;109;15
+23.11.2026;16:35;17:06;Add Contributor Covenant Code of Conduct;;31
+23.11.2026;17:06;17:21;MOTIS update: osmium rejects the .part map file;104;15
+23.11.2026;17:21;17:36;Sprint 2 backlog: #64 and #26 moved to Sprint 3;64;15
+26.11.2026;08:00;10:00;Sprint review meeting (Sprint 2);;120
+26.11.2026;10:00;10:30;Sprint 2 wrap-up: backlog results, DoD, carry-overs;;30
+;;;Total;32:36;1956

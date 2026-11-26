@@ -100,7 +100,8 @@ Same as Sprint 2:
 - [ ] **Database:** changes only through new Flyway migrations
 - [ ] **Privacy and security:** ownership checks on every private endpoint (S02); no keys, addresses or school data in logs (S01)
 - [ ] **Frontend:** 360 px without horizontal scrolling, keyboard only, Lighthouse accessibility ≥ 90
-- [ ] **Deployed and checked on production**
+- [ ] **Tested in operation:** deployed and checked on production; mock data is allowed when the real case does not
+  happen on its own (for example a late bus)
 - [ ] **Critical user flows verified end-to-end:**
   - Save route → leave-by time from MOTIS on Home, same as before the switch
   - Last lesson ends → way home on Home; lessons end early → next connection after the new end

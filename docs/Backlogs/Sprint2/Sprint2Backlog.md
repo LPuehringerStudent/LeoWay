@@ -181,7 +181,13 @@ Unplanned work added during the sprint, all on the board:
 
 ## Sprint review feedback (2026-11-26)
 
-No feedback from the teachers yet.
+Feedback from the teachers:
+
+- **Estimate the walking times.** Students should not have to type in how long they walk to the stop and from the
+  stop to school; LeoWay should suggest these times.
+- **Search addresses, not only stops.** The route editor should also find addresses, with stops listed first.
+- **Definition of Done:** Done Done means tested in operation (on production). Mock data is allowed when the real
+  case does not happen on its own, for example a bus that is late enough for a delay warning.
 
 ## Retrospective
 

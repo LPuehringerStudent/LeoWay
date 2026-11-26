@@ -11,8 +11,8 @@
 4. Open a pull request against `main`, move the issue to **In Review**, and write in the description:
    what changed, how you tested it, and `Closes #<issue>` (or `Part of #<issue>` if work remains).
 5. Merge after CI is green and the review is approved. Use **squash merge** and delete the branch.
-6. GitHub moves the issue to **Done** when the PR is merged. Once the whole Definition of Done is met (deployed,
-   checked on production, accepted by the product owner), move it to **Done Done** by hand.
+6. GitHub moves the issue to **Done** when the PR is merged. Once the whole Definition of Done is met (deployed and
+   tested in operation on production, mock data allowed, accepted by the product owner), move it to **Done Done** by hand.
 7. Log your hours in the teachers' time-tracking Excel on SharePoint (link from the teachers; not in this public repo); at the end of each sprint a copy goes to `docs/time-tracking/`.
 
 ## Reviews (M03)

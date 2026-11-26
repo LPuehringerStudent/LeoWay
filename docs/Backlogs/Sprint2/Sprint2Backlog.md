@@ -179,7 +179,9 @@ Unplanned work added during the sprint, all on the board:
   unhealthy; no quiet-window deploys on school mornings (#83).
 - Referrer policy `strict-origin-when-cross-origin`, so OpenStreetMap tiles get the Referer their policy asks for (#107).
 
-# Sprint 2 — Review Feedback
+## Sprint review feedback (2026-11-26)
+
+No feedback from the teachers yet.
 
 ## Retrospective
 
@@ -193,7 +195,7 @@ Unplanned work added during the sprint, all on the board:
 
 ### What could be improved?
 
-- Hours were logged in the teachers' time-tracking Excel, and a copy is included in `docs/time-tracking/Sprint2.xlsx`. However, time tracking was not updated consistently every day.
+- Hours were logged in the teachers' time-tracking Excel, but not every day.
 - Some important features were tested successfully with automated tests but could not be verified in real-world production scenarios. For example, we did not encounter a sufficiently delayed bus to verify the complete warning process ([#63](https://github.com/LPuehringerStudent/LeoWay/issues/63)).
 - The restore test for deleted accounts passed locally using the real backup and restore scripts, but still needs to be performed on the production container ([#55](https://github.com/LPuehringerStudent/LeoWay/issues/55)).
 - We should improve our estimation and planning so that stretch goals and additional work do not interfere with the main sprint priorities.

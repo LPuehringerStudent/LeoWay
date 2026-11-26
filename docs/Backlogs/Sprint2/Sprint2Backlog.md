@@ -179,7 +179,9 @@ Unplanned work added during the sprint, all on the board:
   unhealthy; no quiet-window deploys on school mornings (#83).
 - Referrer policy `strict-origin-when-cross-origin`, so OpenStreetMap tiles get the Referer their policy asks for (#107).
 
-## Sprint 2 – Review Feedback
+# Sprint 2 — Review Feedback
+
+## Retrospective
 
 ### What went well?
 
@@ -191,11 +193,11 @@ Unplanned work added during the sprint, all on the board:
 
 ### What could be improved?
 
-- We did not complete time tracking, even though this was already identified as an improvement in the previous sprint review.
-- Some important features were tested successfully with automated tests but could not be verified in real-world production scenarios. For example, we did not encounter a sufficiently delayed bus to verify the complete warning process.
-- The restore test for deleted accounts still needs to be performed on the production container.
+- Hours were logged in the teachers' time-tracking Excel, and a copy is included in `docs/time-tracking/Sprint2.xlsx`. However, time tracking was not updated consistently every day.
+- Some important features were tested successfully with automated tests but could not be verified in real-world production scenarios. For example, we did not encounter a sufficiently delayed bus to verify the complete warning process ([#63](https://github.com/LPuehringerStudent/LeoWay/issues/63)).
+- The restore test for deleted accounts passed locally using the real backup and restore scripts, but still needs to be performed on the production container ([#55](https://github.com/LPuehringerStudent/LeoWay/issues/55)).
 - We should improve our estimation and planning so that stretch goals and additional work do not interfere with the main sprint priorities.
-- The VAO contract cancellation is still blocked and needs to be resolved.
+- The VAO contract cancellation still has to be sent in writing ([#94](https://github.com/LPuehringerStudent/LeoWay/issues/94)).
 
 ### What should we do differently in Sprint 3?
 
@@ -205,11 +207,3 @@ Unplanned work added during the sprint, all on the board:
 - Start testing features earlier instead of leaving production verification until the end.
 - Keep prioritizing tasks according to their importance and available team capacity.
 - Continue using mandatory code reviews and automated CI checks.
-
-### Overall assessment
-
-Overall, Sprint 2 was successful.
-We achieved our main goal, delivered the leave-by functionality and made significant improvements to our infrastructure.
-We also handled several unplanned tasks that improved the reliability and security of the project.
-However, we still have room for improvement regarding time tracking and real-world testing.
-In Sprint 3, our main focus should be expanding the existing functionality while ensuring that the features we have already implemented work reliably in production.

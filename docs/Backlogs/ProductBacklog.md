@@ -2,7 +2,7 @@
 
 **Product:** LeoWay, a commute assistant for HTL Leonding
 **Product Owner:** Behrang (@BehrangEl11, [#11](https://github.com/LPuehringerStudent/LeoWay/issues/11))
-**Last updated:** 2026-11-12 (Sprint 1 review)
+**Last updated:** 2026-11-26 (Sprint 3 planning)
 **Priorities** are also set as `priority: high/medium/low` labels on the GitHub issues.
 
 Items with an issue number are tracked on GitHub ([Sprint1](https://github.com/users/LPuehringerStudent/projects/14),
@@ -52,16 +52,20 @@ system specification and are not broken down yet. F01–F12 and A01–A14 refer 
 | PB-36 | [#65](https://github.com/LPuehringerStudent/LeoWay/issues/65) | User Story | As an administrator, I want to see the feed status in the app | Low | Done | Sprint 2 | An admin sees `linz-ag` OK on production. |
 | PB-37 | [#26](https://github.com/LPuehringerStudent/LeoWay/issues/26) | Technical Improvement | Discord notifications for GitHub activity | Low | To Do | Sprint 3 | New issues and pull requests are posted to the team's Discord. |
 | PB-38 | [#13](https://github.com/LPuehringerStudent/LeoWay/issues/13) | Spike | Follow up on VAO Start access | Low | Done | Sprint 2 | Key received, or the decision to use only Linz AG is written into the specification. Key received 2026-11-18 (Start: 100 queries per day in total, §1.3). Counter, §5.3 notice and the storage question moved to #94. |
-| PB-39 | [#10](https://github.com/LPuehringerStudent/LeoWay/issues/10) | Spike | Ask form teachers what a delay appeal must show | Medium | To Do | Backlog | Format of the appeal email agreed with at least one form teacher. |
-| PB-40 | – | User Story | As a student, I want the way home after my last lesson (F05) | Medium | To Do | Backlog | A05 standard and non-standard cases pass. |
+| PB-39 | [#10](https://github.com/LPuehringerStudent/LeoWay/issues/10) | Spike | Ask form teachers what a delay appeal must show | Medium | To Do | Sprint 3 | Format of the appeal email agreed with at least one form teacher. |
+| PB-40 | [#119](https://github.com/LPuehringerStudent/LeoWay/issues/119) | User Story | As a student, I want the way home after my last lesson (F05) | Medium | To Do | Sprint 3 | A05 standard and non-standard cases pass. |
 | PB-41 | – | User Story | As a student, I want to write my own alert rules in auspex-lang (F06) | Low | To Do | Backlog | A06 standard and non-standard cases pass. |
 | PB-42 | – | User Story | As a student, I want to prepare a delay appeal for my form teacher in three taps (F07, U02) | High | To Do | Backlog | A07 standard and non-standard cases pass. |
 | PB-43 | – | User Story | As a form teacher, I want to handle appeals in a portal (F08, optional) | Low | To Do | Backlog | A08 passes, if built. |
 | PB-44 | – | User Story | As a student, I want to report a disruption that LeoWay does not know about yet (F10) | Medium | To Do | Backlog | A10 standard and non-standard cases pass. |
 | PB-45 | – | User Story | As a student, I want a risk level and buffer suggestion for my route (F11) | Medium | To Do | Backlog | A11: the model beats both baselines on later dates, or the stronger baseline is kept. |
 | PB-46 | – | User Story | As a student, I want statistics on how late my connection usually is (F12) | Medium | To Do | Backlog | A12 standard and non-standard cases pass. |
-| PB-47 | – | User Story | As a student, I want push and email alerts as well as Discord (F04) | Medium | To Do | Backlog | One message per chosen channel within 60 seconds (A04). |
+| PB-47 | [#120](https://github.com/LPuehringerStudent/LeoWay/issues/120) | User Story | As a student, I want push and email alerts as well as Discord (F04) | Medium | To Do | Sprint 3 | One message per chosen channel within 60 seconds (A04). |
 | PB-48 | – | Technical Improvement | Load, phone-width, keyboard and browser checks before release (A14) | High | To Do | Backlog | Load targets met; results recorded. |
 | PB-49 | [#69](https://github.com/LPuehringerStudent/LeoWay/issues/69) | Bug Fix | Recorder stores one departure under two trip ids when `AVMSTripID` is missing | High | Done | Sprint 2 | A departure that loses and regains `AVMSTripID` keeps one trip id; one day on production adds no split departures. Existing rows stay (S04). |
 | PB-50 | [#93](https://github.com/LPuehringerStudent/LeoWay/issues/93) | Spike | Free data instead of VAO: MVO GTFS, self-hosted planner, ÖBB train history | High | Done | Sprint 2 | Clear yes/no whether LeoWay can plan trips and find stops without VAO; decision on train delays; server needs written down. |
-| PB-51 | [#94](https://github.com/LPuehringerStudent/LeoWay/issues/94) | Technical Improvement | VAO obligations if VAO stays: daily counter, §5.3 notice, storage answer | Low | Blocked | Sprint 2 | VAO dropped and the contract cancelled, or counter, notice and storage answer done. |
+| PB-51 | [#94](https://github.com/LPuehringerStudent/LeoWay/issues/94) | Technical Improvement | VAO obligations if VAO stays: daily counter, §5.3 notice, storage answer | Low | Blocked | Sprint 3 | VAO dropped and the contract cancelled, or counter, notice and storage answer done. |
+| PB-52 | [#117](https://github.com/LPuehringerStudent/LeoWay/issues/117) | Technical Improvement | Leave-by and stop search on our own MOTIS (#93 follow-ups 2, 3) | High | To Do | Sprint 3 | A02 passes on MOTIS; Linz AG fallback; no 503 for a new route. |
+| PB-53 | [#118](https://github.com/LPuehringerStudent/LeoWay/issues/118) | Technical Improvement | Credit open data sources in the app (MVO, Linz AG, OSM; L05) | High | To Do | Sprint 3 | Credits visible without login at 360 px; L05 matches. |
+| PB-54 | [#121](https://github.com/LPuehringerStudent/LeoWay/issues/121) | User Story | As a student, I want to see my lateness entries next to the recorded delays (base for F07, F12) | High | To Do | Sprint 3 | Entries of the last 30 days with the matched delay on production; other students' entries give 404. |
+| PB-55 | – | Technical Improvement | Typical train delay from ÖBB train runs (#93 follow-up 4, base for F11) | Low | To Do | Backlog | Weekly import; typical delay per train shown or used for the buffer. |

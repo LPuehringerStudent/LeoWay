@@ -179,6 +179,33 @@ Unplanned work added during the sprint, all on the board:
   unhealthy; no quiet-window deploys on school mornings (#83).
 - Referrer policy `strict-origin-when-cross-origin`, so OpenStreetMap tiles get the Referer their policy asks for (#107).
 
-## Sprint review feedback
+## Sprint review feedback (2026-11-26)
 
-To be filled in after the review.
+No feedback from the teachers yet.
+
+## Retrospective
+
+### What went well?
+
+- We successfully achieved the main Sprint Goal. Students can now save their routes and see their real leave-by time based on their first lesson.
+- Switching from VAO to MOTIS and free MVO GTFS data was an important improvement. It gives us more control over our journey-planning infrastructure and avoids depending on VAO.
+- The automatic deployment pipeline, including backups and rollback, makes deployments safer and reduces manual work.
+- Code quality and collaboration improved through mandatory code reviews. After the Sprint 1 review, all 31 merged pull requests received approval from another team member and passed CI.
+- We also completed important improvements that were not originally planned, especially MOTIS deployment, security headers and the new deployment pipeline.
+
+### What could be improved?
+
+- Hours were logged in the teachers' time-tracking Excel, but not every day.
+- Some important features were tested successfully with automated tests but could not be verified in real-world production scenarios. For example, we did not encounter a sufficiently delayed bus to verify the complete warning process ([#63](https://github.com/LPuehringerStudent/LeoWay/issues/63)).
+- The restore test for deleted accounts passed locally using the real backup and restore scripts, but still needs to be performed on the production container ([#55](https://github.com/LPuehringerStudent/LeoWay/issues/55)).
+- We should improve our estimation and planning so that stretch goals and additional work do not interfere with the main sprint priorities.
+- The VAO contract cancellation still has to be sent in writing ([#94](https://github.com/LPuehringerStudent/LeoWay/issues/94)).
+
+### What should we do differently in Sprint 3?
+
+- Keep time tracking up to date throughout the sprint.
+- Focus on completing and verifying the most important user flows on production.
+- Test the integration of MOTIS with the existing leave-by functionality carefully.
+- Start testing features earlier instead of leaving production verification until the end.
+- Keep prioritizing tasks according to their importance and available team capacity.
+- Continue using mandatory code reviews and automated CI checks.

@@ -1,0 +1,20 @@
+﻿Date;Start Time;End Time;Task;GitHub Issue #;Minutes
+2026-11-23;18:07;18:22;PO review - VAO start;13;15
+2026-11-23;18:25;18:50;PO review - Journey planning spike;56;25
+2026-11-23;19:00;19:25;PO review - Stop search and saved route API;57;25
+2026-11-23;19:38;20:03;PO review - Leave-by calculation;58;25
+2026-11-23;20:08;20:33;PO review - Timetable sync;59;25
+2026-11-23;20:33;20:58;PO review - Route editor;60;25
+2026-11-24;18:00;18:20;PO review - Home page real data;61;20
+2026-11-24;18:23;18:48;PO review - Discord alerts;62;25
+2026-11-24;18:51;19:11;PO review - Admin feed status;65;20
+2026-11-24;19:14;19:44;PO review - Recorder trip ID fix;69;30
+2026-11-24;19:47;20:07;PO review - Code review follow-ups;81;20
+2026-11-24;20:10;21:00;PO review - Automatic deployment;83;50
+2026-11-25;19:00;19:15;PO review - Linz AG licence;88;15
+2026-11-25;19:16;19:46;PO review - Free data spike;93;30
+2026-11-25;19:47;20:00;PO review - MOTIS deployment (part 1);104;13
+2026-11-25;20:47;21:14;PO review - MOTIS deployment (part 2);104;27
+2026-11-25;21:15;21:30;PO review - Security headers;107;15
+2026-11-25;21:30;22:00;Sprint 2 retrospective - Markdown writing and PR review;123;30
+;;;Total;07:20;440

@@ -1,0 +1,18 @@
+﻿Date;Start Time;End Time;Task;GitHub Issue #;Minutes
+12.11.2026;08:00;10:00;Sprint review meeting (Sprint 1);;120
+13.11.2026;16:20;18:50;Code review: PR #75, #76, #78, #79, #80, #82, #84, #85, #86, #87;69, 59, 58, 55, 81, 83, 79, 84, 77;150
+15.11.2026;16:20;16:41;Stop search and saved route API;57;21
+16.11.2026;16:20;17:02;Stop search and saved route API;57;42
+17.11.2026;16:20;17:22;Stop search and saved route API;57;62
+18.11.2026;16:20;17:01;Spike: Linz AG trip request and stop finder;56;41
+18.11.2026;17:01;18:24;Stop search and saved route API;57;83
+18.11.2026;18:24;18:40;Require login for stop search, JSON errors;57;16
+18.11.2026;18:40;20:10;Code review: PR #92, #95, #99, #100, #101, #102;13, 93, 58, 61, 99, 62;90
+19.11.2026;08:00;09:30;Code review: PR #98, #103, #105, #109, #110, #111;60, 104, 105, 107, 88;90
+19.11.2026;09:30;10:50;Delay warning with an alternative connection;63;80
+19.11.2026;12:45;15:15;Delay warning with an alternative connection;63;150
+19.11.2026;15:15;15:25;Delay warning with an alternative connection;63;10
+19.11.2026;16:20;17:12;Delay warning with an alternative connection;63;52
+23.11.2026;16:20;17:20;Code review: PR #112, #113, #114, #115;109, 104, 64;60
+26.11.2026;08:00;10:00;Sprint review meeting (Sprint 2);;120
+;;;Total;19:47;1187
